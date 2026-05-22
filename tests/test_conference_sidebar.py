@@ -37,7 +37,7 @@ class ConferenceSidebarTest(unittest.TestCase):
                     "paper_id": "openreview-icml-2025-abc123",
                     "score": 9,
                     "canonical_evidence": "命中 ICML 会议检索需求。",
-                    "matched_query_tag": "query:rl",
+                    "matched_query_tag": "query:rl:composite",
                 }
             ],
         }
@@ -56,9 +56,13 @@ class ConferenceSidebarTest(unittest.TestCase):
 
             self.assertIn("* Conference Papers", text)
             self.assertIn("  * ICML 2025 <!--dpr-conference:icml-2025-->", text)
-            self.assertIn("    * <a class=\"dpr-sidebar-item-link dpr-sidebar-item-structured\"", text)
+            self.assertIn("    * 推荐论文", text)
+            self.assertIn("      * <a class=\"dpr-sidebar-item-link dpr-sidebar-item-structured\"", text)
             self.assertIn("A Conference Paper", text)
             self.assertIn("https://openreview.net/forum?id=abc123", text)
+            self.assertIn("&quot;selection_source&quot;: &quot;conference_retrieval&quot;", text)
+            self.assertIn("&quot;label&quot;: &quot;rl&quot;", text)
+            self.assertNotIn("rl:composite", text)
             self.assertIn("* Daily Papers", text)
 
     def test_update_sidebar_replaces_existing_conference_block(self):

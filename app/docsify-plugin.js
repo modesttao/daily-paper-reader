@@ -2383,9 +2383,13 @@ window.$docsify = {
       const hydrateStructuredSidebarItems = () => {
         const nav = document.querySelector('.sidebar-nav');
         if (!nav) return;
-        const links = nav.querySelectorAll('a.dpr-sidebar-item-link[href*="#/"]');
+        const links = nav.querySelectorAll('a.dpr-sidebar-item-link.dpr-sidebar-item-structured');
         links.forEach((a) => {
           if (a.dataset.sidebarStructuredHydrated === '1') return;
+          const li = a.closest('li');
+          if (li && li.classList) {
+            li.classList.add('sidebar-paper-item');
+          }
           const href = String(a.getAttribute('href') || '').trim();
           const routeMatch = href.match(/#\/(.+)$/);
           const routeId = routeMatch ? decodeURIComponent(routeMatch[1]).replace(/\/$/, '') : '';

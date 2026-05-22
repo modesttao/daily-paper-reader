@@ -41,6 +41,24 @@ def build_conference_label(conference: str, years: str) -> str:
     return f"{norm_text(conference).upper()} {year_label}".strip()
 
 
+def normalize_sidebar_tag(raw_tag: str) -> Tuple[str, str]:
+    text = norm_text(raw_tag)
+    if not text:
+        return "", ""
+    kind, sep, label = text.partition(":")
+    if not sep:
+        return "query", text
+    kind = norm_text(kind).lower() or "query"
+    if kind == "keyword":
+        kind = "query"
+    if kind not in {"keyword", "query", "paper", "other"}:
+        kind = "other"
+    label = norm_text(label)
+    if kind == "query" and label.endswith(":composite"):
+        label = label[: -len(":composite")].strip()
+    return kind, label
+
+
 def load_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
@@ -116,13 +134,15 @@ def build_sidebar_payload(
     ]
     matched_tag = norm_text(ranked_item.get("matched_query_tag"))
     if matched_tag:
-        kind, _, label = matched_tag.partition(":")
-        tags.append({"kind": kind or "query", "label": label or matched_tag})
+        kind, label = normalize_sidebar_tag(matched_tag)
+        if label:
+            tags.append({"kind": kind or "query", "label": label})
 
     payload = {
         "title": title,
         "link": link,
         "score": score_text,
+        "selection_source": "conference_retrieval",
         "tags": tags,
     }
     evidence = norm_text(
@@ -149,7 +169,7 @@ def build_conference_block(result_path: Path, limit: int = 80) -> List[str]:
     }
     ranked = collect_ranked_ids(data, limit)
 
-    lines = [f"  * {label} {marker}\n"]
+    lines = [f"  * {label} {marker}\n", "    * 推荐论文\n"]
     for item in ranked:
         paper_id = norm_text(item.get("paper_id"))
         paper = papers.get(paper_id)
@@ -159,7 +179,7 @@ def build_conference_block(result_path: Path, limit: int = 80) -> List[str]:
         link = norm_text(paper.get("link")) or "#"
         payload = build_sidebar_payload(paper, item, conference, years)
         lines.append(
-            "    * "
+            "      * "
             f'<a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="{html.escape(link, quote=True)}" '
             f'data-sidebar-item="{payload}">{html.escape(title)}</a>\n'
         )
