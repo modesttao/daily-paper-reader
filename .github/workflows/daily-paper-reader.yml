@@ -65,6 +65,10 @@ jobs:
       SUMMARY_BASE_URL: ${{ secrets.SUMMARY_BASE_URL }}
       SUMMARY_MODEL: ${{ secrets.SUMMARY_MODEL }}
       PYTHONUNBUFFERED: "1"
+      DPR_ENABLE_BIORXIV_BACKEND: "true"
+      DPR_ENABLE_MEDRXIV_BACKEND: "true"
+      DPR_BIORXIV_ENABLED: "true"
+      DPR_MEDRXIV_ENABLED: "true"
 
     steps:
       - name: Random delay to spread scheduled runs
