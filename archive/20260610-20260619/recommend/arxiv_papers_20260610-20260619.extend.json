@@ -1,15 +1,15 @@
 {
   "mode": "extend",
-  "generated_at": "2026-06-19T05:33:51.271038+00:00",
+  "generated_at": "2026-06-19T06:01:17.482305+00:00",
   "stats": {
     "mode": "extend",
     "tag_count": 4,
     "deep_divecandidates": 7,
     "deep_cap": 14,
-    "deep_selected": 7,
-    "quick_candidates": 4,
+    "deep_selected": 6,
+    "quick_candidates": 1,
     "quick_skim_target": 19,
-    "quick_selected": 4
+    "quick_selected": 1
   },
   "deep_dive": [
     {
@@ -129,20 +129,20 @@
         "query:scz-model",
         "query:single-cell-omics"
       ],
-      "llm_score": 9.0,
-      "llm_evidence_en": "LLM-enhanced clustering for scRNA-seq",
-      "llm_evidence_cn": "基于大语言模型的单细胞RNA-seq聚类",
-      "llm_evidence": "基于大语言模型的单细胞RNA-seq聚类",
-      "canonical_evidence": "基于大语言模型的单细胞RNA-seq聚类",
-      "llm_tldr_en": "scLLM-DSC uses LLM knowledge to enhance cross-modal deep structural clustering for single-cell RNA-seq, addressing semantic agnosticism.",
-      "llm_tldr_cn": "单细胞RNA-seq聚类是细胞鉴定的基础，但现有方法仅关注数值统计模式，忽略基因的生物学功能语义。本文提出scLLM-DSC框架，利用大语言模型的知识增强跨模态深度结构聚类，通过整合LLM的语义信息克服传统数据驱动方法的语义盲区，在多个数据集上展示了优越的聚类性能，为单细胞分析引入语义感知的新范式。",
-      "llm_tldr": "单细胞RNA-seq聚类是细胞鉴定的基础，但现有方法仅关注数值统计模式，忽略基因的生物学功能语义。本文提出scLLM-DSC框架，利用大语言模型的知识增强跨模态深度结构聚类，通过整合LLM的语义信息克服传统数据驱动方法的语义盲区，在多个数据集上展示了优越的聚类性能，为单细胞分析引入语义感知的新范式。",
+      "llm_score": 10.0,
+      "llm_evidence_en": "proposes a clustering method for single-cell RNA-seq using LLM knowledge",
+      "llm_evidence_cn": "提出利用大语言模型知识的单细胞RNA-seq聚类方法",
+      "llm_evidence": "提出利用大语言模型知识的单细胞RNA-seq聚类方法",
+      "canonical_evidence": "提出利用大语言模型知识的单细胞RNA-seq聚类方法",
+      "llm_tldr_en": "scLLM-DSC is a cross-modal deep structural clustering framework that integrates LLM semantic knowledge with numerical gene expression for improved scRNA-seq clustering.",
+      "llm_tldr_cn": "现有单细胞聚类方法多依赖数值统计模式，忽略基因的生物学语义。本文提出scLLM-DSC框架，首次将大语言模型中的基因功能语义与单细胞转录组数值特征通过交叉模态深度结构聚类相结合。在多个基准数据集上的实验表明，该方法在聚类准确性和生物学可解释性上显著优于现有方法，为单细胞分析提供了新的语义增强范式。",
+      "llm_tldr": "现有单细胞聚类方法多依赖数值统计模式，忽略基因的生物学语义。本文提出scLLM-DSC框架，首次将大语言模型中的基因功能语义与单细胞转录组数值特征通过交叉模态深度结构聚类相结合。在多个基准数据集上的实验表明，该方法在聚类准确性和生物学可解释性上显著优于现有方法，为单细胞分析提供了新的语义增强范式。",
       "llm_tags": [
         "query:sc-methods"
       ],
       "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "single-cell clustering",
-      "matched_requirement_id": "req-12",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
       "selection_source": "fresh_fetch"
     },
     {
@@ -174,19 +174,19 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "single-cell perturbation prediction using gene function and regulatory control",
-      "llm_evidence_cn": "单细胞扰动预测，利用基因功能与调控控制",
-      "llm_evidence": "单细胞扰动预测，利用基因功能与调控控制",
-      "canonical_evidence": "单细胞扰动预测，利用基因功能与调控控制",
-      "llm_tldr_en": "CisTransCell proposes a cell-conditioned multi-modal framework for zero-shot single-cell perturbation prediction, incorporating gene function, cis-regulatory elements, and cellular context.",
-      "llm_tldr_cn": "针对零样本单细胞扰动预测中的难题，即扰动效应不仅取决于表达状态还受基因功能、顺式调控元件和细胞状态的影响，本文提出CisTransCell框架。该方法通过细胞条件多模态建模，为每个基因补充功能信息并融入调控上下文。在多种扰动数据集上的实验表明，该方法在未见过的基因或组合上实现准确的转录响应预测。该工作为理解基因调控和精准医学提供新工具。",
-      "llm_tldr": "针对零样本单细胞扰动预测中的难题，即扰动效应不仅取决于表达状态还受基因功能、顺式调控元件和细胞状态的影响，本文提出CisTransCell框架。该方法通过细胞条件多模态建模，为每个基因补充功能信息并融入调控上下文。在多种扰动数据集上的实验表明，该方法在未见过的基因或组合上实现准确的转录响应预测。该工作为理解基因调控和精准医学提供新工具。",
+      "llm_evidence_en": "Single-cell perturbation prediction framework",
+      "llm_evidence_cn": "单细胞扰动预测框架",
+      "llm_evidence": "单细胞扰动预测框架",
+      "canonical_evidence": "单细胞扰动预测框架",
+      "llm_tldr_en": "A cell-conditioned multimodal framework for zero-shot single-cell perturbation prediction, integrating gene function, regulatory control, and cellular context to predict transcriptional responses to unseen perturbations with improved accuracy.",
+      "llm_tldr_cn": "单细胞扰动预测是单细胞生物学中的核心问题，尤其在零样本场景下面临挑战。本文提出CisTransCell，一种细胞条件多模态框架，通过整合基因功能、调控控制和细胞状态信息，有效预测未见基因扰动及组合的转录响应。实验表明，该方法在零样本预测中显著优于现有方法，为单细胞功能基因组学研究提供了强有力的计算工具，有助于深入理解基因调控网络和细胞状态变化机制。",
+      "llm_tldr": "单细胞扰动预测是单细胞生物学中的核心问题，尤其在零样本场景下面临挑战。本文提出CisTransCell，一种细胞条件多模态框架，通过整合基因功能、调控控制和细胞状态信息，有效预测未见基因扰动及组合的转录响应。实验表明，该方法在零样本预测中显著优于现有方法，为单细胞功能基因组学研究提供了强有力的计算工具，有助于深入理解基因调控网络和细胞状态变化机制。",
       "llm_tags": [
-        "query:single-cell-omics"
+        "query:sc-methods"
       ],
-      "matched_query_tag": "query:single-cell-omics",
-      "matched_query_text": "Perturb-seq",
-      "matched_requirement_id": "req-84",
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
       "selection_source": "fresh_fetch"
     },
     {
@@ -220,63 +220,19 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "spatial transcriptomics modeling",
-      "llm_evidence_cn": "空间转录组建模",
-      "llm_evidence": "空间转录组建模",
-      "canonical_evidence": "空间转录组建模",
-      "llm_tldr_en": "HiST proposes a hierarchical sparse transformer for cross-modal spatial transcriptomics inference from H&E slides, enabling efficient multiscale modeling without dense grids.",
-      "llm_tldr_cn": "空间转录组技术昂贵且通量低，HiST提出一种层次稀疏Transformer，用于从H&E染色切片推断基因表达。该方法将测量位置视为稀疏场，构建dyadic编码器-解码器，结合稀疏窗口注意力与分辨率变化算子，实现高效多尺度上下文整合，避免了密集网格开销。实验表明，HiST在跨模态预测中达到高精度，为计算病理学提供了新工具。",
-      "llm_tldr": "空间转录组技术昂贵且通量低，HiST提出一种层次稀疏Transformer，用于从H&E染色切片推断基因表达。该方法将测量位置视为稀疏场，构建dyadic编码器-解码器，结合稀疏窗口注意力与分辨率变化算子，实现高效多尺度上下文整合，避免了密集网格开销。实验表明，HiST在跨模态预测中达到高精度，为计算病理学提供了新工具。",
+      "llm_evidence_en": "Cross-modal spatial transcriptomics modeling with hierarchical sparse transformer",
+      "llm_evidence_cn": "使用分层稀疏Transformer进行跨模态空间转录组建模",
+      "llm_evidence": "使用分层稀疏Transformer进行跨模态空间转录组建模",
+      "canonical_evidence": "使用分层稀疏Transformer进行跨模态空间转录组建模",
+      "llm_tldr_en": "HiST proposes a hierarchical sparse transformer that directly models sparse spatial transcriptomics measurements from H&E images, enabling efficient cross-modal inference without dense-grid overhead.",
+      "llm_tldr_cn": "针对空间转录组技术成本高、通量有限的挑战，本文提出HiST，一种分层稀疏Transformer，将测量位置视为稀疏场，直接在活跃组织足迹上构建编码器-解码器，结合稀疏窗口注意力和多尺度上下文集成，实现从H&E组织学图像到基因表达的高效跨模态推断。在多个基准上验证了其有效性。",
+      "llm_tldr": "针对空间转录组技术成本高、通量有限的挑战，本文提出HiST，一种分层稀疏Transformer，将测量位置视为稀疏场，直接在活跃组织足迹上构建编码器-解码器，结合稀疏窗口注意力和多尺度上下文集成，实现从H&E组织学图像到基因表达的高效跨模态推断。在多个基准上验证了其有效性。",
       "llm_tags": [
         "query:sc-methods"
       ],
       "matched_query_tag": "query:sc-methods",
       "matched_query_text": "spatial transcriptomics",
       "matched_requirement_id": "req-6",
-      "selection_source": "fresh_fetch"
-    },
-    {
-      "id": "2606.17616v1",
-      "source": "arxiv",
-      "title": "Towards Speech Impairment Prediction in German-Speaking Individuals with Amyotrophic Lateral Sclerosis",
-      "abstract": "Amyotrophic Lateral Sclerosis (ALS) is a neurodegenerative disease, often affecting speech due to bulbar dysfunction. In this study, we predict speech impairment in people with ALS (pwALS) using two clinical speech-related scores. We evaluate cross-sectional (across speakers) and personalised (within-speaker) modelling paradigms and analyse the utility of common speech tasks to contribute to the standardisation of speech data collection for pwALS. Experiments on a German-speaking cohort of 66 pwALS show that repetition tasks (/da/-/da/, /da/-/ba/) achieved the best cross-sectional performance (Concordance Correlation Coefficient (CCC) = 0.62) for predicting the Quality of Life in the Dysarthric Speaker questionnaire, while the within-speaker setting reached a CCC of 0.86. This study represents an initial step towards speech impairment prediction in German-speaking pwALS and highlights the potential of automated speech analysis as a supportive tool for speech impairment assessment.",
-      "authors": [
-        "Monica Gonzalez-Machorro",
-        "Ricarda von Heynitz",
-        "Justine Hanslmeier",
-        "Finja Grimm",
-        "Alexandra-Iulia Deac",
-        "Anne Gründel",
-        "Isabell Cordts",
-        "Björn Schuller"
-      ],
-      "primary_category": "cs.HC",
-      "categories": [
-        "cs.HC"
-      ],
-      "published": "2026-06-16T07:22:49+00:00",
-      "link": "https://arxiv.org/pdf/2606.17616v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:scz-model",
-        "query:als-organoid",
-        "query:scz-model"
-      ],
-      "llm_score": 9.0,
-      "llm_evidence_en": "predicts speech impairment in individuals with ALS",
-      "llm_evidence_cn": "预测渐冻症患者的言语障碍",
-      "llm_evidence": "预测渐冻症患者的言语障碍",
-      "canonical_evidence": "预测渐冻症患者的言语障碍",
-      "llm_tldr_en": "Predicts speech impairment in ALS patients using speech tasks, achieving best performance with repetition tasks for cross-sectional prediction.",
-      "llm_tldr_cn": "该论文研究使用语音任务预测德语句渐冻症（ALS）患者的言语障碍。实验表明重复任务（如/da/-/da/）在跨说话人预测中取得最佳性能（CCC=0.62），为ALS患者言语数据采集标准化提供了参考。研究还比较了跨说话人与个性化建模范式。",
-      "llm_tldr": "该论文研究使用语音任务预测德语句渐冻症（ALS）患者的言语障碍。实验表明重复任务（如/da/-/da/）在跨说话人预测中取得最佳性能（CCC=0.62），为ALS患者言语数据采集标准化提供了参考。研究还比较了跨说话人与个性化建模范式。",
-      "llm_tags": [
-        "query:als-organoid"
-      ],
-      "matched_query_tag": "query:als-organoid",
-      "matched_query_text": "amyotrophic lateral sclerosis",
-      "matched_requirement_id": "req-30",
       "selection_source": "fresh_fetch"
     },
     {
@@ -313,13 +269,13 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "proposes scGTN for scRNA-seq clustering",
-      "llm_evidence_cn": "提出用于单细胞RNA-seq聚类的scGTN方法",
-      "llm_evidence": "提出用于单细胞RNA-seq聚类的scGTN方法",
-      "canonical_evidence": "提出用于单细胞RNA-seq聚类的scGTN方法",
-      "llm_tldr_en": "scGTN uses Siamese Graph Transformer to integrate gene expression and intercellular structure for robust single-cell clustering, addressing sparsity and noise.",
-      "llm_tldr_cn": "现有单细胞RNA-seq聚类方法忽略数据稀疏性和细胞间结构信息。本文提出scGTN，一种深度Siamese图Transformer网络，显式整合基因表达谱和细胞间结构依赖进行聚类。在多个数据集上优于现有方法，有效处理噪声和稀疏性，提升细胞分型精度。",
-      "llm_tldr": "现有单细胞RNA-seq聚类方法忽略数据稀疏性和细胞间结构信息。本文提出scGTN，一种深度Siamese图Transformer网络，显式整合基因表达谱和细胞间结构依赖进行聚类。在多个数据集上优于现有方法，有效处理噪声和稀疏性，提升细胞分型精度。",
+      "llm_evidence_en": "single-cell RNA-seq clustering method",
+      "llm_evidence_cn": "单细胞RNA测序聚类方法",
+      "llm_evidence": "单细胞RNA测序聚类方法",
+      "canonical_evidence": "单细胞RNA测序聚类方法",
+      "llm_tldr_en": "scGTN proposes a deep Siamese Graph Transformer Network for single-cell RNA-seq clustering, integrating gene expression and intercellular structural dependencies to overcome sparsity and noise.",
+      "llm_tldr_cn": "scGTN提出了一种深度孪生图变换器网络用于单细胞RNA-seq聚类，该方法同时利用基因表达谱和细胞间结构依赖关系，解决了当前方法忽视数据稀疏性和噪声的问题。在多个数据集上的实验表明，scGTN在聚类准确性和鲁棒性方面优于现有方法，为单细胞数据分析提供了新的工具。",
+      "llm_tldr": "scGTN提出了一种深度孪生图变换器网络用于单细胞RNA-seq聚类，该方法同时利用基因表达谱和细胞间结构依赖关系，解决了当前方法忽视数据稀疏性和噪声的问题。在多个数据集上的实验表明，scGTN在聚类准确性和鲁棒性方面优于现有方法，为单细胞数据分析提供了新的工具。",
       "llm_tags": [
         "query:sc-methods"
       ],
@@ -327,9 +283,7 @@
       "matched_query_text": "single-cell clustering",
       "matched_requirement_id": "req-12",
       "selection_source": "fresh_fetch"
-    }
-  ],
-  "quick_skim": [
+    },
     {
       "id": "2606.18179v1",
       "source": "arxiv",
@@ -357,129 +311,42 @@
         "query:scz-model",
         "query:single-cell-omics"
       ],
-      "llm_score": 7.0,
-      "llm_evidence_en": "ATAC-seq peak feature extraction tool",
-      "llm_evidence_cn": "ATAC-seq峰特征提取工具",
-      "llm_evidence": "ATAC-seq峰特征提取工具",
-      "canonical_evidence": "ATAC-seq峰特征提取工具",
-      "llm_tldr_en": "PyPeakRankR extracts peak-level features from chromatin accessibility data (ATAC-seq) for regulatory element ranking, applicable to single-cell ATAC-seq analysis.",
-      "llm_tldr_cn": "开发了PyPeakRankR工具，从染色质可及性数据（如ATAC-seq）中提取峰级别特征（信号、GC含量、保守性等），生成可重复的峰-特征矩阵，支持调控元件的优先排序；虽未明确针对单细胞，但方法可直接迁移至单细胞ATAC-seq分析，为单细胞表观基因组学提供标准化特征提取流程。",
-      "llm_tldr": "开发了PyPeakRankR工具，从染色质可及性数据（如ATAC-seq）中提取峰级别特征（信号、GC含量、保守性等），生成可重复的峰-特征矩阵，支持调控元件的优先排序；虽未明确针对单细胞，但方法可直接迁移至单细胞ATAC-seq分析，为单细胞表观基因组学提供标准化特征提取流程。",
+      "llm_score": 8.0,
+      "llm_evidence_en": "ATAC-seq peak feature extraction tool directly relevant to single-cell ATAC-seq analysis",
+      "llm_evidence_cn": "ATAC-seq峰特征提取工具，直接适用于单细胞ATAC-seq分析",
+      "llm_evidence": "ATAC-seq峰特征提取工具，直接适用于单细胞ATAC-seq分析",
+      "canonical_evidence": "ATAC-seq峰特征提取工具，直接适用于单细胞ATAC-seq分析",
+      "llm_tldr_en": "PyPeakRankR is an open-source Python package that extracts peak-level features from ATAC-seq data, enabling reproducible ranking and benchmarking of regulatory elements.",
+      "llm_tldr_cn": "该论文介绍PyPeakRankR，一个开源Python工具包，可从ATAC-seq数据中提取峰水平的多种特征（如大Wig信号、GC含量、保守性分数等），生成标准化的峰-特征矩阵，支持调控元件的可重复排序与基准测试。该工具适用于单细胞ATAC-seq数据分析中的峰优先排序和下游验证，为单细胞染色质可及性研究提供了重要的特征提取方法。",
+      "llm_tldr": "该论文介绍PyPeakRankR，一个开源Python工具包，可从ATAC-seq数据中提取峰水平的多种特征（如大Wig信号、GC含量、保守性分数等），生成标准化的峰-特征矩阵，支持调控元件的可重复排序与基准测试。该工具适用于单细胞ATAC-seq数据分析中的峰优先排序和下游验证，为单细胞染色质可及性研究提供了重要的特征提取方法。",
       "llm_tags": [
         "query:sc-methods"
       ],
       "matched_query_tag": "query:sc-methods",
       "matched_query_text": "single-cell ATAC-seq",
       "matched_requirement_id": "req-5",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "7"
+      "selection_source": "fresh_fetch"
     },
     {
-      "id": "2606.11775v1",
+      "id": "2606.12838v1",
       "source": "arxiv",
-      "title": "Magnitude-Based Features for Multispecies Spatial Data",
-      "abstract": "Multispecies spatial data arise in many applications where interactions between different entities are central to system behaviour, including biomedical imaging, geospatial analysis, and species ecology. Despite their importance, relatively few quantitative tools exist to capture such interactions. In this work, we propose magnitude-based features for the analysis of multispecies spatial data. Magnitude is a real-valued invariant of finite metric spaces that can be interpreted as an effective number of points, incorporating both spatial configuration and scale. We develop global and local magnitude feature vectors and demonstrate their utility on synthetic tumour microenvironment data, and in tissue microarray data from human colorectal cancer samples. Locally, the method identifies distinct neighbourhood types and reveals spatial heterogeneity; in the model, this includes radial patterns associated with different qualitative outcomes of the simulations, while in the real-world data it reflects the importance of tertiary lymphoid structure-like interactions between B and T cell populations. Globally, the approach recovers known classifications of long-term simulation outcomes across parameter regimes in synthetic data, and suggests important roles for CD4+ T cells and CD163+ macrophages in distinguishing patients with favourable Crohn's like reactions from unfavourable diffuse immune infiltration. Together, these results suggest that magnitude-based features provide a powerful and flexible tool for the analysis of multispecies spatial data.",
+      "title": "OCOO-T : A Simple and Scalable Virtual Cell Model for Transcriptional Perturbation Response Prediction",
+      "abstract": "Predicting single-cell transcriptional responses to genetic, chemical and cytokine perturbations is a fundamental challenge in computational biology and AI Virtual Cell (AIVC) modeling, with direct implications for drug discovery and the elucidation of gene regulatory networks. Existing approaches often rely on auxiliary cell-state encoders, hierarchical variational autoencoders, dedicated Transformer encoder-decoder modules, or gene-interaction priors to compress high-dimensional expression profiles into latent representations. While effective, these designs increase architectural complexity and may limit scalability and generalizability. This paper introduces OCOO-T, a minimalist flow-matching-based AIVC model for transcriptional perturbation response prediction. OCOO-T utilizes a vanilla Transformer stack that operates directly on continuous gene expression profiles and formulates perturbation response prediction as a continuous-time denoising process. Perturbation embeddings, dosage information, and cell-line/cell-type specificity are integrated through adaptive layer normalization and in-context tokens. Comprehensive evaluations on Tahoe100M, Replogle, and PBMC benchmarks demonstrate that OCOO-T achieves state-of-the-art performance across diverse perturbations and cell types while effectively scaling to long transcriptional profiles through patching and depatching of cellular contexts. By leveraging the simplicity of Transformer-based denoising for single-cell omics, OCOO-T provides an effective and scalable framework for in-silico cellular simulation.",
       "authors": [
-        "Julia Sollberger",
-        "Joshua Bull",
-        "Sara Kališnik",
-        "Bernadette Stolz"
-      ],
-      "primary_category": "math.MG",
-      "categories": [
-        "math.MG",
-        "q-bio.QM",
-        "stat.ML"
-      ],
-      "published": "2026-06-10T08:02:58+00:00",
-      "link": "https://arxiv.org/pdf/2606.11775v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:scz-model",
-        "keyword:single-cell-omics",
-        "query:sc-methods",
-        "query:single-cell-omics"
-      ],
-      "llm_score": 6.0,
-      "llm_evidence_en": "multispecies spatial data analysis method applied to tumour microenvironment",
-      "llm_evidence_cn": "多物种空间数据分析方法，应用于肿瘤微环境",
-      "llm_evidence": "多物种空间数据分析方法，应用于肿瘤微环境",
-      "canonical_evidence": "多物种空间数据分析方法，应用于肿瘤微环境",
-      "llm_tldr_en": "Proposes magnitude-based features for multispecies spatial data analysis, demonstrated on synthetic tumour microenvironment data and colorectal cancer tissue microarrays, offering a new tool for spatial transcriptomics.",
-      "llm_tldr_cn": "该论文提出基于Magnitude的空间特征，用于分析多物种空间数据。Magnitude是有限度量空间的不变量，可解释为有效点数。方法在合成肿瘤微环境数据和结直肠癌组织芯片数据上验证，表明能有效捕捉空间交互。该工作为空间转录组学等领域的空间相互作用分析提供了新工具。",
-      "llm_tldr": "该论文提出基于Magnitude的空间特征，用于分析多物种空间数据。Magnitude是有限度量空间的不变量，可解释为有效点数。方法在合成肿瘤微环境数据和结直肠癌组织芯片数据上验证，表明能有效捕捉空间交互。该工作为空间转录组学等领域的空间相互作用分析提供了新工具。",
-      "llm_tags": [
-        "query:sc-methods"
-      ],
-      "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "spatial transcriptomics",
-      "matched_requirement_id": "req-6",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "6"
-    },
-    {
-      "id": "2606.18523v1",
-      "source": "arxiv",
-      "title": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
-      "abstract": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
-      "authors": [
-        "Johannes Seiffarth",
-        "Matthias Pesch",
-        "Lukas Scholtes",
-        "Dietrich Kohlheyer",
-        "Hanno Scharr",
-        "Katharina Nöh"
+        "Danning Jiang",
+        "Zheming An",
+        "Yalong Zhao",
+        "Lipeng Lai"
       ],
       "primary_category": "q-bio.QM",
       "categories": [
         "q-bio.QM",
-        "cs.CV"
+        "cs.AI",
+        "cs.LG",
+        "q-bio.GN"
       ],
-      "published": "2026-06-16T22:38:19+00:00",
-      "link": "https://arxiv.org/pdf/2606.18523v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:scz-model",
-        "keyword:single-cell-omics",
-        "query:als-organoid",
-        "query:sc-methods",
-        "query:single-cell-omics"
-      ],
-      "llm_score": 7.0,
-      "llm_evidence_en": "design-aware microfluidic chip for real-time single-cell image analysis",
-      "llm_evidence_cn": "设计感知微流控芯片用于实时单细胞图像分析",
-      "llm_evidence": "设计感知微流控芯片用于实时单细胞图像分析",
-      "canonical_evidence": "设计感知微流控芯片用于实时单细胞图像分析",
-      "llm_tldr_en": "DART aligns CAD blueprint with physical chip to automate real-time localization and processing of single-cell regions in microfluidic live-cell imaging, overcoming throughput-dependent delays.",
-      "llm_tldr_cn": "高内涵微流控活细胞成像产生丰富的单细胞数据，但传统半自动化方法因需逐区域定位而无法实时分析。本文提出DART范式，通过将芯片CAD蓝图与实物对齐，利用嵌入式基准标记实现所有感兴趣区域的吞吐量无关定位和全自动图像处理。实验表明该方法可消除数小时的延迟，支持实时分析，为单细胞功能研究提供了高效工具。",
-      "llm_tldr": "高内涵微流控活细胞成像产生丰富的单细胞数据，但传统半自动化方法因需逐区域定位而无法实时分析。本文提出DART范式，通过将芯片CAD蓝图与实物对齐，利用嵌入式基准标记实现所有感兴趣区域的吞吐量无关定位和全自动图像处理。实验表明该方法可消除数小时的延迟，支持实时分析，为单细胞功能研究提供了高效工具。",
-      "llm_tags": [
-        "query:sc-methods:composite"
-      ],
-      "matched_query_tag": "query:sc-methods:composite",
-      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
-      "matched_requirement_id": "req-composite-sc-methods",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "7"
-    },
-    {
-      "id": "2606.12021v1",
-      "source": "arxiv",
-      "title": "Adaptive spatial blocking for scalable clustering inference with applications to high-throughput spatial proteomics",
-      "abstract": "Ripley's K-function is a widely used spatial summary statistic for assessing clustering in point patterns. However, existing K-based methods can be computationally prohibitive for large-scale data, particularly in high-throughput spatial proteomics, because they rely on spatial information from all points in the image. To address this challenge, we propose a computationally efficient block-based testing framework that extracts disjoint local blocks from an image and aggregates clustering evidence across them. The proposed adaptive spatial blocking algorithm constructs blocks satisfying point-count and shape constraints, enabling scalable spatial clustering inference and fast p-value computation through an asymptotic normal approximation. Numerical studies demonstrate that the proposed method provides a favorable balance between statistical power and computational efficiency. In an application to healthy human intestine spatial proteomics data, our method detects strong spatial aggregation of plasma cells and colocalization between plasma cells and macrophages, while scaling favorably to large images.",
-      "authors": [
-        "Mingyu Go",
-        "Julia Wrobel",
-        "Hoseung Song"
-      ],
-      "primary_category": "stat.ME",
-      "categories": [
-        "stat.ME"
-      ],
-      "published": "2026-06-10T12:45:50+00:00",
-      "link": "https://arxiv.org/pdf/2606.12021v1",
+      "published": "2026-06-11T03:04:38+00:00",
+      "link": "https://arxiv.org/pdf/2606.12838v1",
       "tags": [
         "keyword:als-organoid",
         "keyword:sc-methods",
@@ -490,22 +357,93 @@
         "query:scz-model",
         "query:single-cell-omics"
       ],
-      "llm_score": 6.0,
-      "llm_evidence_en": "scalable spatial clustering inference method applicable to spatial transcriptomics data",
-      "llm_evidence_cn": "可扩展的空间聚类推断方法，适用于空间转录组学数据",
-      "llm_evidence": "可扩展的空间聚类推断方法，适用于空间转录组学数据",
-      "canonical_evidence": "可扩展的空间聚类推断方法，适用于空间转录组学数据",
-      "llm_tldr_en": "Proposes an adaptive spatial blocking framework for scalable clustering inference in spatial point patterns, demonstrated on high-throughput spatial proteomics. The method constructs disjoint blocks with constraints, enabling fast p-value computation and scalable testing. Directly applicable to spatial transcriptomics clustering tasks.",
-      "llm_tldr_cn": "针对大规模空间数据聚类推断计算成本高的问题，提出自适应空间分块测试框架。该方法将图像划分为满足点数和形状约束的局部块，聚合聚类证据，实现快速p值计算和可扩展推断。在高通量空间蛋白质组学数据上验证了效率，其核心思想可直接迁移至空间转录组学等空间单细胞数据的聚类分析。",
-      "llm_tldr": "针对大规模空间数据聚类推断计算成本高的问题，提出自适应空间分块测试框架。该方法将图像划分为满足点数和形状约束的局部块，聚合聚类证据，实现快速p值计算和可扩展推断。在高通量空间蛋白质组学数据上验证了效率，其核心思想可直接迁移至空间转录组学等空间单细胞数据的聚类分析。",
+      "llm_score": 8.0,
+      "llm_evidence_en": "predicts single-cell transcriptional responses to perturbations using a flow-matching model",
+      "llm_evidence_cn": "使用流匹配模型预测单细胞转录扰动响应",
+      "llm_evidence": "使用流匹配模型预测单细胞转录扰动响应",
+      "canonical_evidence": "使用流匹配模型预测单细胞转录扰动响应",
+      "llm_tldr_en": "OCOO-T proposes a minimalist flow-matching-based AI Virtual Cell model to predict single-cell transcriptional responses to genetic, chemical, and cytokine perturbations, achieving scalable and generalizable performance without complex auxiliary encoders.",
+      "llm_tldr_cn": "现有预测单细胞扰动响应的方法依赖复杂的辅助编码器和Transformer模块，限制了可扩展性和泛化能力。OCOO-T提出基于流匹配的简约虚拟细胞模型，无需复杂辅助编码器，直接预测单细胞转录扰动响应。在多种扰动类型上验证，显示出高准确性和良好的泛化能力，为药物发现和基因调控网络研究提供了可扩展的基础模型。",
+      "llm_tldr": "现有预测单细胞扰动响应的方法依赖复杂的辅助编码器和Transformer模块，限制了可扩展性和泛化能力。OCOO-T提出基于流匹配的简约虚拟细胞模型，无需复杂辅助编码器，直接预测单细胞转录扰动响应。在多种扰动类型上验证，显示出高准确性和良好的泛化能力，为药物发现和基因调控网络研究提供了可扩展的基础模型。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.12346v1",
+      "source": "arxiv",
+      "title": "Atlas H&E-TME: Scalable AI-Based Tissue Profiling at Expert Pathologist-Level Accuracy",
+      "abstract": "Hematoxylin and eosin (H&E) staining is the cornerstone of histopathology, yet scalable, quantitative analysis of H&E whole-slide images (WSIs) remains a central challenge in computational pathology. We present Atlas H&E-TME, an AI-based system built on the Atlas family of pathology foundation models that predicts tissue quality, tissue region, and cell type labels across multiple cancer types, yielding over 4,500 quantitative readouts per slide at cell-level resolution. A key challenge to validating such systems is overcoming morphological ambiguity inherent to H&E-only ground truth and the limited scalability of more informed references drawing on modalities such as immunohistochemistry (IHC). We address this with a dual validation framework combining biologically grounded depth with technical and morphological breadth. For depth, we propose an IHC-informed multi-pathologist consensus protocol that substantially improves inter-rater agreement over conventional H&E-only annotation. This yields a molecularly grounded reference against which we compare Atlas H&E-TME and pathologists working from H&E alone. For breadth, we benchmark Atlas H&E-TME on over 200,000 high-confidence H&E-only pathologist annotations across 1,500+ cases spanning eight cancer types and their most common metastatic sites, with subtypes covering >90% of clinical cases per cancer type, drawn from 25+ sources and 8+ scanner models. Benchmarked against the IHC-informed consensus, Atlas H&E-TME matches or exceeds pathologist H&E-only performance and generalizes consistently and robustly across this broad morphological and technical scope. In doing so, Atlas H&E-TME turns the H&E slide -- the most ubiquitous data in pathology -- into a scalable, quantitative window into the tumor and its microenvironment, laying a foundation for the next generation of tissue-based biomarkers in translational and clinical research.",
+      "authors": [
+        "Kai Standvoss",
+        "Miriam Hägele",
+        "Rosemarie Krupar",
+        "Julika Ribbat-Idel",
+        "Jennifer Altschüler",
+        "Gerrit Erdmann",
+        "Hans Pinckaers",
+        "Evelyn Ramberger",
+        "Madleen Drinkwitz",
+        "Ádám Nárai",
+        "Alexander Möllers",
+        "Katja Lingelbach",
+        "Sebastian Kons",
+        "Lukas Hönig",
+        "Recepcan Adigüzel",
+        "Joana Baião",
+        "Alberto Megina Gonzalo",
+        "Marius Teodorescu",
+        "Marie-Lisa Eich",
+        "Paolo Chetta",
+        "Shakil Merchant",
+        "Verena Aumiller",
+        "Simon Schallenberg",
+        "Andrew Norgan",
+        "Klaus-Robert Müller",
+        "Lukas Ruff",
+        "Maximilian Alber",
+        "Frederick Klauschen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-10T17:17:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.12346v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "predicts cell type labels in H&E slides, relevant to cell type annotation",
+      "llm_evidence_cn": "预测H&E切片中的细胞类型标签，与细胞类型注释相关",
+      "llm_evidence": "预测H&E切片中的细胞类型标签，与细胞类型注释相关",
+      "canonical_evidence": "预测H&E切片中的细胞类型标签，与细胞类型注释相关",
+      "llm_tldr_en": "Atlas H&E-TME uses AI foundation models to predict tissue quality, region, and cell type labels from H&E slides, achieving expert-level accuracy across multiple cancer types.",
+      "llm_tldr_cn": "本文提出Atlas H&E-TME系统，基于病理基础模型家族对H&E全切片图像进行细胞级分析，自动预测组织质量、区域和细胞类型标签。该系统通过双重验证框架克服形态学模糊性，在多种癌症类型中达到病理专家级别的准确性，为计算病理学提供了可扩展的定量分析工具。",
+      "llm_tldr": "本文提出Atlas H&E-TME系统，基于病理基础模型家族对H&E全切片图像进行细胞级分析，自动预测组织质量、区域和细胞类型标签。该系统通过双重验证框架克服形态学模糊性，在多种癌症类型中达到病理专家级别的准确性，为计算病理学提供了可扩展的定量分析工具。",
       "llm_tags": [
         "query:sc-methods"
       ],
       "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "spatial transcriptomics",
-      "matched_requirement_id": "req-6",
+      "matched_query_text": "cell type annotation",
+      "matched_requirement_id": "req-7",
       "selection_source": "fresh_fetch",
-      "quick_tier": "6"
+      "quick_tier": "7"
     }
   ]
 }
