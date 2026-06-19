@@ -1,0 +1,806 @@
+Title: Module-Structured Mixture Factor Models to Identify Outcome-Specific Signatures in Gene Expression Data
+
+URL Source: https://arxiv.org/pdf/2606.16460v1
+
+Published Time: Tue, 16 Jun 2026 01:59:12 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+# Module-Structured Mixture Factor Models to Identify Outcome-Specific Signatures in Gene Expression Data 
+
+Jinran Wu a, ∗, Geoffrey J. McLachlan a,1 , Saumyadipta Pyne b,c,1 
+
+> aSchool of Mathematics and Physics, The University of Queensland, Brisbane, QLD 4072, Australia
+> bDepartment of Statistics and Applied Probability, University of California, Santa Barbara, Santa Barbara, CA, USA
+> cHealth Analytics Network, Columbia, MD, USA
+
+Abstract 
+
+High-throughput gene expression data exhibit high dimensionality, complex intergene dependence, and pronounced biological heterogeneity across samples, presenting major challenges for unsupervised clustering and disease subtype discovery. We introduce a module-structured mixture factor model that combines finite mixture modelling with low-rank latent factor representations defined at the gene-module level. By explicitly modelling gene modules in both the mean and covariance structure, the proposed frame-work decomposes expression variability into global gene-specific effects, cluster-specific module-level shifts, latent dependence within modules, and gene-specific residual noise. An Expectation–Conditional Maximisation algorithm is developed for parameter estima-tion, allowing stable and scalable inference in high-dimensional transcriptomic settings. This framework enables interpretable unsupervised identification of disease-associated molecular subtypes and phenotypic heterogeneity across two autoimmune diseases using a large clinical transcriptomic dataset. 
+
+Keywords: 
+
+1. Introduction 
+
+A defining biological feature of gene expression data, unlike other high-dimensional data, is its pronounced modular organization. Genes typically function in coordinated groups corresponding to shared regulatory programs or biological pathways, resulting in strong within-module dependence and heterogeneous signal strengths across genes (Segal et al., 2004; Wang et al., 2025). Clustering approaches that ignore this modular structure, such as methods relying solely on marginal gene effects or overly simplistic covariance assumptions, are prone to numerical instability, limited interpretability, and poor repro-         
+
+> ∗Corresponding author
+> Email addresses: jinran.wu@uq.edu.au (Jinran Wu ), g.mclachlan@uq.edu.au (Geoffrey J. McLachlan ), spyne@ucsb.edu (Saumyadipta Pyne )
+> 1These authors contributed equally as senior authors.
+> arXiv:2606.16460v1 [stat.AP] 15 Jun 2026
+
+ducibility. At the other extreme, fully unstructured covariance modeling is statistically infeasible and computationally prohibitive in high-dimensional settings. Gene modules and pathways are increasingly popular for comparison and classifica-tion of diseases (Mi et al., 2019). Groups of diseases could be characterized not only by disease-specific modules but also by core pathways sometimes shared among them. Autoimmune diseases form a group of 80-150 complex, chronic disorders that are often debilitating and have no known cures (Martorell-Marugán et al., 2021; Shen et al., 2022). They are commonly characterized by immune responses to self-antigens, leading to tissue damage and dysfunction in several organs. Their pathogenesis is not fully understood, and they exhibit a high degree of heterogeneity in clinical and molecular phenotypes among patients (Cheng et al., 2024). Although these disorders damage different organs and have variable clinical outcomes, studies have found that they share many risk factors and molecular mechanisms (Li et al., 2025). In this study, we adopt a new module-based approach to characterize the transcrip-tomic signatures of two prominent autoimmune diseases: systemic lupus erythematosus (SLE) and rheumatoid arthritis (RA). SLE is a particularly heterogeneous autoimmune disease characterized by aberrant immune activation, impaired regulatory cell function, antinuclear antibody production, etc. (Cojocaru et al., 2011). SLE phenotypes are driven by the deposition of circulating immune complexes into different organs (hence deemed systemic), triggering complement system activation and local tissue damage, e.g., lupus nephritis (Patino-Martinez et al., 2026). At the molecular level, SLE has multiple drivers, including unchecked B cell activation, a strong interferon signature, and the massive pro-duction of pathogenic autoantibodies, e.g., anti-dsDNA. In contrast, RA is characterized by localized, chronic joint inflammation marked by chronic inflammation of the synovium, leading to complex disease heterogeneity. Its molecular drivers are dominated by hyper-activation of the JAK-STAT signaling pathway, activation of NF-κB, and an abundance of pro-inflammatory cytokines. With its progression, RA leads to irreversible bone tis-sue damage, causing persistent pain and significantly impaired joint functionality (Sharif et al., 2018). Molecular classification studies have refined distinct functional subtypes of SLE, in-cluding interferon-driven, neutrophil-associated, and other immune-cell-related subtypes (Cheng et al., 2024). Similarly, transcriptomic analyses of RA have identified sub-groups characterized by inflammatory responses, neutrophil activation, and joint-damage-related pathways. Despite substantial differences in their underlying molecular mecha-nisms, notable commonalities have been observed between SLE and RA patient sub-types. For example, neutrophil activity and TGF-β signaling, both of which play im-portant roles in immune regulation and inflammatory processes, have been implicated across multiple autoimmune diseases. Many of these subtype discoveries have been facil-itated through gene modules identified by weighted gene co-expression network analysis 2(WGCNA) (Langfelder and Horvath, 2008), highlighting the importance of modular tran-scriptomic organization in understanding disease heterogeneity (Cheng et al., 2024). From a statistical perspective, finite mixture models provide a natural framework for uncovering latent disease subtypes within heterogeneous transcriptomic populations (McLach-lan et al., 2019, 2005). However, direct Gaussian mixture modeling becomes impractical in high-dimensional settings because of the large number of covariance parameters that must be estimated. Mixtures of factor analyzers (MFA) address this challenge by rep-resenting cluster-specific (or common) covariance structures through a low-dimensional latent factor space (McLachlan et al., 2003; McLachlan and Peel, 2000; Baek et al., 2009; McLachlan et al., 2011), thereby achieving substantial dimension reduction while pre-serving important dependence patterns among genes. Owing to these advantages, MFA and related latent variable mixture models have been widely used for clustering high-dimensional biological data (McLachlan et al., 2019). Nevertheless, conventional MFA models typically treat genes as exchangeable variables (Silkwood et al., 2024) and do not explicitly account for the modular organization inherent in biological systems. As a result, module-level dependence structures and pathway-specific sources of variation may be inadequately captured, limiting both biological interpretability and the ability to characterize disease-relevant molecular mechanisms. To address these challenges, this study aims to develop clustering models that explic-itly incorporate modular structure while remaining statistically stable and computation-ally scalable. In this paper, we propose a module-structured mixture factor model that integrates finite mixture modeling with low-rank latent factor representations defined at the gene-module level. The proposed framework accommodates either data-driven or externally defined gene modules and embeds them directly into the mixture model to jointly capture between-cluster heterogeneity and within-module dependence. By decom-posing expression variability into global gene-specific effects, cluster-specific module-level shifts, latent module-level dependence, and gene-specific residual variability, the model achieves a principled balance between modeling flexibility, biological interpretability, and computational tractability. Unlike conventional mixtures of factor analyzers that allow cluster-specific covariance structures, the proposed model employs a common module-structured covariance representation across clusters, focusing on disease heterogeneity through interpretable module-level mean shifts. Notably, our module-structured mixture factor modeling was able to identify, in an interpretable unsupervised manner, detailed molecular subtypes and phenotypic hetero-geneity within a large clinical transcriptomic dataset across two autoimmune diseases, RA and SLE. Functional interpretation of the inferred modules was done in terms of en-richment of known molecular pathways. In addition, Human Phenotype Ontology (HPO) was used to characterize these subtypes based on the corresponding clinical phenotypes. Finally, a comparative analysis of multiple module-based methods demonstrated higher-3resolution clustering and significantly improved the performance of our model. The remainder of the paper is organized as follows. Section 2 describes the construc-tion of gene modules used as model inputs. Section 3 introduces the proposed module-structured mixture factor model. Parameter estimation via an Expectation–Conditional Maximization (ECM) algorithm is presented in Section 4, followed by the results of em-pirical studies illustrating the practical utility of the proposed approach in Section 5. In Section 6, we end with a discussion of our findings, limitations of our approach, and future work. 
+
+2. Gene module construction 
+
+Let X = ( xij ) ∈ Rn×p denote the gene expression matrix, where n is the number of samples and p is the number of genes. Prior to module construction, each gene is standardized across samples to have mean zero and unit variance. The purpose of the module construction step is not to identify biologically optimal gene modules, but rather to obtain a stable low-resolution representation of transcriptomic structure that can be incorporated into the proposed mixture factor model. 
+
+Gene filtering. To reduce dimensionality and remove weakly informative genes, genes are ranked according to their median absolute deviation (MAD) (Tibshirani et al., 1999). For gene j, the MAD is defined as 
+
+MAD j = median 1≤i≤n |xij − median 1≤i≤n(xij )| .
+
+The MAD provides a robust measure of marginal variability that is less sensitive to extreme observations than the sample variance. The top p∗ genes with the largest MAD values are retained for subsequent analysis. 
+
+Correlation-based clustering. Let J ∗ denote the set of retained genes. Gene modules are constructed using hierarchical agglomerative clustering based on pairwise gene correla-tions. For genes j, j ′ ∈ J ∗, define the dissimilarity measure 
+
+djj ′ =
+
+q
+
+1 − cor( x·j , x ·j′ ),
+
+where cor( ·, ·) denotes the Pearson correlation coefficient computed across samples. Av-erage linkage clustering is then applied to the resulting dissimilarity matrix to construct a hierarchical dendrogram. 
+
+Module definition. The dendrogram is partitioned at a prespecified cutting threshold, yielding a collection of candidate gene modules. Modules containing fewer than mmin 
+
+genes are removed to avoid unstable estimation arising from extremely small groups. Let 4G denote the number of retained modules. Define 
+
+c(j) ∈ { 1, . . . , G }
+
+as the module membership indicator for gene j, and let 
+
+Gg = {j ∈ J ∗ : c(j) = g}, g = 1 , . . . , G, 
+
+denote the index set corresponding to module g. The collection 
+
+{G 1, . . . , GG}
+
+forms a partition of the retained gene set J ∗. For notational convenience, we write j ∈ g
+
+whenever j ∈ G g.The resulting modules are used solely to define the structured mean and covariance components of the proposed mixture factor model. Importantly, the subsequent modeling and estimation framework is agnostic to the particular module construction procedure. Consequently, alternative module definitions, including pathway-based annotations, cu-rated biological gene sets, and externally supplied module structures, can be incorporated without modification to the model formulation or estimation algorithm. 
+
+3. Module–structured mixture factor model 
+
+Let X = ( x1, . . . , xn)⊤ ∈ Rn×p denote the gene expression matrix, where xi =(xi1, . . . , x ip )⊤ is the observation for sample i. Assume a finite mixture model with K
+
+latent clusters. Let zi ∈ { 1, . . . , K } denote the cluster indicator for sample i, with 
+
+Pr( zi = k) = πk,
+
+> K
+
+X
+
+> k=1
+
+πk = 1 .
+
+Genes are partitioned into G non-overlapping modules. Let c(j) ∈ { 1, . . . , G } denote the module index for gene j.
+
+3.1. Hierarchical generative model 
+
+Conditional on cluster membership zi = k, we adopt a module–structured factor– analytic model: 
+
+fi | (zi = k) ∼ N (0, Iq), (1) 
+
+xi | (fi, z i = k) = δ + Mαk + Bf i + εi, (2) 
+
+εi ∼ N (0, D) , (3) 5where xi ∈ Rp denotes the gene expression vector for sample i, δ ∈ Rp is a global gene– specific mean vector capturing baseline expression levels shared across all samples, and 
+
+fi ∈ Rq is a q-dimensional latent factor. The cluster-specific effects are defined at the module level by αk = ( αk1, . . . , α kG )⊤ ∈ RG. The residual covariance is diagonal with 
+
+D = diag( ψ), where ψ = ( ψ1, . . . , ψ p)⊤ collects gene–specific residual variances. To encode the module structure, the loading matrix B ∈ Rp×q is constrained as 
+
+B = SMU , (4) where S = diag( s1, . . . , s p) contains gene–specific scaling coefficients, M ∈ { 0, 1}p×G
+
+is a gene–module assignment matrix with Mjg = 1 if and only if c(j) = g, and U =(u1, . . . , uG)⊤ ∈ RG×q collects module-level loading directions. For identifiability, we impose ∥ug∥2 = 1 for all g = 1 , . . . , G . Equivalently, for each gene j = 1 , . . . , p ,
+
+xij = δj + αk,c (j) + b⊤ 
+
+> j
+
+fi + εij , εij ∼ N (0 , ψ j ),
+
+where bj is the jth row of B and satisfies bj = sj uc(j).
+
+3.2. Marginal cluster–conditional distribution 
+
+Integrating out the latent factor fi yields 
+
+xi | zi = k ∼ N (μk, Σ) , (5) with 
+
+μk = δ + Mαk, Σ = BB ⊤ + D. (6) Under B = SMU and D = diag( ψ), this becomes 
+
+Σ = diag( ψ) + SMUU ⊤M⊤S. (7) 
+
+3.3. Observed–data mixture likelihood 
+
+The marginal density of xi is a finite mixture of Gaussian distributions, 
+
+p(xi | Θ) = 
+
+> K
+
+X
+
+> k=1
+
+πk ϕp(xi; μk, Σ) , (8) where Θ denotes the full collection of model parameters. The observed–data log–likelihood is therefore 
+
+ℓ(Θ) = 
+
+> n
+
+X
+
+> i=1
+
+log 
+
+" KX
+
+> k=1
+
+πk ϕp(xi; μk, Σ)
+
+#
+
+. (9) 63.4. Interpretation 
+
+The proposed model admits a clear interpretation as a module–structured mixture of factor analysers, in which gene expression variability is decomposed into four distinct and interpretable components: 1. Global gene–specific baseline effects ( δ), which capture systematic expression dif-ferences shared across all samples and clusters. These effects account for gene-level baseline activity and remove global expression offsets before clustering and covari-ance modelling. 2. Cluster–specific module shifts ( αk), which represent differential activation or sup-pression of entire gene modules across latent clusters. By operating at the module level, these mean shifts encode biologically meaningful between-cluster heterogene-ity at the level of pathways or functional groups, rather than individual genes, thereby improving both interpretability and statistical efficiency. 3. Latent factor–driven dependence within modules ( B, fi), which models residual cor-relation among genes through a low–rank factor–analytic structure. The loading matrix B = SMU imposes structured parameter sharing, so that genes within the same module share common factor directions while differing in magnitude via gene-specific scalings. This component captures coordinated expression patterns beyond mean shifts, such as shared regulatory programs or unobserved cellular states, while substantially reducing the effective dimensionality of the covariance structure. 4. Gene–specific residual variability ( ψ), which accounts for idiosyncratic noise and measurement error not explained by the latent factors or module structure. Al-lowing heterogeneous residual variances across genes avoids overly restrictive ho-moscedastic assumptions and improves model flexibility. By jointly modeling module-level structure in both the mean and covariance, the proposed framework achieves substantial dimension reduction while retaining the expres-sive power of a mixture of factor analysers. The explicit separation of global effects, cluster-specific mean structure, latent dependence, and gene-specific noise enhances in-terpretability, improves estimation stability in high-dimensional settings, and facilitates biologically meaningful clustering of transcriptomic profiles. 
+
+4. Estimation via an ECM algorithm 
+
+Parameter estimation is carried out using an ECM algorithm (McLachlan and Krish-nan, 2008; Ng et al., 2011). The complete data consist of the observed vectors together with the latent cluster indicators {zi}ni=1 and the latent factors {fi}ni=1 . The ECM frame-work allows the maximisation step to be decomposed into a sequence of lower-dimensional conditional maximisation problems, leading to improved numerical stability in high di-mensions. 7Let 
+
+Θ = ( π, δ, α, U, s, ψ)
+
+denote the full parameter set. Recall the factor–analytic form 
+
+xi = μzi + Bf i + εi, εi ∼ N (0, D),
+
+where 
+
+μk = δ + Mαk, B = SMU , D = diag( ψ).
+
+4.1. E–step 
+
+Given current parameter estimates Θ(t), the E-step computes conditional expectations with respect to the posterior distribution of the missing data. 
+
+Posterior cluster responsibilities. The posterior probability that observation i belongs to cluster k is 
+
+rik = Pr( zi = k | xi; Θ(t)) = 
+
+π(t) 
+
+> k
+
+ϕp
+
+
+
+xi; μ(t) 
+
+> k
+
+, Σ(t)
+
+PKℓ=1 π(t) 
+
+> ℓ
+
+ϕp
+
+
+
+xi; μ(t) 
+
+> ℓ
+
+, Σ(t)
+
+, (10) where 
+
+μ(t) 
+
+> k
+
+= δ(t) + Mα(t) 
+
+> k
+
+, Σ(t) = B(t)(B(t))⊤ + D(t),
+
+with B(t) = S(t)MU (t) and D(t) = diag( ψ(t)).
+
+Conditional moments of latent factors. Conditional on zi = k, the posterior distribution of the latent factor fi is Gaussian, 
+
+fi | (xi, z i = k) ∼ N (mik , V) , (11) with the standard factor–analysis expressions 
+
+V =  Iq + B⊤D−1B−1 , mik = VB ⊤D−1 (xi − μk) . (12) For later use, define 
+
+Cik = E(fif ⊤ 
+
+> i
+
+| xi, z i = k) = V + mik m⊤
+
+> ik
+
+. (13) 
+
+Structured computation under the module parameterisation. Let eik = xi −μk and denote 
+
+eikj its jth element. Using B = SMU and D = diag( ψ), we have 
+
+B⊤D−1B =
+
+> G
+
+X
+
+> g=1
+
+X
+
+> j∈g
+
+s2
+
+> j
+
+ψj
+
+!
+
+ugu⊤ 
+
+> g
+
+≡
+
+> G
+
+X
+
+> g=1
+
+wg ugu⊤ 
+
+> g
+
+, wg = X
+
+> j∈g
+
+s2
+
+> j
+
+ψj
+
+, (14) 8and 
+
+Tik ≡ B⊤D−1eik =
+
+> G
+
+X
+
+> g=1
+
+X
+
+> j∈g
+
+sj
+
+ψj
+
+eikj 
+
+!
+
+ug ≡
+
+> G
+
+X
+
+> g=1
+
+cikg ug, cikg = X
+
+> j∈g
+
+sj
+
+ψj
+
+eikj . (15) Then mik = VT ik , with V = ( Iq + P 
+
+> g
+
+wgugu⊤ 
+
+> g
+
+)−1.
+
+4.2. CM–steps 
+
+Given the conditional expectations from the E–step, the M–step is carried out via a sequence of conditional maximisation steps. 
+
+CM–step 1: Mixing proportions. 
+
+π(t+1)  
+
+> k
+
+= 1
+
+n
+
+> n
+
+X
+
+> i=1
+
+rik . (16) 
+
+CM–step 2: Cluster–specific module effects. Fix (δ, S, U, ψ). For module g, define aikg =
+
+u⊤ 
+
+> g
+
+mik . The first-order condition for αkg yields the closed-form update 
+
+α(t+1)  
+
+> kg
+
+=
+
+Pni=1 rik 
+
+P 
+
+> j∈g
+
+ψ−1
+
+> j
+
+
+
+xij − δ(t) 
+
+> j
+
+− s(t) 
+
+> j
+
+aikg 
+
+Pni=1 rik 
+
+P 
+
+> j∈g
+
+ψ−1
+
+> j
+
+. (17) 
+
+CM–step 3: Global gene means. Fix (α, S, U, ψ). For gene j in module g = c(j), with 
+
+aikg = u⊤ 
+
+> g
+
+mik ,
+
+δ(t+1)  
+
+> j
+
+= 1
+
+n
+
+> n
+
+X
+
+> i=1
+
+"
+
+xij −
+
+> K
+
+X
+
+> k=1
+
+rik 
+
+
+
+α(t+1)  
+
+> k,g
+
++ s(t) 
+
+> j
+
+aikg 
+
+#
+
+. (18) 
+
+CM–step 4: update of sj (gene–specific scaling). Fix (δ, {αk}Kk=1 , {ug}Gg=1 , ψ). For gene 
+
+j in module g = c(j), define 
+
+eikj = xij −δj −αk,g , mik = E(fi | xi, z i = k), Cik = E(fif ⊤ 
+
+> i
+
+| xi, z i = k) = V+mik m⊤
+
+> ik
+
+,
+
+and 
+
+aikg = u⊤ 
+
+> g
+
+mik , bikg = u⊤ 
+
+> g
+
+Cik ug = u⊤ 
+
+> g
+
+Vug + ( u⊤ 
+
+> g
+
+mik )2.
+
+The part of the Q-function involving sj is quadratic, and the first-order condition yields 
+
+s(t+1)  
+
+> j
+
+=
+
+Pni=1 
+
+PKk=1 rik eikj aikg 
+
+Pni=1 
+
+PKk=1 rik bikg 
+
+, g = c(j).
+
+Optionally, one may enforce sj ≥ 0 for identifiability by setting s(t+1)  
+
+> j
+
+← | s(t+1)  
+
+> j
+
+| and absorbing the sign into ug.9CM–step 5: update of ug (module loading direction). Fix (δ, {αk}Kk=1 , S, ψ). For module 
+
+g, collect terms in the Q-function depending on ug and write 
+
+Qg(ug) = −12u⊤ 
+
+> g
+
+Agug + b⊤ 
+
+> g
+
+ug + const , subject to ∥ug∥2 = 1 .
+
+Let 
+
+wg = X
+
+> j∈g
+
+s2
+
+> j
+
+ψj
+
+, cikg = X
+
+> j∈g
+
+sj
+
+ψj
+
+eikj .
+
+Then Ag and bg admit the explicit expressions 
+
+Ag =
+
+> n
+
+X
+
+> i=1
+> K
+
+X
+
+> k=1
+
+rik wg Cik , bg =
+
+> n
+
+X
+
+> i=1
+> K
+
+X
+
+> k=1
+
+rik cikg mik .
+
+Therefore, 
+
+u(t+1)  
+
+> g
+
+= arg max 
+
+> ∥u∥2=1
+
+n
+
+− 12 u⊤Agu + b⊤ 
+
+> g
+
+u
+
+o
+
+.
+
+The KKT conditions imply that there exists λ ∈ R such that 
+
+(Ag + λI q) ug = bg, ∥ug∥2 = 1 ,
+
+hence ug(λ) = ( Ag + λI q)−1bg and λ solves 
+
+ϕ(λ) = ∥ug(λ)∥22 − 1 = 0 , λ > −λmin (Ag).
+
+In practice, one may compute λ by a one-dimensional root-finding method (e.g., bisec-tion), and then set u(t+1)  
+
+> g
+
+= ug(λ). Afterwards, enforce the sign convention ug,m (g) > 0
+
+where m(g) = arg max ℓ |ugℓ |.
+
+CM–step 6: Residual variances. Let g = c(j) and recall eikj = xij − δj − αk,g and 
+
+aikg = u⊤ 
+
+> g
+
+mik , where mik = E(fi | xi, z i = k) and V = Var( fi | xi, z i = k) from the E– step. Using Cik = V + mik m⊤
+
+> ik
+
+, we have u⊤ 
+
+> g
+
+Cik ug = u⊤ 
+
+> g
+
+Vug + a2
+
+> ikg
+
+. Then the gene-specific residual variances are updated by 
+
+ψ(t+1)  
+
+> j
+
+= 1
+
+n
+
+> n
+
+X
+
+> i=1
+> K
+
+X
+
+> k=1
+
+rik 
+
+h
+
+e2 
+
+> ikj
+
+− 2s(t+1)  
+
+> j
+
+eikj aikg + ( s(t+1)  
+
+> j
+
+)2  u⊤ 
+
+> g
+
+Vug + a2
+
+> ikg
+
+i
+
+, (19) where we use PKk=1 rik = 1 for each i. In practice, we bound ψ(t+1)  
+
+> j
+
+below by a small positive constant to prevent degeneracy. 
+
+Initialisation. The ECM algorithm is initialised using a reduced–dimension representa-tion based on gene modules. Specifically, for each sample, we compute module-level mean expression profiles and apply K–means clustering (with multiple random starts) in the 10 resulting G-dimensional space to obtain an initial hard partition. The initial responsibil-ities are set to r(0)  
+
+> ik
+
+= I{ˆz(0)  
+
+> i
+
+= k}, and the mixing proportions are initialised accordingly. Given the initial cluster assignments, the global gene means are initialised by sample averages, δ(0)  
+
+> j
+
+= n−1 Pni=1 xij , and the cluster-specific module effects are initialised as within-cluster averages of the module-level centred expression profiles. The module load-ing directions are initialised as random unit vectors in Rq, and the gene-specific scaling coefficients are set to s(0)  
+
+> j
+
+= 1 . Finally, the residual variances are initialised using gene-wise mean squared residuals under the initial mean structure, with a small positive lower bound imposed to avoid degeneracy. 
+
+5. Results 
+
+5.1. Autoimmune disease data 
+
+The empirical analyses are based on a large transcriptomic dataset comprising samples drawn from two clinically distinct autoimmune diseases, RA and SLE. The anonymized publicly available dataset (entry GSE45291) was obtained from the ADEx database (Au-toimmune Diseases Explorer (Martorell-Marugán et al., 2021)). It contains a total of 
+
+n = 785 samples, including nRA = 493 RA samples and nSLE = 292 SLE samples, with raw expression measurements available for 9,671 genes. While the disease membership of each sample is known a priori, this information is not used at any stage of model fitting, model selection, or subtype inference. Instead, all analyses are conducted in an unsupervised manner based solely on the observed gene expression profiles, allowing la-tent molecular structure and heterogeneity to emerge from the data without imposing disease-level labels. To reduce dimensionality and improve estimation stability in high-dimensional tran-scriptomic data, genes are first screened using the MAD, and only highly variable genes are retained for downstream analysis. Gene expression values are subsequently stan-dardised to have zero mean and unit variance to ensure comparability across genes and samples. The retained genes are then grouped into co-expression modules using hierarchi-cal clustering based on pairwise gene–gene correlations, with average-linkage clustering applied to a correlation-based dissimilarity matrix. Small or weakly defined clusters are removed to enhance the robustness and interpretability of module-level estimation. After preprocessing under this fixed empirical protocol, the final analysis set consists of p = 979 highly variable genes organised into G = 19 co-expression modules. These gene modules are constructed as a preprocessing step and treated as fixed inputs to the proposed model. The resulting processed dataset serves as the input for all subsequent model-based analyses, including subtype discovery, module-level effect estimation, and functional interpretation. Detailed implementation choices are provided in Appendix A. 11 5.2. Model selection 
+
+The proposed module-structured mixture factor model is fitted to the combined dataset over a grid of candidate values for the number of mixture components K and the latent factor dimension q. Model selection is carried out using the Bayesian infor-mation criterion (BIC), with smaller values indicating a better trade-off between model fit and complexity. Figure 1 displays the resulting ∆BIC values across the (K, q ) grid. The optimal model configuration is selected as the combination of (K, q ) that minimises the BIC and is used for all subsequent analyses. For the combined RA–SLE dataset, the minimum BIC is attained at K = 9 and q = 8 .    
+
+> Figure 1: ∆BIC values for the dataset across different numbers of mixture components Kand latent factor dimensions q.
+
+5.3. Clustering structure and disease-associated heterogeneity 
+
+Using the selected model configuration (K = 9 , q = 8) , samples from the dataset are assigned to latent clusters according to posterior cluster responsibilities. Table 1 sum-marises the distribution of samples across the inferred clusters, stratified by disease status. Although disease labels are not used during model fitting or clustering, the inferred clus-ters exhibit a pronounced disease-specific composition. Each cluster is dominated by samples from a single disease, with clusters 1, 5, 6, 7, and 9 primarily composed of RA samples, and clusters 2, 3, 4, and 8 almost exclusively populated by SLE samples. This complete separation indicates that disease-level molecular structure (Cheng et al., 2024) 12 emerges naturally from the unsupervised analysis, while the presence of multiple clusters within each disease highlights substantial within-disease heterogeneity. 
+
+> Table 1: Distribution of samples across inferred clusters by disease status.
+
+Cluster Disease 1 2 3 4 5 6 7 8 9RA 15 0 0 0 149 66 228 0 35 SLE 0 9 114 113 0 0 0 56 0
+
+Figure 2 further characterises the inferred clusters in terms of their module-level ex-pression patterns and sample sizes. Panel (a) displays the estimated cluster-specific module effects αk,g , where rows correspond to inferred clusters and columns correspond to gene modules. Clear and structured variation is observed across clusters, with many clusters exhibiting coordinated up- or down-regulation across multiple modules rather than isolated deviations in individual modules.     
+
+> Figure 2: Cluster-specific module effects and cluster prevalence in the investigated dataset. (a) Heatmap of estimated module-level mean effects αk,g , with rows corresponding to inferred clusters and columns corresponding to gene modules. Numerical values indicate estimated effects rounded to two decimal places. (b) Number of samples assigned to each inferred cluster.
+
+Several clusters exhibited clearly distinct module-level effect patterns, which can be summarised in terms of characteristic signature modules. Clusters 2, 3, 4, and 8 (SLE-dominated) were characterised by broadly negative signatures, particularly across Mod-ules 3–6 and Modules 10–15, where effect sizes frequently fell below −1.0 (e.g., Cluster 2: Module 14 α = −1.51 ; Cluster 3: Modules 12–14 α ≈ − 1.15 , −1.04 ). In contrast, RA-dominated clusters such as Clusters 5 and 7 showed positive signature modules spanning Modules 5, 8, 9, and 15–18, with effect sizes typically between 0.6 and 1.1 (e.g., Cluster 5: 13 Module 9 α = 0 .92 , Module 18 α = 1 .08 ; Cluster 7: Module 9 α = 1 .09 ). These patterns indicate a clear separation between globally suppressive (SLE) and globally activated (RA) module signatures. Within RA clusters, additional heterogeneity was observed in the composition of sig-nature modules. Cluster 6 displayed a distinctive bidirectional signature, with strongly negative modules (Modules 2, 4, 8–10; e.g., Module 9 α = −3.35 ) co-occurring with strongly positive modules (Modules 3 and 11; α = 1 .68 and 2.71 , respectively), suggest-ing a dysregulated or reprogrammed molecular state. Cluster 5, by contrast, showed a coherent positive signature across nearly all modules, whereas Cluster 1 and Cluster 9 exhibited mixed but weaker signatures, with moderate positive effects in Modules 8–9 (α ≈ 0.98 , 0.87 in Cluster 1) alongside negative values in Modules 10–11. Among SLE clusters, Cluster 3 showed partial deviation from the global negative pattern, with a local positive signature in Module 11 ( α = 1 .26 ), indicating that even within SLE, there exist substructures defined by specific module activation. Despite the overall separation between RA and SLE clusters, limited overlap in sig-nature modules was observed. For example, moderate positive effects in Modules 8–9 appeared in both RA Cluster 1 and, to a lesser extent, SLE Cluster 3, suggesting shared molecular components. However, the dominant distinction lies in the directionality and magnitude of the signatures: RA clusters are primarily defined by coordinated positive module effects, whereas SLE clusters are characterised by consistent negative regulation across the same module groups. The extreme range observed in Cluster 6 ( α from ap-proximately −3.35 to 2.71 ) further highlights that the principal source of heterogeneity arises from the strength and polarity of module-specific effects rather than from isolated module differences. Panel (b) summarises the distribution of samples across clusters by disease status. The cluster sizes are moderately imbalanced, with a few large clusters (e.g., Cluster 7 with n = 228 and Cluster 5 with n = 149 , both RA-dominated) and several smaller clusters (e.g., Cluster 2 with n = 9 and Cluster 1 with n = 15 ). Importantly, the distribution is strongly stratified by disease: RA samples are concentrated in Clusters 1, 5, 6, 7, and 9, whereas SLE samples are almost exclusively assigned to Clusters 2, 3, 4, and 8. This sharp partition indicates that the inferred clustering structure captures disease-associated variation while still allowing for multiple subtypes within each disease. To sum up, the results demonstrate that the proposed model captures both global disease separation and finer-grained molecular heterogeneity. The identification of dis-tinct signature modules across clusters, combined with the non-trivial and disease-aligned cluster sizes, suggests that the inferred subgroups reflect biologically meaningful molec-ular programs rather than artefacts of sample distribution. These findings highlight the presence of multiple, functionally distinct molecular subtypes within RA and SLE, char-acterised by differences in both the direction and magnitude of module-level effects. 14 5.4. Functional interpretation of inferred modules 5.4.1. Functional annotation and disease-associated cluster-level interpretation 
+
+To characterise the biological processes underlying the inferred clusters, Gene Ontol-ogy (GO) and KEGG pathway enrichment analyses were performed for each gene module and integrated with the cluster-specific effects αk,g .A clear separation between RA- and SLE-associated molecular programs is observed at the module level. SLE-dominant clusters (Clusters 2, 3, 4, and 8) exhibit broadly neg-ative α values across multiple modules, particularly those enriched for immune signalling and inflammatory pathways, including Modules 2, 9, 15, and 17. In these clusters, effect sizes frequently fall below −1.0, indicating coordinated suppression of immune and sig-nalling processes. In contrast, RA-associated clusters (Clusters 1, 5, 6, 7, and 9) display more heterogeneous but generally positive module-level effects. Clusters 5 and 7 show co-ordinated up-regulation across modules related to ribosome biogenesis, RNA processing, and protein modification (e.g., Modules 4, 5, and 12), with α values typically ranging from 0.5 to 1.1, suggesting enhanced biosynthetic and regulatory activity. Other RA clusters (e.g., Clusters 1 and 9) exhibit more moderate and mixed patterns, indicating intermediate molecular states. Beyond disease-level separation, the α patterns reveal substantial heterogeneity across subtypes. Among RA clusters, Cluster 6 is particularly distinctive, showing a strongly bidirectional signature with pronounced negative effects in some modules (e.g., Module 9: 
+
+α ≈ − 3.35 ) and strong positive effects in others (e.g., Module 11: α ≈ 2.71 ), consistent with a highly dysregulated phenotype. In comparison, Cluster 5 shows more uniform acti-vation, whereas Cluster 7 exhibits moderate but consistent up-regulation. SLE-associated clusters also display heterogeneity. While Clusters 2 and 4 show consistent suppression across most modules, Cluster 3 exhibits localised deviations, including moderate positive effects in specific modules, and Cluster 8 displays a comparatively attenuated pattern. These results indicate that SLE subtypes are primarily distinguished by differences in the magnitude and localisation of module suppression. Although limited overlap in module-level activity is observed between diseases, occa-sional similarities exist (e.g., moderate activity in Modules 8–9 across selected RA and SLE clusters). However, the dominant distinction lies in directionality: RA clusters are characterised by coordinated activation, whereas SLE clusters exhibit systematic sup-pression of similar functional modules. Together, these results demonstrate that both disease-level differences and subtype heterogeneity arise from structured shifts across gene modules. From a clinical perspective, the identification of distinct module-driven subtypes suggests potential strategies for patient stratification and targeted intervention. 15 Table 2: Functional annotation summary of inferred gene modules (updated analysis). 
+
+Module Size Mapped genes Representative functional themes (GO / KEGG) 1 250 243 Cell adhesion regulation; hypoxia response; PI3K–Akt, FoxO and mTOR signalling; Th17 differentiation 2 105 100 Myeloid activation; ROS metabolism; exocyto-sis; chemokine signalling; innate immune re-sponse 3 70 67 Telomere maintenance; chromosome organisa-tion; oxidative phosphorylation; apoptosis 4 28 28 Ribosome biogenesis; translation; rRNA pro-cessing; spliceosome 5 23 23 RNA transport; nuclear export; nucleocytoplas-mic transport; spliceosome 6 50 47 Viral processes; translation; mitochondrial gene expression; protein folding 7 22 22 Ion homeostasis; calcium signalling; stress re-sponse; chromatin organisation 8 66 57 Nervous and vascular development; membrane potential regulation; signalling pathways 9 27 25 IL-6 production; NF-κB signalling; apoptosis; inflammatory response 10 20 20 Muscle contraction; platelet activation; coagula-tion; vascular processes 11 69 65 Catabolic regulation; RNA stability; Wnt sig-nalling; metabolic pathways 12 53 52 Protein ubiquitination; post-translational modi-fication; vesicle organisation 13 34 33 Nucleotide biosynthesis; purine metabolism; protein folding 14 24 24 RNA processing; splicing; cell division; organelle fission 15 24 22 T cell activation; Th1/Th2/Th17 differentiation; MAPK signalling 16 22 21 Transcriptional regulation; RNA polymerase II activity; cognition-related processes 17 35 34 TCR signalling; immune activation; cytokine signalling; PI3K–Akt pathway 18 33 33 Intracellular transport; lysosome; apoptosis; JAK–STAT signalling 19 24 23 Transcriptional repression; angiogenesis; differ-entiation; Rap1 signalling 
+
+5.4.2. HPO-based phenotype enrichment analysis 
+
+To further assess the clinical relevance of the inferred gene modules, enrichment anal-ysis was performed using the Human Phenotype Ontology (HPO), linking module gene sets to curated gene–phenotype associations. HPO is an established database of annota-tions for hundreds of known clinical phenotypes along with the gene signatures associated 16 with each of them (Köhler et al., 2021). As HPO annotations span a wide range of disease contexts, including developmental and rare genetic conditions, we adopted a structured interpretation strategy in which modules were categorized based on the clinical relevance of their associated phenotypes (Table 3). A subset of modules exhibited strong and direct associations with immune and autoimmune-related phenotypes. In particular, Modules 15 and 17 were enriched for phenotypes such as autoimmune thrombocytopenia, persistent Epstein–Barr virus (EBV) viremia, lymphadenopathy, and abnormal T cell physiology, indicating a clear link to adaptive immune dysregulation and infection-related immune responses. These findings are con-sistent with the immunopathology of RA and SLE. Additional modules captured comple-mentary disease-related processes. Module 10 was associated with platelet abnormalities and bleeding-related phenotypes, reflecting haematological involvement, while Module 11 showed enrichment for erythrocyte-related phenotypes, suggesting a secondary role in blood-related processes. Module 9 captured infection-associated phenotypes, including candidiasis and splenomegaly, consistent with altered host defence. In contrast, sev-eral modules were associated with developmental, structural, or neurological phenotypes. These patterns likely reflect the broad and non-specific nature of HPO annotations rather than direct relevance to RA or SLE, and are therefore interpreted as background signals. To sum up, the HPO analysis provides a complementary layer of interpretation linking module-level molecular signatures to clinically observable phenotypes. By distinguishing between disease-relevant and non-specific phenotype patterns, these results further sup-port the biological and clinical interpretability of the inferred clustering structure. 
+
+5.5. Comparative analysis of module-based methods 
+
+The WGCNA-based module construction was performed using a signed co-expression network. The soft-thresholding power was selected based on the scale-free topology cri-terion, and when no clear optimum was identified, a default value of β = 6 was adopted. The minimum module size was set to 20 genes, and the module merging threshold was set to 0.25. Pearson correlation was used to construct the network. To ensure numerical stability and compatibility with downstream modeling, module reassignment and kME-based filtering were disabled. Genes assigned to the grey module were excluded from further analysis. To evaluate the impact of module construction on downstream clustering, we com-pared the MAD-HC and WGCNA approaches using the same set of pre-selected genes. The MAD-HC method identified 19 gene modules from 979 genes, whereas WGCNA resulted in only 3 modules after excluding 4 genes assigned to the grey module. These modules were then used as input to the same MSD-MFM-ECM framework. Model selec-tion was performed via a grid search over K (number of clusters) and q (latent dimension), as our proposed method. 17 Table 3: HPO enrichment summary of inferred gene modules with structured interpretation. Modules are categorised based on the clinical relevance of associated phenotype terms. 
+
+Module Category Representative HPO phenotype terms 1 Non-specific Lymphedema; bruising susceptibility; recurrent epistaxis; optic neuritis 2 Infection / immune Rectal abscess; respiratory failure; lymphadenopa-thy; cellulitis 3 Non-specific Seizure; cerebellar atrophy; delayed tooth eruption 4 Developmental Cardiomyopathy; gait abnormality; genital abnor-mality 5 Mixed Epistaxis; gingival overgrowth 6 Developmental Limb asymmetry; skeletal abnormality 7 Mixed Cardiorespiratory arrest; arrhythmia 8 Developmental Umbilical hernia; aortic arch abnormality 9 Infection / immune Hemoptysis; candidiasis; aphthous stomatitis; splenomegaly 10 Haematological Platelet anisocytosis; thrombocytopenia; bleeding tendency 11 Haematological (secondary) Abnormal erythrocyte morphology; hyperbiliru-binemia 12 Developmental Syndactyly; craniofacial abnormalities 13 Immune (weak) Verrucae; decreased circulating IgM 14 Developmental Neuromuscular abnormality; testicular dysplasia 15 Immune / autoimmune B-cell lymphoma; EBV viremia; splenomegaly; au-toimmune thrombocytopenia 16 Non-specific Craniofacial features; polyphagia 17 Immune / T cell EBV viremia; lymphadenopathy; recurrent pneu-monia; T cell abnormality 18 Respiratory Ground-glass opacity; dyspnea; cough 19 Non-specific Cataract; nerve conduction abnormality; iron accu-mulation 
+
+The model selection results are summarized in Table 4. The MAD-based model achieved its optimum at K = 9 and q = 8 , with a log-likelihood of −504 ,975 .3 and a BIC of 1,031 ,607 . In contrast, the WGCNA-based model selected a smaller model with K = 4 and q = 6 , yielding a substantially lower log-likelihood ( −630 ,297 .4) and a much higher BIC ( 1,280 ,292 ). The large difference in BIC ( ∆BIC ≈ 250 ,000 ) indicates a markedly poorer fit for the WGCNA-based model, suggesting that the reduced number of modules leads to a significant loss of information in the representation. 
+
+> Table 4: Model comparison between MAD-HC and WGCNA-based module construction
+
+Model K q log-likelihood BIC Modules Genes MAD-based model 9 8 −504 ,975 .3 1,031 ,607 19 979 WGCNA-based model 4 6 −630 ,297 .4 1,280 ,292 3 975 Further insight is provided by the cluster composition under the WGCNA-based model, as shown in Table 5. The four clusters contain mixed proportions of RA and 18 SLE samples. For example, cluster 3 includes 223 RA and 137 SLE samples, while clus-ter 4 contains 151 RA and 125 SLE samples. Even the smaller clusters (clusters 1 and 2) are dominated by RA but still include a non-negligible number of SLE samples. Overall, no cluster exhibits clear disease-specific separation, indicating that the WGCNA-derived modules fail to capture meaningful disease heterogeneity. 
+
+> Table 5: Distribution of RA and SLE samples across clusters under the WGCNA-based model
+
+Disease Cluster 1 Cluster 2 Cluster 3 Cluster 4 RA 73 46 223 151 SLE 25 5 137 125 Taken together, these results suggest that the coarse module structure produced by WGCNA limits the expressive capacity of the downstream model. With only three mod-ules, the effective dimensionality of the data is substantially reduced, constraining the model to identify fewer clusters and resulting in inferior model fit. In contrast, the finer-grained module structure obtained via MAD-HC preserves more detailed variation, enabling higher-resolution clustering and significantly improved performance. 
+
+6. Discussion 
+
+High-dimensional gene expression data present fundamental challenges for model-based clustering and disease subtype discovery due to extreme dimensionality, strong intergene dependence, and heterogeneous biological signals (Aghaieabiane and Koutis, 2024). In this work, we propose a module-structured mixture factor model that explicitly incorporates gene modules into both the mean and covariance structure of a finite mixture framework. By decomposing expression variability into global gene effects, cluster-specific module-level shifts, latent module-level dependence, and gene-specific residual variation, the proposed model provides a principled balance between statistical flexibility, inter-pretability, and computational tractability. A central contribution of this framework is the explicit treatment of gene modules as structural units for both clustering and biological interpretation. In contrast to con-ventional mixture models that operate at the individual gene level or rely on unstruc-tured covariance estimation, the proposed formulation leverages biologically informed co-expression patterns while avoiding instability in high-dimensional covariance estimation. The incorporation of latent module-level factors further captures residual within-module dependence beyond mean shifts, resulting in a more realistic representation of gene–gene correlations without excessive parameterisation. Application of the model to combined RA and SLE transcriptomic data demonstrates its ability to recover biologically meaningful structure in a fully unsupervised setting. Despite the absence of disease labels during model fitting, the inferred clusters exhibit 19 strong alignment with disease status, indicating that major disease-associated molecular differences emerge naturally from the data. At the same time, the identification of mul-tiple clusters within each disease highlights substantial molecular heterogeneity beyond binary disease classification (Hubbard et al., 2023; Karmakar et al., 2024). Importantly, the inferred clustering structure is driven by coordinated shifts across gene modules rather than isolated gene-level effects. The estimated module-level effects define clear signature modules that distinguish disease-associated molecular programs. RA-associated clusters are characterised by coordinated activation of modules related to biosynthetic and regulatory processes (Holers et al., 2024; Jonsson, 2024), including ri-bosome biogenesis, RNA processing, protein modification, and intracellular transport. In contrast, SLE-associated clusters exhibit widespread suppression across modules enriched for immune signalling and inflammatory pathways (Wang et al., 2024), including myeloid activation, NF-κB signalling, and T cell receptor pathways. This contrast highlights a fundamental difference in the directionality and magnitude of module-level activity be-tween the two diseases. Beyond disease-level separation, the model reveals pronounced subtype heterogeneity within each disease. Among RA-associated clusters, distinct subtypes are defined by different combinations of module activation patterns, ranging from broadly up-regulated biosynthetic programs to highly heterogeneous profiles with simultaneous activation and suppression across modules. In particular, clusters exhibiting strong bidirectional module effects suggest dysregulated molecular states that cannot be captured by simple up- or down-regulation patterns. Similarly, SLE-associated clusters display variation in both the magnitude and localisation of immune suppression, indicating that disease heterogeneity arises from differences in the strength and distribution of module-level perturbations rather than from entirely distinct pathway activation. From a clinical perspective, the identification of module-driven molecular subtypes suggests potential strategies for patient stratification and targeted intervention (Hub-bard et al., 2023; Karmakar et al., 2024). Linking cluster-specific module activity to clinically relevant phenotype patterns further highlights the translational potential of the proposed framework for understanding heterogeneous autoimmune diseases. From a methodological perspective, the ECM estimation strategy is critical for scalable inference in high-dimensional settings. By decomposing the maximisation step into a sequence of lower-dimensional conditional updates, the ECM algorithm mitigates numerical instabil-ity commonly encountered in mixture models and enables reliable parameter estimation when the number of genes substantially exceeds the number of samples. Several directions for future work naturally arise. First, gene modules are treated as fixed inputs, and jointly learning module structure within the mixture framework rep-resents an important extension (Tommasini and Fogel, 2023). Second, allowing more flexible covariance structures, such as cluster-specific latent factors, may further im-20 prove model expressiveness, albeit at increased computational cost. Finally, the pro-posed module-structured formulation is readily extensible beyond transcriptomic data to other high-dimensional biological modalities, including proteomics and multi-omics integration (Boyd et al., 2025). 
+
+Appendix A. Module structure construction and parameter settings 
+
+Gene modules were constructed according to the procedure described in Section 2. For the autoimmune disease dataset, the top 3000 genes ranked by MAD were retained. Hierarchical agglomerative clustering with average linkage and dissimilarity measure 
+
+djj ′ =
+
+q
+
+1 − cor( x·j , x ·j′ )
+
+was then applied. The dendrogram was cut at r0 = 0 .3, and modules containing fewer than 20 genes were removed. This resulted in 979 genes grouped into 19 modules. Model selection was performed using BIC over a grid of candidate values for the number of clusters K and latent factor dimension q. The selected model had K = 9 and q = 8 .
+
+CRediT authorship contribution statement 
+
+Jinran Wu: Conceptualization, Methodology, Software, Formal analysis, Data cura-tion, Validation, Visualization, Writing – original draft. Geoffrey J. McLachlan: Con-ceptualization, Methodology, Supervision, Project administration, Writing – review & editing. Saumyadipta Pyne: Conceptualization, Biological interpretation, Supervision, Writing – review & editing. 
+
+Declaration of competing interest 
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper. 
+
+Acknowledgments 
+
+This work was supported by the Australian Research Council [DP230101671] and the ARC Training Centre on Innovation in Biomedical Imaging Technology [IC170100035]. 
+
+Data availability 
+
+All data and code required to reproduce the analyses presented in this paper are publicly available at: https://github.com/wujrtudou/structured_MFA.git .21 References 
+
+Aghaieabiane, N. and Koutis, I. (2024). SGCP: A spectral self-learning method for clustering genes in co-expression networks. BMC Bioinformatics , 25(1):230. Baek, J., McLachlan, G. J., and Flack, L. K. (2009). Mixtures of factor analyzers with common factor loadings: Applications to the clustering and visualization of high-dimensional data. IEEE Transactions on Pattern Analysis and Machine Intelligence ,32(7):1298–1309. Boyd, S. S., Slawson, C., and Thompson, J. A. (2025). AMEND 2.0: Module identi-fication and multi-omic data integration with multiplex-heterogeneous graphs. BMC Bioinformatics , 26(1):39. Cheng, X., Meng, X., Chen, R., Song, Z., Li, S., Wei, S., Lv, H., Zhang, S., Tang, H., Jiang, Y., et al. (2024). The molecular subtypes of autoimmune diseases. Computational and Structural Biotechnology Journal , 23:1348–1363. Cojocaru, M., Cojocaru, I. M., Silosi, I., and Vrabie, C. D. (2011). Manifestations of systemic lupus erythematosus. Maedica , 6(4):330. Holers, V. M., Demoruelle, K. M., Buckner, J. H., James, E. A., Firestein, G. S., Robin-son, W. H., Steere, A. C., Zhang, F., Norris, J. M., Kuhn, K. A., et al. (2024). Distinct mucosal endotypes as initiators and drivers of rheumatoid arthritis. Nature Reviews Rheumatology , 20(10):601–613. Hubbard, E. L., Bachali, P., Kingsmore, K. M., He, Y., Catalina, M. D., Grammer, A. C., and Lipsky, P. E. (2023). Analysis of transcriptomic features reveals molecular endotypes of SLE with clinical implications. Genome Medicine , 15(1):84. Jonsson, A. H. (2024). Synovial tissue insights into heterogeneity of rheumatoid arthritis. 
+
+Current Rheumatology Reports , 26(3):81–88. Karmakar, A., Kumar, U., Prabhu, S., Ravindran, V., Nagaraju, S. P., Suryakanth, V. B., Prabhu, M. M., and Karmakar, S. (2024). Molecular profiling and therapeutic tailoring to address disease heterogeneity in systemic lupus erythematosus. Clinical and Experimental Medicine , 24(1):223. Köhler, S., Gargano, M., Matentzoglu, N., Carmody, L. C., Lewis-Smith, D., Vasilevsky, N. A., Danis, D., Balagura, G., Baynam, G., Brower, A. M., et al. (2021). The human phenotype ontology in 2021. Nucleic Acids Research , 49(D1):D1207–D1217. Langfelder, P. and Horvath, S. (2008). WGCNA: An R package for weighted correlation network analysis. BMC Bioinformatics , 9(1):559. 22 Li, J., Tang, H., Shang, Z., Chen, R., Meng, X., Cheng, X., Song, Z., Li, S., Zhang, R., and Lv, W. (2025). Identifying functional subtypes and common mechanisms of rheumatoid arthritis and systemic lupus erythematosus. Genes & Diseases , 12(5):101527. Martorell-Marugán, J., López-Domínguez, R., García-Moreno, A., Toro-Domínguez, D., Villatoro-García, J. A., Barturen, G., Martín-Gómez, A., Troule, K., Gómez-López, G., Al-Shahrour, F., et al. (2021). A comprehensive database for integrated analysis of omics data in autoimmune diseases. BMC Bioinformatics , 22(1):343. McLachlan, G. J., Baek, J., and Rathnayake, S. I. (2011). Mixtures of factor analysers for the analysis of high-dimensional data. Mixtures: Estimation and Applications , pages 189–212. McLachlan, G. J., Do, K.-A., and Ambroise, C. (2005). Analyzing microarray gene expression data. McLachlan, G. J. and Krishnan, T. (2008). The EM algorithm and extensions . John Wiley & Sons. McLachlan, G. J., Lee, S. X., and Rathnayake, S. I. (2019). Finite mixture models. 
+
+Annual Review of Statistics and its Application , 6(1):355–378. McLachlan, G. J. and Peel, D. (2000). Mixtures of factor analyzers. In Proceedings of the seventeenth international conference on machine learning , pages 599–606. McLachlan, G. J., Peel, D., and Bean, R. W. (2003). Modelling high-dimensional data by mixtures of factor analyzers. Computational Statistics & Data Analysis , 41(3-4):379– 388. Mi, Z., Guo, B., Yin, Z., Li, J., and Zheng, Z. (2019). Disease classification via gene network integrating modules and pathways. Royal Society Open Science , 6(7):190214. Ng, S. K., Krishnan, T., and McLachlan, G. J. (2011). The EM algorithm. In Handbook of computational statistics: Concepts and methods , pages 139–172. Springer. Patino-Martinez, E., Hajihosseini, M., Hanata, N., Jiang, K., Oguz, C., Tandon, M., Schaughency, P., Randazzo, D., Naz, F., Dell’Orso, S., et al. (2026). Longitudinal multiomic and spatial transcriptomic profiling of lupus nephritis progression in a murine model. The Journal of Immunology , 215(5):vkag100. Segal, E., Friedman, N., Koller, D., and Regev, A. (2004). A module map showing conditional activity of expression modules in cancer. Nature Genetics , 36(10):1090– 1098. 23 Sharif, K., Sharif, A., Jumah, F., Oskouian, R., and Tubbs, R. S. (2018). Rheumatoid arthritis in review: Clinical, anatomical, cellular and molecular points of view. Clinical Anatomy , 31(2):216–223. Shen, Z., Fang, M., Sun, W., Tang, M., Liu, N., Zhu, L., Liu, Q., Li, B., Sun, R., Shi, Y., et al. (2022). A transcriptome atlas and interactive analysis platform for autoimmune disease. Database , 2022:baac050. Silkwood, K., Dollinger, E., Gervin, J., Atwood, S., Nie, Q., and Lander, A. D. (2024). Leveraging gene correlations in single cell transcriptomic data. BMC Bioinformatics ,25(1):305. Tibshirani, R., Hastie, T., Eisen, M., Ross, D., Botstein, D., Brown, P., et al. (1999). Clustering methods for the analysis of dna microarray data. Dept. Statist., Stanford Univ., Stanford, CA, Tech. Rep .Tommasini, D. and Fogel, B. L. (2023). multiWGCNA: An R package for deep min-ing gene co-expression networks in multi-trait expression data. BMC Bioinformatics ,24(1):115. Wang, F. Q., Dang, X., and Yang, W. (2024). Transcriptomic studies unravel the molec-ular and cellular complexity of systemic lupus erythematosus: A review. Clinical Immunology , 268:110367. Wang, R., Qian, Y., Guo, X., Song, F., Xiong, Z., Cai, S., Bian, X., Wong, M. H., Cao, Q., Cheng, L., et al. (2025). STModule: Identifying tissue modules to uncover spa-tial components and characteristics of transcriptomic landscapes. Genome Medicine ,17(1):18. 24
