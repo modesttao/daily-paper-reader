@@ -306,13 +306,62 @@ jobs:
           SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
 
           if [ "$STATUS" = "success" ]; then
-            TITLE="📚 论文推荐更新成功"
-            DESP="每日论文推荐已更新！\n\n👉 [查看论文推荐]($SITE_URL)\n\n📊 [查看运行日志]($RUN_URL)"
+            # 读取最新推荐论文
+            PAPER_SUMMARY=""
+            LATEST_DIR=$(ls -td docs/????????-???????? 2>/dev/null | head -1)
+            if [ -n "$LATEST_DIR" ] && [ -f "$LATEST_DIR/papers.meta.json" ]; then
+              PAPER_COUNT=$(python3 -c "
+          import json
+          with open('$LATEST_DIR/papers.meta.json', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          print(len(data.get('papers', [])))
+          " 2>/dev/null || echo "0")
+
+              if [ "$PAPER_COUNT" -gt 0 ]; then
+                PAPER_SUMMARY=$(python3 -c "
+          import json
+          with open('$LATEST_DIR/papers.meta.json', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          papers = data.get('papers', [])[:10]
+          lines = []
+          for i, p in enumerate(papers, 1):
+              title = p.get('title', 'N/A')
+              score = p.get('score', p.get('llm_score', ''))
+              tags = ', '.join(p.get('tags', []))
+              abstract = p.get('abstract', p.get('summary', ''))[:150]
+              link = p.get('link', p.get('url', ''))
+              line = f'{i}. **{title}**'
+              if score:
+                  line += f' (评分: {score})'
+              if tags:
+                  line += f' [{tags}]'
+              if abstract:
+                  line += f'\n   > {abstract}...'
+              if link:
+                  line += f'\n   🔗 {link}'
+              lines.append(line)
+          print('\n\n'.join(lines))
+          " 2>/dev/null || echo "")
+              fi
+            fi
+
+            if [ -n "$PAPER_SUMMARY" ]; then
+              TITLE="📚 今日论文推荐 (${PAPER_COUNT}篇)"
+              DESP="## 今日推荐论文\n\n${PAPER_SUMMARY}\n\n---\n👉 [查看全部推荐](${SITE_URL})\n\n📊 [运行日志](${RUN_URL})"
+            else
+              TITLE="📚 论文推荐已更新"
+              DESP="每日论文推荐已更新，暂无新论文。\n\n👉 [查看推荐](${SITE_URL})\n\n📊 [运行日志](${RUN_URL})"
+            fi
           else
             TITLE="❌ 论文推荐更新失败"
-            DESP="工作流运行失败，请检查。\n\n📊 [查看运行日志]($RUN_URL)"
+            DESP="工作流运行失败，请检查。\n\n📊 [查看运行日志](${RUN_URL})"
+          fi
+
+          # 截断避免过长
+          if [ ${#DESP} -gt 4000 ]; then
+            DESP="${DESP:0:3900}...\n\n👉 [查看全部](${SITE_URL})"
           fi
 
           curl -s "https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send" \
-            -d "title=$TITLE" \
-            -d "desp=$DESP"
+            --data-urlencode "title=$TITLE" \
+            --data-urlencode "desp=$DESP"
