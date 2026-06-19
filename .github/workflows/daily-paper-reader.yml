@@ -375,3 +375,41 @@ jobs:
           curl -s "https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send" \
             --data-urlencode "title=$TITLE" \
             --data-urlencode "desp=$DESP"
+
+      - name: Notify via Bark
+        if: always()
+        env:
+          BARK_URL: ${{ secrets.BARK_URL }}
+        run: |
+          STATUS="${{ job.status }}"
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+
+          if [ "$STATUS" = "success" ]; then
+            PAPER_COUNT=""
+            LATEST_DIR=$(ls -td docs/????????-???????? 2>/dev/null | head -1)
+            if [ -n "$LATEST_DIR" ] && [ -f "$LATEST_DIR/papers.meta.json" ]; then
+              PAPER_COUNT=$(python3 -c "
+          import json
+          with open('$LATEST_DIR/papers.meta.json', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          print(len(data.get('papers', [])))
+          " 2>/dev/null || echo "0")
+            fi
+
+            if [ "$PAPER_COUNT" -gt 0 ]; then
+              TITLE="📚 今日论文推荐 (${PAPER_COUNT}篇)"
+              BODY="点击查看详情"
+            else
+              TITLE="📚 论文推荐已更新"
+              BODY="暂无新论文"
+            fi
+          else
+            TITLE="❌ 论文推荐更新失败"
+            BODY="点击查看详情"
+          fi
+
+          ENCODED_TITLE=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$TITLE'))")
+          ENCODED_BODY=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$BODY'))")
+
+          curl -s "${BARK_URL}/${ENCODED_TITLE}/${ENCODED_BODY}?url=${SITE_URL}"
