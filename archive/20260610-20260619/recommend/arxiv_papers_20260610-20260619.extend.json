@@ -1,17 +1,66 @@
 {
   "mode": "extend",
-  "generated_at": "2026-06-19T03:49:10.530287+00:00",
+  "generated_at": "2026-06-19T04:19:09.598212+00:00",
   "stats": {
     "mode": "extend",
     "tag_count": 4,
     "deep_divecandidates": 7,
     "deep_cap": 14,
     "deep_selected": 7,
-    "quick_candidates": 5,
+    "quick_candidates": 3,
     "quick_skim_target": 19,
-    "quick_selected": 5
+    "quick_selected": 3
   },
   "deep_dive": [
+    {
+      "id": "2606.18672v1",
+      "source": "arxiv",
+      "title": "scGTN: Deep Siamese Graph Transformer Network for Single-cell RNA Sequencing Clustering",
+      "abstract": "Single-cell RNA sequencing (scRNA-seq) serves a pivotal role in characterizing gene expression at the cellular level, enabling the identification of cell types and advancing the understanding of cellular heterogeneity. Despite the significant progress in scRNA-seq data clustering, we argue that current methods always ignore the sparsity and noise, as well as the complex intercellular structural information inherent in scRNA-seq data. Toward this end, in this paper, we propose a novel single-cell RNA-seq clustering framework via deep Siamese Graph Transformer Network (termed scGTN), which explicitly integrates gene expression profile and intercellular structural dependencies for cell clustering. In particular, we formulate scRNA-seq data as a graph and construct two augmented graph views that serve as dual views to capture complementary intercellular information. Then, a Siamese graph transformer network is employed to explicitly incorporate shortest-path information and node-wise distances for capturing richer structural relationships between cells. Finally, we employ an optimal transport strategy to guide the cell clustering in a self-supervised manner. Extensive experiments on multiple benchmark scRNA-seq datasets demonstrate that our scGTN consistently outperforms existing methods. Our code is available at https://github.com/W-RMSL/scGTN.",
+      "authors": [
+        "Jinke Wu",
+        "Yifan Wang",
+        "Siyu Yi",
+        "Caiyang Yu",
+        "Ziyue Qiao",
+        "Nan Yin",
+        "Jiancheng Lv",
+        "Wei Ju"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "q-bio.GN"
+      ],
+      "published": "2026-06-17T04:17:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.18672v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "novel single-cell clustering method using deep Siamese Graph Transformer Network",
+      "llm_evidence_cn": "使用深度孪生图变换网络的新型单细胞聚类方法",
+      "llm_evidence": "使用深度孪生图变换网络的新型单细胞聚类方法",
+      "canonical_evidence": "使用深度孪生图变换网络的新型单细胞聚类方法",
+      "llm_tldr_en": "Proposes scGTN, a deep Siamese Graph Transformer Network for single-cell RNA-seq clustering that integrates gene expression and intercellular structural dependencies to improve clustering accuracy.",
+      "llm_tldr_cn": "针对单细胞RNA-seq数据聚类中忽略稀疏性、噪声和细胞间结构信息的问题，本文提出scGTN框架。它通过深度孪生图变换网络显式整合基因表达谱和细胞间结构依赖，利用图注意力捕获细胞关系。在多个数据集上实验证明，scGTN在聚类性能上优于现有方法，为单细胞异质性研究提供了有效工具。",
+      "llm_tldr": "针对单细胞RNA-seq数据聚类中忽略稀疏性、噪声和细胞间结构信息的问题，本文提出scGTN框架。它通过深度孪生图变换网络显式整合基因表达谱和细胞间结构依赖，利用图注意力捕获细胞关系。在多个数据集上实验证明，scGTN在聚类性能上优于现有方法，为单细胞异质性研究提供了有效工具。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell clustering",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
     {
       "id": "2606.12838v1",
       "source": "arxiv",
@@ -43,13 +92,13 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "single-cell transcriptional perturbation response prediction using flow-matching model",
-      "llm_evidence_cn": "使用流匹配模型预测单细胞转录组扰动响应",
-      "llm_evidence": "使用流匹配模型预测单细胞转录组扰动响应",
-      "canonical_evidence": "使用流匹配模型预测单细胞转录组扰动响应",
-      "llm_tldr_en": "OCOO-T is a minimalist flow-matching AI virtual cell model that predicts single-cell transcriptional responses to perturbations, achieving competitive performance with simpler architecture.",
-      "llm_tldr_cn": "针对现有单细胞扰动响应预测模型架构复杂、扩展性有限的问题，本文提出OCOO-T，一个基于流匹配的极简AI虚拟细胞模型。该模型无需辅助编码器或复杂先验，可直接预测单细胞对遗传、化学和细胞因子扰动的转录响应。实验表明，OCOO-T在多个基准上达到与复杂模型相当的性能，同时具有更好的可扩展性和通用性。这项工作为单细胞功能预测提供了简洁高效的解决方案。",
-      "llm_tldr": "针对现有单细胞扰动响应预测模型架构复杂、扩展性有限的问题，本文提出OCOO-T，一个基于流匹配的极简AI虚拟细胞模型。该模型无需辅助编码器或复杂先验，可直接预测单细胞对遗传、化学和细胞因子扰动的转录响应。实验表明，OCOO-T在多个基准上达到与复杂模型相当的性能，同时具有更好的可扩展性和通用性。这项工作为单细胞功能预测提供了简洁高效的解决方案。",
+      "llm_evidence_en": "single-cell transcriptional perturbation prediction using flow-matching",
+      "llm_evidence_cn": "利用流匹配预测单细胞转录扰动响应",
+      "llm_evidence": "利用流匹配预测单细胞转录扰动响应",
+      "canonical_evidence": "利用流匹配预测单细胞转录扰动响应",
+      "llm_tldr_en": "OCOO-T uses a flow-matching-based virtual cell model to predict single-cell transcriptomic responses to perturbations, outperforming complex existing methods while being simpler and more scalable.",
+      "llm_tldr_cn": "现有单细胞转录扰动预测模型架构复杂，可扩展性有限。本文提出OCOO-T，基于流匹配的简约虚拟细胞模型，直接预测扰动后的基因表达。在多个基准数据集上，OCOO-T以更简单的架构取得了优于或媲美现有方法的效果。该工作展示了流匹配在单细胞建模中的潜力，为药物发现和基因调控网络解析提供了高效工具。",
+      "llm_tldr": "现有单细胞转录扰动预测模型架构复杂，可扩展性有限。本文提出OCOO-T，基于流匹配的简约虚拟细胞模型，直接预测扰动后的基因表达。在多个基准数据集上，OCOO-T以更简单的架构取得了优于或媲美现有方法的效果。该工作展示了流匹配在单细胞建模中的潜力，为药物发现和基因调控网络解析提供了高效工具。",
       "llm_tags": [
         "query:sc-methods"
       ],
@@ -91,13 +140,13 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "LLM-enhanced deep structural clustering for single-cell RNA-seq",
-      "llm_evidence_cn": "利用大语言模型增强的单细胞RNA-seq深度结构聚类方法",
-      "llm_evidence": "利用大语言模型增强的单细胞RNA-seq深度结构聚类方法",
-      "canonical_evidence": "利用大语言模型增强的单细胞RNA-seq深度结构聚类方法",
-      "llm_tldr_en": "scLLM-DSC leverages LLM knowledge and cross-modal deep structural clustering to improve single-cell RNA-seq clustering by incorporating gene function semantics.",
-      "llm_tldr_cn": "现有单细胞RNA-seq聚类方法仅利用数值模式，忽略了基因的生物功能语义。本文提出scLLM-DSC，一种大语言模型知识增强的跨模态深度结构聚类框架，通过将LLM的语义能力与深度聚类相结合，解决了语义无知的问题。在多种数据集上的实验表明，该方法显著提升了聚类性能，为单细胞分析提供了更准确的细胞类型识别工具。",
-      "llm_tldr": "现有单细胞RNA-seq聚类方法仅利用数值模式，忽略了基因的生物功能语义。本文提出scLLM-DSC，一种大语言模型知识增强的跨模态深度结构聚类框架，通过将LLM的语义能力与深度聚类相结合，解决了语义无知的问题。在多种数据集上的实验表明，该方法显著提升了聚类性能，为单细胞分析提供了更准确的细胞类型识别工具。",
+      "llm_evidence_en": "single-cell clustering with LLM enhancement",
+      "llm_evidence_cn": "利用大语言模型增强的单细胞聚类新方法",
+      "llm_evidence": "利用大语言模型增强的单细胞聚类新方法",
+      "canonical_evidence": "利用大语言模型增强的单细胞聚类新方法",
+      "llm_tldr_en": "scLLM-DSC integrates gene semantic knowledge from LLMs into single-cell clustering, overcoming the structural mismatch between generative pre-training and discriminative clustering, achieving improved cell type identification.",
+      "llm_tldr_cn": "针对现有单细胞聚类方法忽略基因功能语义的问题，本文提出scLLM-DSC框架，利用大语言模型的先验知识进行跨模态深度结构聚类。该方法通过对抗对齐将LLM嵌入与基因表达结合，在多个scRNA-seq数据集上取得了优于传统方法的聚类性能。该工作证明了LLM知识在单细胞分析中的价值，为语义感知的细胞聚类开辟了新途径。",
+      "llm_tldr": "针对现有单细胞聚类方法忽略基因功能语义的问题，本文提出scLLM-DSC框架，利用大语言模型的先验知识进行跨模态深度结构聚类。该方法通过对抗对齐将LLM嵌入与基因表达结合，在多个scRNA-seq数据集上取得了优于传统方法的聚类性能。该工作证明了LLM知识在单细胞分析中的价值，为语义感知的细胞聚类开辟了新途径。",
       "llm_tags": [
         "query:sc-methods"
       ],
@@ -135,13 +184,13 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "single-cell perturbation prediction using multi-modal framework",
-      "llm_evidence_cn": "使用多模态框架进行单细胞扰动预测",
-      "llm_evidence": "使用多模态框架进行单细胞扰动预测",
-      "canonical_evidence": "使用多模态框架进行单细胞扰动预测",
-      "llm_tldr_en": "CisTransCell proposes a cell-conditioned multi-modal framework for zero-shot single-cell perturbation prediction by integrating gene function, regulatory control, and cellular context.",
-      "llm_tldr_cn": "单细胞扰动预测面临零样本挑战。CisTransCell提出一个细胞上下文调节的多模态框架，融合基因功能、调控和细胞程序。在零样本设置中准确预测未知基因的转录响应。该方法揭示了基因功能、调控和细胞上下文的协同作用，为理解基因调控和设计扰动实验提供了新工具。",
-      "llm_tldr": "单细胞扰动预测面临零样本挑战。CisTransCell提出一个细胞上下文调节的多模态框架，融合基因功能、调控和细胞程序。在零样本设置中准确预测未知基因的转录响应。该方法揭示了基因功能、调控和细胞上下文的协同作用，为理解基因调控和设计扰动实验提供了新工具。",
+      "llm_evidence_en": "Single-cell perturbation prediction method",
+      "llm_evidence_cn": "单细胞扰动预测方法",
+      "llm_evidence": "单细胞扰动预测方法",
+      "canonical_evidence": "单细胞扰动预测方法",
+      "llm_tldr_en": "CisTransCell predicts single-cell transcriptional responses to genetic perturbations using gene function, regulatory control, and cellular context.",
+      "llm_tldr_cn": "该论文针对单细胞扰动预测问题，提出了CisTransCell框架。该方法通过整合基因功能、顺式调控元件和细胞状态上下文，实现了对未见基因扰动的零样本预测。实验表明，CisTransCell比现有方法更准确地预测了扰动后的基因表达变化。这项工作为单细胞遗传学中的计算建模提供了新的思路。",
+      "llm_tldr": "该论文针对单细胞扰动预测问题，提出了CisTransCell框架。该方法通过整合基因功能、顺式调控元件和细胞状态上下文，实现了对未见基因扰动的零样本预测。实验表明，CisTransCell比现有方法更准确地预测了扰动后的基因表达变化。这项工作为单细胞遗传学中的计算建模提供了新的思路。",
       "llm_tags": [
         "query:sc-methods"
       ],
@@ -181,19 +230,58 @@
         "query:single-cell-omics"
       ],
       "llm_score": 9.0,
-      "llm_evidence_en": "Hierarchical sparse transformer for spatial transcriptomics inference from histology",
-      "llm_evidence_cn": "用于从组织学推断空间转录组的分层稀疏变换器",
-      "llm_evidence": "用于从组织学推断空间转录组的分层稀疏变换器",
-      "canonical_evidence": "用于从组织学推断空间转录组的分层稀疏变换器",
-      "llm_tldr_en": "Proposes HiST, a hierarchical sparse transformer that infers spatial gene expression from whole-slide H&E images, overcoming dense-grid and quadratic attention challenges.",
-      "llm_tldr_cn": "空间转录组学成本高且通量低，因此需要从常规组织学切片推断基因表达。现有方法面临全切片图像稀疏测量位置带来的多尺度建模困难。为此提出HiST，一种分层稀疏变换器，将测量位置视为格点索引稀疏场，并构建直接作用于组织活动区域的二元编解码器。HiST结合稀疏窗口注意力与分辨率切换算子，在多个基准上实现了从H&E到空间转录组的高效跨模态推断，为降低空间转录组学实验成本提供了新途径。",
-      "llm_tldr": "空间转录组学成本高且通量低，因此需要从常规组织学切片推断基因表达。现有方法面临全切片图像稀疏测量位置带来的多尺度建模困难。为此提出HiST，一种分层稀疏变换器，将测量位置视为格点索引稀疏场，并构建直接作用于组织活动区域的二元编解码器。HiST结合稀疏窗口注意力与分辨率切换算子，在多个基准上实现了从H&E到空间转录组的高效跨模态推断，为降低空间转录组学实验成本提供了新途径。",
+      "llm_evidence_en": "spatial transcriptomics modeling method",
+      "llm_evidence_cn": "空间转录组学建模新方法",
+      "llm_evidence": "空间转录组学建模新方法",
+      "canonical_evidence": "空间转录组学建模新方法",
+      "llm_tldr_en": "HiST is a hierarchical sparse transformer that models cross-modal spatial transcriptomics from H&E images, using sparse attention to handle irregular measurement locations efficiently.",
+      "llm_tldr_cn": "针对空间转录组数据昂贵且低通量的问题，本文提出HiST，一个层次稀疏Transformer框架，直接从H&E全切片图像推断空间基因表达。该方法将测量位置视为稀疏格点场，通过稀疏窗口注意力和多尺度操作实现有效建模。在多个数据集上，HiST在基因表达预测任务中优于现有方法，为空间转录组学提供了一种经济的替代方案。",
+      "llm_tldr": "针对空间转录组数据昂贵且低通量的问题，本文提出HiST，一个层次稀疏Transformer框架，直接从H&E全切片图像推断空间基因表达。该方法将测量位置视为稀疏格点场，通过稀疏窗口注意力和多尺度操作实现有效建模。在多个数据集上，HiST在基因表达预测任务中优于现有方法，为空间转录组学提供了一种经济的替代方案。",
       "llm_tags": [
         "query:sc-methods"
       ],
       "matched_query_tag": "query:sc-methods",
       "matched_query_text": "spatial transcriptomics",
       "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.12712v1",
+      "source": "arxiv",
+      "title": "Predictions for and lack of maximal information transmission in the neuromuscular junction",
+      "abstract": "A key question in theoretical biology is how effectively biological systems preserve information about their inputs while operating under physical and functional constraints. We examine that question at the neuromuscular junction (NMJ) by studying how neurotransmitter concentration is transformed into current at both cholinergic and glutamatergic NMJs. An information maximization analysis was used to derive a theoretical distribution over neurotransmitter concentrations based on biological understandings of dose-response relationships. These theoretical distributions were compared to an experimentally derived distribution obtained from a Drosophila NMJ. The theoretical and experimental distributions showed very little agreement, indicating that the Drosophila NMJ does not shape its distribution of synaptic vesicle release probabilities in order to maximize information transmission from nervous system to muscle. Predictions for cholinergic systems are provided.",
+      "authors": [
+        "Eitan Goldfein",
+        "Sarah Marzen"
+      ],
+      "primary_category": "q-bio.MN",
+      "categories": [
+        "q-bio.MN"
+      ],
+      "published": "2026-06-10T22:04:07+00:00",
+      "link": "https://arxiv.org/pdf/2606.12712v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:scz-model"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "studies neuromuscular junction information transmission",
+      "llm_evidence_cn": "研究神经肌肉接头信息传递",
+      "llm_evidence": "研究神经肌肉接头信息传递",
+      "canonical_evidence": "研究神经肌肉接头信息传递",
+      "llm_tldr_en": "Theoretical analysis of information transmission at the neuromuscular junction using information maximization reveals mismatch between predicted and experimental neurotransmitter distributions.",
+      "llm_tldr_cn": "该论文从理论生物学角度研究神经肌肉接头（NMJ）的信息传递问题。作者利用信息最大化方法推导出神经递质浓度的理论分布，并将其与果蝇NMJ的实验分布进行比较，发现两者不一致。研究揭示了NMJ并非以最大信息传递为目标，为理解神经肌肉突触功能提供了新视角。",
+      "llm_tldr": "该论文从理论生物学角度研究神经肌肉接头（NMJ）的信息传递问题。作者利用信息最大化方法推导出神经递质浓度的理论分布，并将其与果蝇NMJ的实验分布进行比较，发现两者不一致。研究揭示了NMJ并非以最大信息传递为目标，为理解神经肌肉突触功能提供了新视角。",
+      "llm_tags": [
+        "query:als-organoid"
+      ],
+      "matched_query_tag": "query:als-organoid",
+      "matched_query_text": "neuromuscular junction",
+      "matched_requirement_id": "req-36",
       "selection_source": "fresh_fetch"
     },
     {
@@ -224,71 +312,24 @@
         "query:als-organoid",
         "query:scz-model"
       ],
-      "llm_score": 9.0,
-      "llm_evidence_en": "ALS speech impairment prediction",
-      "llm_evidence_cn": "渐冻症语音障碍预测",
-      "llm_evidence": "渐冻症语音障碍预测",
-      "canonical_evidence": "渐冻症语音障碍预测",
-      "llm_tldr_en": "Predicts speech impairment in German-speaking ALS patients using speech tasks, achieving CCC=0.62 for quality of life prediction, supporting standardized clinical assessment.",
-      "llm_tldr_cn": "该研究针对德语ALS患者的语音障碍预测问题，利用重复任务等语音特征，在66名患者中达到0.62的一致性相关系数，为ALS的客观评估提供了可标准化的语音分析手段，有望改善临床监测流程。",
-      "llm_tldr": "该研究针对德语ALS患者的语音障碍预测问题，利用重复任务等语音特征，在66名患者中达到0.62的一致性相关系数，为ALS的客观评估提供了可标准化的语音分析手段，有望改善临床监测流程。",
+      "llm_score": 8.0,
+      "llm_evidence_en": "directly addresses amyotrophic lateral sclerosis (ALS) speech impairment prediction",
+      "llm_evidence_cn": "直接研究肌萎缩侧索硬化症（ALS）的语音障碍预测",
+      "llm_evidence": "直接研究肌萎缩侧索硬化症（ALS）的语音障碍预测",
+      "canonical_evidence": "直接研究肌萎缩侧索硬化症（ALS）的语音障碍预测",
+      "llm_tldr_en": "Predicts speech impairment in German-speaking ALS patients using clinical speech scores; repetition tasks achieve best cross-sectional performance (CCC=0.62) for predicting QoL in dysarthric speaker questionnaire.",
+      "llm_tldr_cn": "该研究针对肌萎缩侧索硬化症（ALS）患者语音障碍预测问题，评估了跨说话人和个性化建模范式，发现重复任务（/da/-/da/、/da/-/ba/）在预测生活质量问卷得分时取得最佳一致性相关系数0.62，为ALS语音数据标准化收集提供了依据。",
+      "llm_tldr": "该研究针对肌萎缩侧索硬化症（ALS）患者语音障碍预测问题，评估了跨说话人和个性化建模范式，发现重复任务（/da/-/da/、/da/-/ba/）在预测生活质量问卷得分时取得最佳一致性相关系数0.62，为ALS语音数据标准化收集提供了依据。",
       "llm_tags": [
         "query:als-organoid"
       ],
       "matched_query_tag": "query:als-organoid",
-      "matched_query_text": "ALS",
-      "matched_requirement_id": "req-31",
+      "matched_query_text": "amyotrophic lateral sclerosis",
+      "matched_requirement_id": "req-30",
       "selection_source": "fresh_fetch"
-    },
-    {
-      "id": "2606.18672v1",
-      "source": "arxiv",
-      "title": "scGTN: Deep Siamese Graph Transformer Network for Single-cell RNA Sequencing Clustering",
-      "abstract": "Single-cell RNA sequencing (scRNA-seq) serves a pivotal role in characterizing gene expression at the cellular level, enabling the identification of cell types and advancing the understanding of cellular heterogeneity. Despite the significant progress in scRNA-seq data clustering, we argue that current methods always ignore the sparsity and noise, as well as the complex intercellular structural information inherent in scRNA-seq data. Toward this end, in this paper, we propose a novel single-cell RNA-seq clustering framework via deep Siamese Graph Transformer Network (termed scGTN), which explicitly integrates gene expression profile and intercellular structural dependencies for cell clustering. In particular, we formulate scRNA-seq data as a graph and construct two augmented graph views that serve as dual views to capture complementary intercellular information. Then, a Siamese graph transformer network is employed to explicitly incorporate shortest-path information and node-wise distances for capturing richer structural relationships between cells. Finally, we employ an optimal transport strategy to guide the cell clustering in a self-supervised manner. Extensive experiments on multiple benchmark scRNA-seq datasets demonstrate that our scGTN consistently outperforms existing methods. Our code is available at https://github.com/W-RMSL/scGTN.",
-      "authors": [
-        "Jinke Wu",
-        "Yifan Wang",
-        "Siyu Yi",
-        "Caiyang Yu",
-        "Ziyue Qiao",
-        "Nan Yin",
-        "Jiancheng Lv",
-        "Wei Ju"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.AI",
-        "q-bio.GN"
-      ],
-      "published": "2026-06-17T04:17:49+00:00",
-      "link": "https://arxiv.org/pdf/2606.18672v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:scz-model",
-        "keyword:single-cell-omics",
-        "query:als-organoid",
-        "query:sc-methods",
-        "query:scz-model",
-        "query:single-cell-omics"
-      ],
-      "llm_score": 9.0,
-      "llm_evidence_en": "scRNA-seq clustering using Graph Transformer",
-      "llm_evidence_cn": "使用图Transformer进行单细胞RNA-seq聚类",
-      "llm_evidence": "使用图Transformer进行单细胞RNA-seq聚类",
-      "canonical_evidence": "使用图Transformer进行单细胞RNA-seq聚类",
-      "llm_tldr_en": "scGTN proposes a deep Siamese Graph Transformer Network that integrates gene expression and intercellular structural dependencies for single-cell RNA sequencing clustering, addressing sparsity and noise issues.",
-      "llm_tldr_cn": "单细胞RNA测序聚类面临数据稀疏、噪声和细胞间结构信息缺失的问题。本文提出scGTN，一个基于深度孪生图Transformer网络的框架，融合基因表达谱与细胞间结构依赖关系进行聚类。该方法通过图Transformer捕捉细胞间的复杂关系，并在多个数据集上展示出优于现有方法的聚类性能和细胞类型识别能力。scGTN为单细胞转录组异质性研究提供了有效的工具。",
-      "llm_tldr": "单细胞RNA测序聚类面临数据稀疏、噪声和细胞间结构信息缺失的问题。本文提出scGTN，一个基于深度孪生图Transformer网络的框架，融合基因表达谱与细胞间结构依赖关系进行聚类。该方法通过图Transformer捕捉细胞间的复杂关系，并在多个数据集上展示出优于现有方法的聚类性能和细胞类型识别能力。scGTN为单细胞转录组异质性研究提供了有效的工具。",
-      "llm_tags": [
-        "query:sc-methods"
-      ],
-      "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "single-cell clustering",
-      "matched_requirement_id": "req-12",
-      "selection_source": "fresh_fetch"
-    },
+    }
+  ],
+  "quick_skim": [
     {
       "id": "2606.16460v1",
       "source": "arxiv",
@@ -316,24 +357,23 @@
         "query:scz-model",
         "query:single-cell-omics"
       ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "mixture factor model for gene expression clustering and subtype discovery applicable to single-cell RNA-seq",
-      "llm_evidence_cn": "基因表达数据的混合因子模型，适用于单细胞RNA-seq聚类和亚型发现",
-      "llm_evidence": "基因表达数据的混合因子模型，适用于单细胞RNA-seq聚类和亚型发现",
-      "canonical_evidence": "基因表达数据的混合因子模型，适用于单细胞RNA-seq聚类和亚型发现",
-      "llm_tldr_en": "A module-structured mixture factor model that combines finite mixture modeling with latent factor representations to identify outcome-specific signatures in high-dimensional gene expression data, validated on clustering and subtype discovery.",
-      "llm_tldr_cn": "该论文针对高维基因表达数据中的异质性和聚类挑战，提出了一种模块化结构混合因子模型。该方法将有限混合模型与低秩潜在因子表示相结合，在基因模块层面分解表达变异性。实验表明该方法能有效识别疾病亚型特异性标志，为单细胞RNA-seq数据的聚类和亚型发现提供了新工具。",
-      "llm_tldr": "该论文针对高维基因表达数据中的异质性和聚类挑战，提出了一种模块化结构混合因子模型。该方法将有限混合模型与低秩潜在因子表示相结合，在基因模块层面分解表达变异性。实验表明该方法能有效识别疾病亚型特异性标志，为单细胞RNA-seq数据的聚类和亚型发现提供了新工具。",
+      "llm_score": 7.0,
+      "llm_evidence_en": "module-structured mixture factor model for gene expression clustering applicable to single-cell RNA-seq",
+      "llm_evidence_cn": "模块化混合因子模型用于基因表达聚类，可应用于单细胞RNA-seq分析",
+      "llm_evidence": "模块化混合因子模型用于基因表达聚类，可应用于单细胞RNA-seq分析",
+      "canonical_evidence": "模块化混合因子模型用于基因表达聚类，可应用于单细胞RNA-seq分析",
+      "llm_tldr_en": "This paper proposes a module-structured mixture factor model for gene expression data that decomposes variability into interpretable components and identifies cluster-specific signatures, providing a transferable method for single-cell clustering.",
+      "llm_tldr_cn": "该文针对高维基因表达数据聚类和疾病亚型发现中的挑战，提出了一种模块化混合因子模型。该方法将有限混合模型与基因模块级别的低秩因子表示相结合，显式建模基因模块在均值和协方差结构中的作用，从而分解为全局效应、簇特异性模块偏移、模块内潜在依赖和残差噪声。在合成和真实基因表达数据上的实验表明，该方法能有效识别与临床结局相关的特征，并优于传统方法。该模型框架可灵活迁移至单细胞RNA-seq数据的聚类和标记发现，为单细胞方法学提供了新的统计工具。",
+      "llm_tldr": "该文针对高维基因表达数据聚类和疾病亚型发现中的挑战，提出了一种模块化混合因子模型。该方法将有限混合模型与基因模块级别的低秩因子表示相结合，显式建模基因模块在均值和协方差结构中的作用，从而分解为全局效应、簇特异性模块偏移、模块内潜在依赖和残差噪声。在合成和真实基因表达数据上的实验表明，该方法能有效识别与临床结局相关的特征，并优于传统方法。该模型框架可灵活迁移至单细胞RNA-seq数据的聚类和标记发现，为单细胞方法学提供了新的统计工具。",
       "llm_tags": [
         "query:sc-methods:composite"
       ],
       "matched_query_tag": "query:sc-methods:composite",
       "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
       "matched_requirement_id": "req-composite-sc-methods",
-      "selection_source": "fresh_fetch"
-    }
-  ],
-  "quick_skim": [
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
     {
       "id": "2606.12021v1",
       "source": "arxiv",
@@ -360,58 +400,14 @@
         "query:scz-model",
         "query:single-cell-omics"
       ],
-      "llm_score": 7.0,
-      "llm_evidence_en": "spatial clustering method for proteomics applicable to transcriptomics",
-      "llm_evidence_cn": "适用于转录组学的空间聚类方法",
-      "llm_evidence": "适用于转录组学的空间聚类方法",
-      "canonical_evidence": "适用于转录组学的空间聚类方法",
-      "llm_tldr_en": "Proposes adaptive spatial blocking to accelerate Ripley's K-function clustering for high-throughput spatial proteomics, enabling scalable p-value computation.",
-      "llm_tldr_cn": "该工作针对大规模空间蛋白质组学数据的聚类推断计算瓶颈，提出了自适应空间分块算法，通过提取局部块并聚合证据，实现了高效的空间聚类p值计算，可扩展应用于空间转录组学等场景，为大规模空间组学分析提供了可扩展的统计推断框架。",
-      "llm_tldr": "该工作针对大规模空间蛋白质组学数据的聚类推断计算瓶颈，提出了自适应空间分块算法，通过提取局部块并聚合证据，实现了高效的空间聚类p值计算，可扩展应用于空间转录组学等场景，为大规模空间组学分析提供了可扩展的统计推断框架。",
-      "llm_tags": [
-        "query:sc-methods"
-      ],
-      "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "spatial transcriptomics",
-      "matched_requirement_id": "req-6",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "7"
-    },
-    {
-      "id": "2606.11775v1",
-      "source": "arxiv",
-      "title": "Magnitude-Based Features for Multispecies Spatial Data",
-      "abstract": "Multispecies spatial data arise in many applications where interactions between different entities are central to system behaviour, including biomedical imaging, geospatial analysis, and species ecology. Despite their importance, relatively few quantitative tools exist to capture such interactions. In this work, we propose magnitude-based features for the analysis of multispecies spatial data. Magnitude is a real-valued invariant of finite metric spaces that can be interpreted as an effective number of points, incorporating both spatial configuration and scale. We develop global and local magnitude feature vectors and demonstrate their utility on synthetic tumour microenvironment data, and in tissue microarray data from human colorectal cancer samples. Locally, the method identifies distinct neighbourhood types and reveals spatial heterogeneity; in the model, this includes radial patterns associated with different qualitative outcomes of the simulations, while in the real-world data it reflects the importance of tertiary lymphoid structure-like interactions between B and T cell populations. Globally, the approach recovers known classifications of long-term simulation outcomes across parameter regimes in synthetic data, and suggests important roles for CD4+ T cells and CD163+ macrophages in distinguishing patients with favourable Crohn's like reactions from unfavourable diffuse immune infiltration. Together, these results suggest that magnitude-based features provide a powerful and flexible tool for the analysis of multispecies spatial data.",
-      "authors": [
-        "Julia Sollberger",
-        "Joshua Bull",
-        "Sara Kališnik",
-        "Bernadette Stolz"
-      ],
-      "primary_category": "math.MG",
-      "categories": [
-        "math.MG",
-        "q-bio.QM",
-        "stat.ML"
-      ],
-      "published": "2026-06-10T08:02:58+00:00",
-      "link": "https://arxiv.org/pdf/2606.11775v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:scz-model",
-        "keyword:single-cell-omics",
-        "query:sc-methods",
-        "query:single-cell-omics"
-      ],
       "llm_score": 6.0,
-      "llm_evidence_en": "magnitude-based spatial features for tumor microenvironment analysis",
-      "llm_evidence_cn": "基于量级的空间特征用于肿瘤微环境分析",
-      "llm_evidence": "基于量级的空间特征用于肿瘤微环境分析",
-      "canonical_evidence": "基于量级的空间特征用于肿瘤微环境分析",
-      "llm_tldr_en": "Proposes magnitude-based features for multispecies spatial data; applied to tumor microenvironment and colorectal cancer tissue data; offers new quantitative tools for spatial analysis.",
-      "llm_tldr_cn": "该论文针对多物种空间数据缺乏定量交互分析工具的问题，提出基于量级（magnitude）的特征向量，包括全局和局部特征。在合成肿瘤微环境数据和人类结直肠癌组织微阵列数据上验证了特征的有效性，展示了其在捕捉空间配置和尺度方面的能力。该方法为空间转录组学等领域的空间数据提供了新的分析方法，有助于理解细胞微环境的组织模式。",
-      "llm_tldr": "该论文针对多物种空间数据缺乏定量交互分析工具的问题，提出基于量级（magnitude）的特征向量，包括全局和局部特征。在合成肿瘤微环境数据和人类结直肠癌组织微阵列数据上验证了特征的有效性，展示了其在捕捉空间配置和尺度方面的能力。该方法为空间转录组学等领域的空间数据提供了新的分析方法，有助于理解细胞微环境的组织模式。",
+      "llm_evidence_en": "scalable spatial clustering method for high-throughput proteomics",
+      "llm_evidence_cn": "针对高通量空间蛋白质组学的可扩展空间聚类方法",
+      "llm_evidence": "针对高通量空间蛋白质组学的可扩展空间聚类方法",
+      "canonical_evidence": "针对高通量空间蛋白质组学的可扩展空间聚类方法",
+      "llm_tldr_en": "Proposes adaptive spatial blocking for scalable Ripley's K-based clustering inference, enabling fast analysis of large spatial proteomics data.",
+      "llm_tldr_cn": "Ripley's K函数在大规模空间数据分析中计算负担重。本文提出自适应空间分块框架，通过将图像划分为满足点数和形状约束的局部块，并聚合各块的聚类证据。该方法显著降低了计算复杂度，同时保持了聚类推断的准确性，为高通量空间蛋白质组学分析提供了高效方案。",
+      "llm_tldr": "Ripley's K函数在大规模空间数据分析中计算负担重。本文提出自适应空间分块框架，通过将图像划分为满足点数和形状约束的局部块，并聚合各块的聚类证据。该方法显著降低了计算复杂度，同时保持了聚类推断的准确性，为高通量空间蛋白质组学分析提供了高效方案。",
       "llm_tags": [
         "query:sc-methods"
       ],
@@ -449,13 +445,13 @@
         "query:single-cell-omics"
       ],
       "llm_score": 7.0,
-      "llm_evidence_en": "ATAC-seq peak feature extraction with cell-type specificity",
-      "llm_evidence_cn": "ATAC-seq峰值特征提取包含细胞类型特异性",
-      "llm_evidence": "ATAC-seq峰值特征提取包含细胞类型特异性",
-      "canonical_evidence": "ATAC-seq峰值特征提取包含细胞类型特异性",
-      "llm_tldr_en": "PyPeakRankR extracts peak-level features from ATAC-seq data including signal summaries, conservation scores, and cell-type specificity, providing a reproducible feature matrix for regulatory element ranking.",
-      "llm_tldr_cn": "当前缺乏标准化工具来组装ATAC-seq峰值的多样定量特征以进行功能验证排序。本文提出PyPeakRankR，一个开源Python包，从ATAC-seq数据中提取BigWig信号摘要、GC含量、保守性分数、分布矩及细胞类型特异性排名，生成可重复的峰值-特征矩阵。该工具将特征提取与下游排序分离，支持透明基准测试。",
-      "llm_tldr": "当前缺乏标准化工具来组装ATAC-seq峰值的多样定量特征以进行功能验证排序。本文提出PyPeakRankR，一个开源Python包，从ATAC-seq数据中提取BigWig信号摘要、GC含量、保守性分数、分布矩及细胞类型特异性排名，生成可重复的峰值-特征矩阵。该工具将特征提取与下游排序分离，支持透明基准测试。",
+      "llm_evidence_en": "ATAC-seq peak feature extraction tool",
+      "llm_evidence_cn": "ATAC-seq峰特征提取工具",
+      "llm_evidence": "ATAC-seq峰特征提取工具",
+      "canonical_evidence": "ATAC-seq峰特征提取工具",
+      "llm_tldr_en": "PyPeakRankR is an open-source Python package that extracts peak-level features (BigWig signal, GC content, conservation, distribution moments, cell-type specificity) from chromatin accessibility data (e.g., ATAC-seq) into a reproducible matrix, enabling transparent benchmarking of regulatory element prioritization.",
+      "llm_tldr_cn": "该论文开发了PyPeakRankR，一个开源Python包，用于从ATAC-seq等染色质可及性数据中提取峰级特征，包括信号强度、GC含量、保守性、分布矩和细胞类型特异性排名，输出为峰×特征矩阵。该工具将特征提取与下游排序分离，使得调控元件优先级排序的基准测试更加透明和可重复。",
+      "llm_tldr": "该论文开发了PyPeakRankR，一个开源Python包，用于从ATAC-seq等染色质可及性数据中提取峰级特征，包括信号强度、GC含量、保守性、分布矩和细胞类型特异性排名，输出为峰×特征矩阵。该工具将特征提取与下游排序分离，使得调控元件优先级排序的基准测试更加透明和可重复。",
       "llm_tags": [
         "query:sc-methods"
       ],
@@ -464,94 +460,6 @@
       "matched_requirement_id": "req-5",
       "selection_source": "fresh_fetch",
       "quick_tier": "7"
-    },
-    {
-      "id": "2606.14028v1",
-      "source": "arxiv",
-      "title": "Anytime-Valid Confirmation of Label-Shift Corrections",
-      "abstract": "In small-batch scientific deployments, labeled target outcomes may be too scarce for reliable shift estimation even when unlabeled target inputs are available. We address the complementary setting where the practitioner has a pre-specified label-shift correction from domain knowledge and asks whether incoming labeled outcomes support it. We show that the per-observation likelihood ratio between a label-shift-corrected predictive and the source predictive is a conditional e-value, so its running product is a nonnegative martingale and Ville's inequality yields an anytime-valid confirmation rule. The log martingale equals the cumulative negative log-predictive density (NLPD) gap between the source and the corrected predictive, converting routine model monitoring into a formal sequential test. Rejection means the incoming data support the posited correction relative to the source predictive, but it is not a precise estimate of the degree of shift. Closed forms are available for GP sources with Gaussian label-shift ratios. GP regression simulations validate Type I control, finite-sample power, miscalibration sensitivity, and the small-batch advantage of a reliable prior over label-based re-estimation.",
-      "authors": [
-        "Seungjin Choi"
-      ],
-      "primary_category": "stat.ML",
-      "categories": [
-        "stat.ML",
-        "cs.LG"
-      ],
-      "published": "2026-06-12T02:03:21+00:00",
-      "link": "https://arxiv.org/pdf/2606.14028v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:single-cell-omics",
-        "query:sc-methods",
-        "query:single-cell-omics"
-      ],
-      "llm_score": 6.0,
-      "llm_evidence_en": "label-shift correction confirmation method transferable to batch correction validation in single-cell data",
-      "llm_evidence_cn": "标签偏移校正确认方法可迁移至单细胞数据批次校正验证",
-      "llm_evidence": "标签偏移校正确认方法可迁移至单细胞数据批次校正验证",
-      "canonical_evidence": "标签偏移校正确认方法可迁移至单细胞数据批次校正验证",
-      "llm_tldr_en": "A method for anytime-valid confirmation of a pre-specified label-shift correction using e-values and martingales, enabling routine model monitoring without requiring batch-specific estimation.",
-      "llm_tldr_cn": "该论文针对迁移学习中标签偏移校正的验证问题，提出了一种基于条件e值和鞅的随时有效确认方法。该方法将源域与目标域的负对数预测密度差转化为对数鞅，从而在收到少量标注样本后即可判断校正是否合理。这项技术可直接应用于单细胞数据中批次校正效果的在线验证，无需等待完整批次的标注数据。",
-      "llm_tldr": "该论文针对迁移学习中标签偏移校正的验证问题，提出了一种基于条件e值和鞅的随时有效确认方法。该方法将源域与目标域的负对数预测密度差转化为对数鞅，从而在收到少量标注样本后即可判断校正是否合理。这项技术可直接应用于单细胞数据中批次校正效果的在线验证，无需等待完整批次的标注数据。",
-      "llm_tags": [
-        "query:sc-methods"
-      ],
-      "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "batch correction",
-      "matched_requirement_id": "req-8",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "6"
-    },
-    {
-      "id": "2606.16517v1",
-      "source": "arxiv",
-      "title": "How Post-Training Shapes Biological Reasoning Models",
-      "abstract": "Scientific reasoning models for biology combine language models with foundation models trained on multimodal biological data, including DNA, RNA, and proteins. These models are built through post-training, yet how each stage shapes reasoning and generalization remains poorly understood. We study when post-training improves performance and when it induces over-specialization. Across genomics, transcriptomics, and proteins, we train and evaluate more than 100 biological reasoning models under controlled variation in backbone, continued pre-training (CPT), supervised fine-tuning (SFT), and reinforcement learning (RL), measuring both in-domain (ID) and out-of-domain (OOD) performance. We find that each post-training stage reshapes generalization in a distinct way rather than contributing uniform gains. CPT improves downstream performance by aligning models with biological language. SFT consistently increases ID performance but causes OOD performance to peak early and decline as models fit the training distribution. RL, when applied to strong SFT checkpoints with aligned rewards, improves OOD performance and partially recovers generalization. These results show that biological reasoning does not improve monotonically with additional supervision or compute. Instead, performance depends on how training stages are composed. Under fixed post-training budgets, the strongest ID-OOD trade-off comes from brief SFT, larger RL allocations, and asymmetric adaptation capacity across stages.",
-      "authors": [
-        "Lukas Fesser",
-        "Hanlin Zhang",
-        "Michelle M. Li",
-        "Eric Wang",
-        "Bryan Perozzi",
-        "Shekoofeh Azizi",
-        "Sham M. Kakade",
-        "Marinka Zitnik"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "q-bio.QM"
-      ],
-      "published": "2026-06-15T10:19:49+00:00",
-      "link": "https://arxiv.org/pdf/2606.16517v1",
-      "tags": [
-        "keyword:als-organoid",
-        "keyword:sc-methods",
-        "keyword:scz-model",
-        "keyword:single-cell-omics",
-        "query:als-organoid",
-        "query:sc-methods",
-        "query:scz-model",
-        "query:single-cell-omics"
-      ],
-      "llm_score": 6.0,
-      "llm_evidence_en": "systematic study of post-training on biological reasoning models with RNA data",
-      "llm_evidence_cn": "系统研究后训练对含RNA数据的生物学推理模型的影响",
-      "llm_evidence": "系统研究后训练对含RNA数据的生物学推理模型的影响",
-      "canonical_evidence": "系统研究后训练对含RNA数据的生物学推理模型的影响",
-      "llm_tldr_en": "Systematic study of post-training stages (CPT, SFT, RL) on biological reasoning models reveals distinct generalization patterns across genomics, transcriptomics, and proteins.",
-      "llm_tldr_cn": "生物学推理模型的后训练过程如何影响泛化和过专业化尚不明确。本文在基因组学、转录组学和蛋白质组学上训练并评估了超过100个模型，发现每个后训练阶段以不同方式重塑泛化能力，而非简单叠加。这些发现为构建更鲁棒的单细胞基础模型提供了重要指导。",
-      "llm_tldr": "生物学推理模型的后训练过程如何影响泛化和过专业化尚不明确。本文在基因组学、转录组学和蛋白质组学上训练并评估了超过100个模型，发现每个后训练阶段以不同方式重塑泛化能力，而非简单叠加。这些发现为构建更鲁棒的单细胞基础模型提供了重要指导。",
-      "llm_tags": [
-        "query:sc-methods"
-      ],
-      "matched_query_tag": "query:sc-methods",
-      "matched_query_text": "single-cell foundation model",
-      "matched_requirement_id": "req-17",
-      "selection_source": "fresh_fetch",
-      "quick_tier": "6"
     }
   ]
 }
