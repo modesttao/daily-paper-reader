@@ -1,11 +1,11 @@
 {
   "label": "2026-06-10 ~ 2026-06-19",
   "date": "2026-06-10 ~ 2026-06-19",
-  "generated_at": "2026-06-19T06:02:51",
-  "count": 7,
+  "generated_at": "2026-06-19T06:23:36",
+  "count": 8,
   "papers": [
     {
-      "paper_id": "20260610-20260619/2606.12712v1-predictions-for-and-lack-of-maximal-information-transmission-in-the-neuromuscular-junction",
+      "paper_id": "20260610-20260619/2606.13007v1-scllm-dsc-llm-knowledge-enhanced-cross-modal-deep-structural-clustering-for-single-cell-rna-sequencing",
       "section": "deep",
       "title_en": "scLLM-DSC: LLM-Knowledge Enhanced Cross-Modal Deep Structural Clustering for Single-Cell RNA Sequencing",
       "authors": "Ping Xu, Pengjiang Li, Tian Du, Zaitian Wang, Jiawei Gu, Ziyue Qiao, Pengfei Wang, Yuanchun Zhou",
@@ -16,21 +16,6 @@
       "tldr": "单细胞RNA测序聚类中现有方法忽视基因的生物学语义，而大语言模型(LLM)虽有语义能力但生成式预训练与判别任务不匹配。为此提出scLLM-DSC框架，融合知识驱动的语义视图（NCBI基因先验与Cell2Sentence嵌入）和结构感知的拓扑视图（图引导编码器），并通过跨模态对比对齐统一潜在空间。在多个基准上，scLLM-DSC聚类准确率显著超越11种基线方法，弥合了LLM生成式预训练与聚类判别任务的鸿沟。",
       "tags": "query:sc-methods",
       "abstract_en": "Clustering is fundamental to scRNA-seq analysis, serving as a cornerstone for identifying cell populations and resolving tissue heterogeneity. However, existing methods focus on mining numerical statistical patterns, suffering from semantic agnosticism by neglecting the intrinsic biological functions encoded by genes. While Large Language Models (LLMs) offer promising semantic capabilities, their direct adaptation to cell clustering is hindered by the structural mismatch between generative pre-training objectives and discriminative downstream tasks. To bridge this gap, we propose scLLM-DSC, a novel LLM-Knowledge Enhanced Cross-Modal Deep Structural Clustering framework. Diverging from data-driven paradigms, scLLM-DSC establishes a semantically-grounded representation by synergizing two views: a Knowledge-Driven Semantic View derived from NCBI gene priors and contextualized Cell2Sentence embeddings, and a Structure-Aware Topological View extracted via a graph-guided encoder. Crucially, we introduce a cross-modal contrastive alignment mechanism to enforce consistency between biological semantics and transcriptomic features within a unified latent space. Extensive benchmarks demonstrate that scLLM-DSC significantly outperforms eleven state-of-the-art baselines in clustering accuracy.",
-      "source": "arxiv",
-      "selection_source": "fresh_fetch"
-    },
-    {
-      "paper_id": "20260610-20260619/2606.13713v1-cistranscell-single-cell-perturbation-prediction-via-gene-function-regulatory-control-and-cellular-context",
-      "section": "deep",
-      "title_en": "CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context",
-      "authors": "Wei Zhang, Xun Jiang, Yuesi Xi, Ming Tang",
-      "date": "2026-06-10",
-      "pdf": "https://arxiv.org/pdf/2606.13713v1",
-      "score": "9.0",
-      "evidence": "单细胞扰动预测框架",
-      "tldr": "单细胞扰动预测面临零样本挑战，因扰动效应受基因功能、调控机制和细胞状态共同决定。CisTransCell为每个基因引入调控序列先验和编码序列先验，融合细胞表达状态构建多模态框架，建模从基因功能到转录级联的响应过程。在基准数据集上实现零样本最优预测，为理解基因互作与细胞状态关系提供新范式。",
-      "tags": "query:sc-methods",
-      "abstract_en": "Predicting cellular transcriptional responses to genetic perturbations is a central problem in single-cell biology, especially in the zero-shot setting where the perturbed gene or gene combination is unseen during training. A major difficulty is that perturbation effects are not determined by expression state alone: they depend on how the perturbed gene product influences other genes and proteins, how those downstream factors act on cis-regulatory elements, and which regulatory programs are active in the current cell state. To better capture this biological complexity, we propose CisTransCell, a cell-conditioned multi-modal framework for single-cell perturbation prediction that augments each gene with two complementary priors: a regulatory-sequence prior that captures how the gene is controlled, and a coding-sequence prior that captures what the gene product does. By integrating these priors with cellular expression state, CisTransCell models perturbation response as a cascade from gene function to regulatory control to downstream transcriptional change. Experiments on benchmark single-cell perturbation datasets show that CisTransCell achieves strong performance in zero-shot perturbation prediction.",
       "source": "arxiv",
       "selection_source": "fresh_fetch"
     },
@@ -80,6 +65,36 @@
       "selection_source": "fresh_fetch"
     },
     {
+      "paper_id": "20260610-20260619/2606.12021v1-adaptive-spatial-blocking-for-scalable-clustering-inference-with-applications-to-high-throughput-spatial-proteomics",
+      "section": "quick",
+      "title_en": "Adaptive spatial blocking for scalable clustering inference with applications to high-throughput spatial proteomics",
+      "authors": "Mingyu Go, Julia Wrobel, Hoseung Song",
+      "date": "2026-06-10",
+      "pdf": "https://arxiv.org/pdf/2606.12021v1",
+      "score": "6.0",
+      "evidence": "针对高通量空间蛋白质组学的可扩展空间聚类方法",
+      "tldr": "大规模空间蛋白质组学中，Ripley's K函数聚类推断计算昂贵。本文提出自适应空间分块算法，构建满足点计数和形状约束的局部块，基于渐近正态近似快速计算p值。在仿真和实际数据中平衡统计功效与效率，成功检测健康人肠道中浆细胞聚集及其与巨噬细胞共定位。为高通量空间蛋白质组学提供可扩展聚类推断框架。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Ripley's K-function is a widely used spatial summary statistic for assessing clustering in point patterns. However, existing K-based methods can be computationally prohibitive for large-scale data, particularly in high-throughput spatial proteomics, because they rely on spatial information from all points in the image. To address this challenge, we propose a computationally efficient block-based testing framework that extracts disjoint local blocks from an image and aggregates clustering evidence across them. The proposed adaptive spatial blocking algorithm constructs blocks satisfying point-count and shape constraints, enabling scalable spatial clustering inference and fast p-value computation through an asymptotic normal approximation. Numerical studies demonstrate that the proposed method provides a favorable balance between statistical power and computational efficiency. In an application to healthy human intestine spatial proteomics data, our method detects strong spatial aggregation of plasma cells and colocalization between plasma cells and macrophages, while scaling favorably to large images.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260610-20260619/2606.13713v1-cistranscell-single-cell-perturbation-prediction-via-gene-function-regulatory-control-and-cellular-context",
+      "section": "quick",
+      "title_en": "CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context",
+      "authors": "Wei Zhang, Xun Jiang, Yuesi Xi, Ming Tang",
+      "date": "2026-06-10",
+      "pdf": "https://arxiv.org/pdf/2606.13713v1",
+      "score": "9.0",
+      "evidence": "单细胞扰动预测框架",
+      "tldr": "单细胞扰动预测面临零样本挑战，因扰动效应受基因功能、调控机制和细胞状态共同决定。CisTransCell为每个基因引入调控序列先验和编码序列先验，融合细胞表达状态构建多模态框架，建模从基因功能到转录级联的响应过程。在基准数据集上实现零样本最优预测，为理解基因互作与细胞状态关系提供新范式。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Predicting cellular transcriptional responses to genetic perturbations is a central problem in single-cell biology, especially in the zero-shot setting where the perturbed gene or gene combination is unseen during training. A major difficulty is that perturbation effects are not determined by expression state alone: they depend on how the perturbed gene product influences other genes and proteins, how those downstream factors act on cis-regulatory elements, and which regulatory programs are active in the current cell state. To better capture this biological complexity, we propose CisTransCell, a cell-conditioned multi-modal framework for single-cell perturbation prediction that augments each gene with two complementary priors: a regulatory-sequence prior that captures how the gene is controlled, and a coding-sequence prior that captures what the gene product does. By integrating these priors with cellular expression state, CisTransCell models perturbation response as a cascade from gene function to regulatory control to downstream transcriptional change. Experiments on benchmark single-cell perturbation datasets show that CisTransCell achieves strong performance in zero-shot perturbation prediction.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
       "paper_id": "20260610-20260619/2606.18179v1-pypeakrankr-reproducible-peak-level-feature-extraction-for-regulatory-element-ranking",
       "section": "deep",
       "title_en": "PyPeakRankR: Reproducible Peak-Level Feature Extraction for Regulatory Element Ranking",
@@ -97,15 +112,15 @@
     {
       "paper_id": "20260610-20260619/2606.12346v1-atlas-he-tme-scalable-ai-based-tissue-profiling-at-expert-pathologist-level-accuracy",
       "section": "quick",
-      "title_en": "Atlas H&E-TME: Scalable AI-Based Tissue Profiling at Expert Pathologist-Level Accuracy",
-      "authors": "Kai Standvoss, Miriam Hägele, Rosemarie Krupar, Julika Ribbat-Idel, Jennifer Altschüler, Gerrit Erdmann, Hans Pinckaers, Evelyn Ramberger, Madleen Drinkwitz, Ádám Nárai, Alexander Möllers, Katja Lingelbach, Sebastian Kons, Lukas Hönig, Recepcan Adigüzel, Joana Baião, Alberto Megina Gonzalo, Marius Teodorescu, Marie-Lisa Eich, Paolo Chetta, Shakil Merchant, Verena Aumiller, Simon Schallenberg, Andrew Norgan, Klaus-Robert Müller, Lukas Ruff, Maximilian Alber, Frederick Klauschen",
-      "date": "2026-06-10",
-      "pdf": "https://arxiv.org/pdf/2606.12346v1",
-      "score": "7.0",
-      "evidence": "预测H&E切片中的细胞类型标签，与细胞类型注释相关",
-      "tldr": "H&E染色是病理学基石，但大规模定量分析面临挑战。本文提出Atlas H&E-TME系统，基于Atlas病理基础模型，预测组织质量、区域和细胞类型，每张切片输出超4500个定量指标。针对H&E标注模糊性，采用IHC-informed多病理学家共识协议提升一致性，并在20万+高置信度标注上验证。系统在IHC共识基准上匹配或超越病理学家仅H&E性能，稳健泛化至8种癌症类型。该工作将H&E切片转化为可扩展定量窗口，为下一代组织生物标志物奠定基础。",
+      "title_en": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
+      "authors": "Johannes Seiffarth, Matthias Pesch, Lukas Scholtes, Dietrich Kohlheyer, Hanno Scharr, Katharina Nöh",
+      "date": "2026-06-16",
+      "pdf": "https://arxiv.org/pdf/2606.18523v1",
+      "score": "8.0",
+      "evidence": "微流控活细胞成像单细胞数据实时分析",
+      "tldr": "高吞吐微流控活细胞成像生成丰富单细胞数据，但半自动定位感兴趣区域和去除微流控结构耗时，阻碍实时分析。DART范式通过CAD蓝图对齐物理芯片，嵌入基准标记并用深度学习检测，实现吞吐量无关的RoI定位和全自动图像处理。在Swiss Army Knife芯片上，5分钟定位1164个RoI，40ms去除微结构，1.1秒内完成细胞分割。DART作为端到端硬件-软件范式，提供实时分析能力，为闭环智能显微镜奠定基础。",
       "tags": "query:sc-methods",
-      "abstract_en": "Hematoxylin and eosin (H&E) staining is the cornerstone of histopathology, yet scalable, quantitative analysis of H&E whole-slide images (WSIs) remains a central challenge in computational pathology. We present Atlas H&E-TME, an AI-based system built on the Atlas family of pathology foundation models that predicts tissue quality, tissue region, and cell type labels across multiple cancer types, yielding over 4,500 quantitative readouts per slide at cell-level resolution. A key challenge to validating such systems is overcoming morphological ambiguity inherent to H&E-only ground truth and the limited scalability of more informed references drawing on modalities such as immunohistochemistry (IHC). We address this with a dual validation framework combining biologically grounded depth with technical and morphological breadth. For depth, we propose an IHC-informed multi-pathologist consensus protocol that substantially improves inter-rater agreement over conventional H&E-only annotation. This yields a molecularly grounded reference against which we compare Atlas H&E-TME and pathologists working from H&E alone. For breadth, we benchmark Atlas H&E-TME on over 200,000 high-confidence H&E-only pathologist annotations across 1,500+ cases spanning eight cancer types and their most common metastatic sites, with subtypes covering >90% of clinical cases per cancer type, drawn from 25+ sources and 8+ scanner models. Benchmarked against the IHC-informed consensus, Atlas H&E-TME matches or exceeds pathologist H&E-only performance and generalizes consistently and robustly across this broad morphological and technical scope. In doing so, Atlas H&E-TME turns the H&E slide -- the most ubiquitous data in pathology -- into a scalable, quantitative window into the tumor and its microenvironment, laying a foundation for the next generation of tissue-based biomarkers in translational and clinical research.",
+      "abstract_en": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
       "source": "arxiv",
       "selection_source": "fresh_fetch"
     }
