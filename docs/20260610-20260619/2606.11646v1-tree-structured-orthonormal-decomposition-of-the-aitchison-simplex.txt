@@ -1,0 +1,1715 @@
+Title: Tree-Structured Orthonormal Decomposition of the Aitchison Simplex
+
+URL Source: https://arxiv.org/pdf/2606.11646v1
+
+Published Time: Thu, 11 Jun 2026 00:32:05 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+# Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Daisuke Yamada 1 Qijun Zhang 1 Travis Pence 1 Barbara B. Bendlin 1 Federico Rey 1 Vikas Singh 1
+
+## Abstract 
+
+Compositional data—vectors encoding relative proportions—arise across scientific domains, in-cluding ecology, geochemistry, and genomics. The features in these data often come with known hierarchical structure (e.g., taxonomies, phyloge-nies, ontologies), yet existing methods either ig-nore this structure, discard the intrinsic Aitchison geometry, are designed for binary trees, or yield incomplete coordinate systems. We describe Poly-ILR , a canonical orthonormal decomposition of the Aitchison tangent space aligned with any tree topology. Our construction defines a weighted lo-cal geometry at each internal node capturing full branching structure, then lifts these to a global orthonormal basis where every coordinate corre-sponds to a specific tree location. On microbiome and single-cell benchmarks, PolyILR yields sta-ble, interpretable features and enables inference at multiscale tree resolution. We also establish a novel theoretical connection to softmax classifiers, suggesting possible applications to probabilistic modeling. 
+
+## 1. Introduction 
+
+Compositional data —nonnegative vectors (or components) whose summed total carries no intrinsic meaning—arise across scientific and statistical settings, including micro-biome profiles, cell type proportions, ecological counts, and probabilistic model outputs (Gloor et al., 2017; Billheimer et al., 2001; Buettner et al., 2021). Such data live on the simplex, where inference is based on relative not absolute values. Often, the components are not exchangeable and are organized by domain hierarchies reflecting evolutionary, functional, or semantic relationships (Silverman et al., 2017; Harmon, 2019). These trees describe which comparisons among components are meaningful and at what resolution.     
+
+> 1University of Wisconsin Madison, Madison WI, USA. Corre-spondence to: Daisuke Yamada <dyamada2@wisc.edu >.
+> Proceedings of the 43 rd International Conference on Machine Learning , Seoul, South Korea. PMLR 306, 2026. Copyright 2026 by the author(s).
+
+The standard tool in compositional data analysis (CoDA) is Aitchison geometry (Aitchison, 1982), which formalizes that only ratios are informative. This is achieved via an isometric log - ratio (ILR) embedding of compositional data into Euclidean space (Egozcue et al., 2003). Here, one treats components symmetrically , partly reflecting origins in do-mains where no external structure was assumed (Egozcue & Pawlowsky-Glahn, 2005; Mandal et al., 2015). But in many applications, domain-specific hierarchies are known: trees specify which comparisons are meaningful and how they are related. To address this gap, the literature provides strategies to incorporate tree structure, such as tree - based balances and phylogeny - aware coordinates. Doing so improves in-terpretability and downstream analysis. Yet, existing ap-proaches typically address specific regimes (e.g., binary trees as in phylogenetic reconstruction, selected contrasts) (Silverman et al., 2017; Washburne et al., 2017; Morton et al., 2017) or rely on construction choices external to the geometry (Lozupone & Knight, 2005; Mao & Ma, 2022). For instance, a polytomous node admits no canonical binary resolution, yet binary-tree methods force an arbitrary choice (Figure 1). Hence, the key question we study is whether hierarchies can be incorporated in a way that is general, geometrically principled, and canonical for arbitrary trees. 
+
+Main difficulty. The core issue is structural incompatibility. Aitchison geometry identifies compositions up to a global 
+
+scaling: a (d − 1) -dimensional Euclidean tangent space where ILR coordinates live. But trees impose local and 
+
+nested constraints: distinctions are meaningful within clades (i.e., subtrees) and comparisons happen at multiple resolu-tions. Aligning these requires decomposing the Aitchison tangent space to respect branching structure at every internal node. Binary trees sidestep this issue by reducing each node to a single contrast (Figure 1). For multi - branching (i.e., 
+
+polytomous ) hierarchies, no canonical construction exists. 
+
+This paper. We ask if an orthonormal decomposition of the Aitchison tangent space can be compatible with arbitrary tree structure and the simplex invariances—without sacri-ficing isometry or introducing arbitrary choices. Such a de-composition would give each internal node a geometrically motivated signature and provide a multiscale coordinate sys-tem for simplex-valued data on the same footing as standard ILR methods (Pawlowsky-Glahn & Egozcue, 2001), while grounding the analysis firmly in tree structure. 1
+
+> arXiv:2606.11646v1 [cs.LG] 10 Jun 2026 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex
+
+Original T   
+
+> 12
+> 34
+> k= 3
+
+V ∈ R4×3
+
+Binarized Tb   
+
+> 1234
+> artificial
+
+Vb ∈ R4×3              
+
+> Figure 1. Polytomous vs. Binarized Tree. (Left) Twith a poly-tomous root ( k= 3 ). PolyILR assigns k−1 = 2 basis vectors (column of V) to the root (red). (Right) Binarized Tbrequired by PhILR ( one coordinate per node ) introduces an artificial node (yel-low) encoding an arbitrary grouping of leaves 1 and 2—a choice not justified by original T.
+
+The absence of such a coordinate system extends beyond traditional CoDA to probabilistic model representations. Softmax outputs are simplex-valued but often represented in flat probability coordinates, while structure over outcomes is increasingly explicit: class taxonomies, semantic hierar-chies, grammars, tree-structured search spaces (Silla Jr & Freitas, 2011). The absence of a canonical tree-aligned co-ordinate system beyond heuristics limits analysis of where probability mass, errors, or learning signals concentrate. 
+
+Contributions. We (1) construct PolyILR (Polytomous ILR), a canonical orthonormal decomposition of the Aitchi-son tangent space aligned with arbitrary trees, answer-ing affirmatively the question raised above, (2) demon-strate its utility in CoDA; stable feature selection and tree-level inference in standard microbiome and single-cell datasets, (3) establish a novel theoretical connection to softmax classifiers via shared invariance structure. Our goal is interpretability of the representation itself, not down-stream performance: each coordinate corresponds to a spe-cific tree location (i.e., a node-contrast pair) that yields consistent, tree-grounded analysis and inference (see Ta-ble 1). Code is available at https://github.com/ vsingh-group/polyilr .
+
+Conflict of Interest Disclosure. The authors declare no financial conflicts of interest related to this work. 
+
+## 2. Background 
+
+We introduce the geometry of compositional data and for-malize the tree alignment problem (see Aitchison (1982)). 
+
+2.1. Aitchison Geometry Compositional data. Compositional data are nonnegative vectors whose totals are uninformative and only relative proportions matter, e.g., microbial abundances (counts with varying sequencing depth) or chemical concentrations (parts of a mixture) (Gloor et al., 2017; Jackson, 1997). We nor-malize to unit sum, placing data in the open simplex: 
+
+∆d−1 =
+
+(
+
+x ∈ Rd>0 :
+
+> d
+
+X
+
+> i=1
+
+xi = 1 
+
+)
+
+. (1) The key constraint is that only ratios xi/x j carry informa-tion, not absolute values. 
+
+Geometry is fixed. Aitchison geometry (Aitchison, 1982) formalizes this by equipping the set ∆d−1 with perturba-tion x ⊕ y = C(x1y1, . . . , x dyd) and powering α ⊙ x =
+
+C(xα 
+
+> 1
+
+, . . . , x αd ), where C(·) is the closure. Under these oper-ations, (∆ d−1, ⊕, ⊙) forms a (d − 1) -dimensional Hilbert space with inner product: 
+
+⟨x, y ⟩A = 1
+
+d
+
+> d
+
+X
+
+> i=1
+> d
+
+X
+
+> j=1
+
+log xi
+
+xj
+
+log yi
+
+yj
+
+.
+
+The induced Aitchison distance dA(x, y ) = ∥x ⊖ y∥A is perturbation-invariant: dA(x ⊕ z, y ⊕ z) = dA(x, y ). Note that this geometry is not a modeling choice —it is the unique structure respecting compositional invariance. 
+
+2.2. ILR Basis Basis is a choice. The centered log-ratio (CLR) transform maps x ∈ ∆d−1 (under Aitchison geometry) isometrically to the CLR hyperplane (i.e., Aitchison tangent space )
+
+H = {z ∈ Rd : 1⊤z = 0 } (2) via clr (x) = (log x1/g (x), . . . , log xd/g (x)) , where 
+
+g(x) = ( Q 
+
+> i
+
+xi)1/d is the geometric mean. Any matrix 
+
+V ∈ Rd×d−1 whose columns form an orthonormal basis of 
+
+H yields isometric log-ratio (ILR) coordinates and admits an isometric bijection 
+
+φ(x) = V ⊤ log x, (3) from (∆ d−1, ⟨· , ·⟩ A) to (Rd−1, ⟨· , ·⟩ 2) (Egozcue et al., 2003). All such bases V are related by orthogonal trans-formations. That is, they induce the same geometry but different decompositions of the simplex. The question is thus not whether to use an ILR basis, but which basis to choose , and this choice largely determines interpretability. 
+
+Basis choice controls interpretability. This parallels classi-cal signal processing: Fourier bases yield frequency compo-nents from translation symmetry (Brigham, 1988); wavelet bases yield scale-localized components from dyadic parti-tions (Mallat, 2002). Aligning the basis with domain struc-ture produces interpretable coordinates. 2Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+## 3. Problem Setup 
+
+Compositions come with tree. The d components of a composition are often organized by a known rooted tree 
+
+T , e.g., phylogenetic or taxonomic trees in ecology, gene ontologies in genomics (Ashburner et al., 2000; Lozupone & Knight, 2005). The tree encodes domain structure: which comparisons are meaningful and at what resolution. Hence, we seek a basis V aligned with T .
+
+Binary trees. When T is binary, each internal node u has exactly two children, yielding one contrast : the log-ratio of geometric means of the two descendant clades. This is a spe-cial case of sequential binary partitioning (SBP) (Egozcue & Pawlowsky-Glahn, 2005), which Silverman et al. (2017) applied to phylogenies as PhILR . PhILR is well-matched to that setting, as phylogenies are typically inferred as bifurcat-ing, and here, orthonormality is straightforward: contrasts at disjoint nodes have disjoint support, and contrasts at nested nodes are orthogonal because the inner contrast sums to zero on each child clade. This construction works because binary branching imposes minimal local structure: each node requires exactly one contrast, yielding a one-to-one correspondence between internal nodes and basis vectors. The global consistency problem asking that local contrasts compose into an orthonormal basis on leaves reduces to verifying pairwise orthogonality, which holds by support structure and zero-sum constraints. 
+
+What happens with polytomies? For general trees T , the simplicity above breaks down (Figure 1). Consider a node u
+
+with ku > 2 children. Comparing ku clades requires ku − 1
+
+orthogonal contrasts—a subspace, not a single vector. Sev-eral challenges arise: (i) defining canonical local contrasts at u, (ii) extending them to global vectors on leaves, and (iii) ensuring orthogonality across all nodes. Standard ap-proaches fail because subtrees of different sizes contribute unequally to inner products, as detailed shortly. 
+
+Polytomies are common in practice. Polytomies arise within phylogenies as both hard polytomies (e.g., rapid ra-diations) and soft polytomies (e.g., collapsed low-support nodes) (Maddison, 1989). About 64% of taxonomic branch points in the NCBI Taxonomy Database have three or more children (Lin et al., 2011) and biomedical ontologies rou-tinely encode multi-way groupings, e.g., the cell ontology (Diehl et al., 2016). Such curated trees often carry mean-ingful internal structure (e.g., independently named inter-nal nodes) that can inform downstream representations. However, in practice, one typically arbitrarily refines them into binary trees (Lin et al., 2011). This introduces addi-tional internal nodes and splits not present in the original hierarchy , making resulting coordinates and interpretations binarization-dependent. Alternative approaches aim to iden-tify predictive log-ratio features via log-contrast regression, greedy balance selection (Rivera-Pinto et al., 2018), pair-                        
+
+> u1
+> 1u2
+> 23
+> u3
+> 456
+> k1= 3
+> k2= 2 k3= 3 PolyILR
+> u1u2u3
+> v1v2v3v4v5
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> Figure 2. PolyILR from Ton d= 6 leaves to V∈Rd×(d−1) .Colors indicate generating nodes; white entries are zeros.
+
+wise log-ratio testing (Mandal et al., 2015), or phylogeny-guided ILR factors via edge selection (Washburne et al., 2017). But these methods yield isolated contrasts rather than a full, node-grouped orthonormal coordinate system canonically tied to a given multifurcating tree. No existing method provides a canonical, complete orthonor-mal decomposition for general trees that simultaneously defines local contrasts, extends them globally, and ensures consistency. Obtaining such a decomposition without sacri-ficing isometry or introducing arbitrary choices is our goal. 
+
+## 4. PolyILR 
+
+We describe the high-level idea in §4.1, the formal construc-tion in §4.2, and properties in §4.3. 
+
+4.1. From Hierarchy to Geometry Goal. We seek an orthonormal decomposition of H re-flecting the full branching structure of T . We do not just want predictive log-ratios or useful balances, but a complete coordinate system where each coordinate corresponds to a location in T . Such a basis must capture the full local structure at each node, maintain orthonormality within and across nodes, span H, and be canonical. The first ensures complete encoding, the next two define a valid ILR basis in (3) . And the last one ensures reproducibility. It is not obvious such a construction exists. 
+
+Key insight. To address this, we (i) associate local geomet-ric structure to each internal node and (ii) assemble them into global structure. We attach to each node a structured object encoding all relative comparisons among its children. The specific structure and canonicity follow from requiring the global basis to be a valid ILR basis and a deterministic choice of local basis. We make this precise in §4.2. 
+
+(i) Local structure. Consider an internal node u with ku
+
+children. The global basis will act on compositions, com-paring leaves (via geometric mean) within each child clade. Since compositions carry only relative information (as in §2.1), we encode relative differences among these ku clades and not absolute levels. This requires ku − 1 degrees of freedom: one contrast distinguishes two children, two con-trasts distinguish three, and so on. Each internal node thus 3Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+contributes a (ku − 1) -dimensional structure. 
+
+(ii) Global assembly. Local contrasts live at nodes, but ILR coordinates must be global vectors on leaves. We write a weighted inner product at each node to account for the num-ber of descendant leaves in each child clade. Orthonormal-ity under this weighted inner product (locally) guarantees global orthonormality in Rd after spreading to leaves. We now formalize our construction, PolyILR (Figure 2). 
+
+4.2. PolyILR Construction Setup. Let T be any rooted tree with d leaves. Our data live in the Aitchison simplex ∆d−1, where each compo-nent corresponds to a leaf of T . Our goal is to construct a valid ILR basis V ∈ Rd×(d−1) such that each column of V
+
+corresponds to a specific internal node of T .
+
+Local contrast subspace. Consider a node u with ku chil-dren. We define the local contrast subspace at u as 
+
+Su =
+
+(
+
+h ∈ Rku :
+
+> ku
+
+X
+
+> r=1
+
+hr = 0 
+
+)
+
+. (4) This is the (ku − 1) -dimensional subspace orthogonal to 1,capturing all relative comparisons among the ku children (see §4.1). Notice that this zero-sum constraint is not ar-bitrary: it is, in fact, forced by the ILR requirement that 
+
+V ⊤1 = 0 . Since each column of V must be orthogonal to 
+
+1, and each column is formed by spreading a local vector h
+
+from node u, we require h⊤1 = 0 locally. 
+
+Weighted inner product. To ensure that local orthonor-mality extends globally, we equip Su with a weighted inner product . Let nr denote the number of leaves descending from child r ∈ { 1, . . . , k u}. We define: 
+
+⟨h, h ′⟩w =
+
+> ku
+
+X
+
+> r=1
+
+hr h′
+
+> r
+
+nr
+
+. (5) This accounts for unequal subtree sizes: children with more descendants contribute less per leaf to the global inner prod-uct when spread. Note that (Su, ⟨· , ·⟩ w) is a Hilbert space. 
+
+Local basis. We choose an orthonormal basis of Su. Any or-thonormal basis works mathematically, but we use Helmert contrasts (Lancaster, 1965) for canonicity. The standard Helmert matrix H ∈ Rk×(k−1) has columns: 
+
+Hr,m =
+
+q 1 
+
+> m(m+1)
+
+if r ≤ m, 
+
+−
+
+q mm+1 if r = m + 1 ,
+
+0 if r > m + 1 .
+
+(6) The m-th column compares child m + 1 against the average                                     
+
+> h⊤=
+> 1√2,−1√2
+> 
+> u
+> 1
+> 234
+> n1= 1 n2= 3
+> uniform
+> v⊤
+> u=
+> 1√2,−1√2,−1√2,−1√2
+> 
+> ˜h⊤=
+> √32,−√32
+> 
+> u
+> 1
+> 234
+> n1= 1 n2= 3
+> ÷nr
+> v⊤
+> u=
+> √32,−√36,−√36,−√36
+> 
+
+Figure 3. Naive vs. weighted spreading (Example 4.1). Uniform spreading (Left) vs. Weighted spreading (Right) 
+
+of children 1, . . . , m . For example, with ku = 3 children: 
+
+H(u) =
+
+
+
+> 1√21√6
+
+− 1√21√6
+
+0 − 2√6
+
+ .
+
+The first column contrasts child 2 versus child 1, the second contrasts child 3 versus the average of children 1 and 2. Helmert contrasts provide a canonical choice: given an ordering of children, the basis is deterministic. Alternative orthonormal bases of Su (e.g., QR decomposition) can also work but lack this sequential interpretability. Here, the columns of H(u) are orthonormal under the stan-dard inner product and lie in Su. To obtain orthonormality under ⟨· , ·⟩ w, we apply Gram-Schmidt to H(u) under this weighted inner product, yielding eH(u) ∈ Rku×(ku−1) . This choice ensures that given T and a fixed ordering of children at each node, the local basis is uniquely obtained. 
+
+Spreading to leaves. Each column of the local basis eH(u)
+
+is a vector in Rku , defined on the children of u. We spread it to a global vector v ∈ Rd on all leaves: 
+
+vi =
+
+( eH(u)
+
+> r,m
+
+/n r if leaf i descends from child r, 
+
+0 otherwise. Division by nr is key, as it ensures that orthonormality under ⟨· , ·⟩ w at node u implies orthonormality in Rd after spreading. Consider two local vectors h, h′ orthonormal under ⟨· , ·⟩ w: P 
+
+> r
+
+hr h′ 
+
+> r
+
+/n r = δh,h′ . After spreading with the 1/n r weighting, their global inner product becomes: 
+
+⟨v, v′⟩ =
+
+> d
+
+X
+
+> i=1
+
+viv′ 
+
+> i
+
+=
+
+> ku
+
+X
+
+> r=1
+
+X
+
+> i∈C(u)
+> r
+
+ hr
+
+nr
+
+  h′
+
+> r
+
+nr
+
+
+
+=
+
+> ku
+
+X
+
+> r=1
+
+hr h′
+
+> r
+
+n2
+
+> r
+
+· nr =
+
+> ku
+
+X
+
+> r=1
+
+hr h′
+
+> r
+
+nr
+
+= δh,h′ ,
+
+where the second equality holds because child r contributes exactly nr leaves, each with coefficient hr /n r (similarly for 
+
+h′). So, local orthonormality means global orthonormality. 4Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Algorithm 1 PolyILR Basis Construction                                                                                                 
+
+> Require: Rooted Twith dleaves, internal node ordering π(DFS)
+> Ensure: ILR basis V∈Rd×(d−1)
+> 1: j←1
+> 2: for each internal node ufrom πdo
+> 3: ku←number of children of u
+> 4: for r= 1 , . . . , k udo
+> 5: C(r)
+> u←leaves descending from r-th child 6: nr← | C(r)
+> u|
+> 7: end for
+> 8: Su← { h∈Rku:P
+> rhr= 0 }
+> 9: ⟨h,h′⟩w←P
+> rhrh′
+> r/n r
+> 10: H(u)←Helmert matrix in Rku×(ku−1)
+> 11: eH(u)←Gram-Schmidt on H(u)under ⟨· ,·⟩ w
+> 12: for m= 1 , . . . , k u−1do
+> 13: for i= 1 , . . . , d do
+> 14: if i∈C(r)
+> ufor some rthen
+> 15: Vi,j ←eH(u)
+> r,m /n r
+> 16: else
+> 17: Vi,j ←0
+> 18: end if
+> 19: end for
+> 20: j←j+ 1
+> 21: end for
+> 22: end for
+> 23: return V
+
+Example 4.1 . Consider u with two children n1 = 1 and 
+
+n2 = 3 . The Helmert contrast is h = (1 /√2, −1/√2) ⊤,which satisfies ∥h∥22 = 1 , but spreading uniformly gives 
+
+v = (1 /√2, −1/√2, −1/√2, −1/√2) ⊤ with ∥v∥2 = 2 ̸ =1. The weighted norm in (5) gives ∥h∥2 
+
+> w
+
+= (1 /2) /1 + (1 /2) /3 = 2 /3; normalizing gives ˜h = [ √3/2, −√3/2] ⊤.Spreading with ÷nr yields ∥v∥2 = 1 . See Figure 3. 
+
+Assembling it all. Applying this procedure at every in-ternal node of T and collecting all spread vectors yields the PolyILR basis V . The columns of V are indexed by pairs (u, m ) for some internal node u and a contrast index 
+
+m ∈ { 1, . . . , k u − 1}. For example, if T has ℓ internal nodes ordered as u1, . . . , u ℓ, with u1 having 4 children, u2
+
+having 3, . . . , and uℓ having 3 children, then the basis is 
+
+V =  v1, v 2, v 3
+
+| {z } 
+
+> node u1
+
+, v 4, v 5
+
+| {z }  
+
+> node u2
+
+, . . . , v d−2, v d−1
+
+| {z } 
+
+> node uℓ
+
+.
+
+See Algorithm 1 and Figure 2. 
+
+Theorem 4.1 (PolyILR) . Let T be any rooted tree with d
+
+leaves. The matrix V ∈ Rd×(d−1) from Alg. 1 satisfies: 1. V ⊤1 = 0 (contrast property) ,2. V ⊤V = Id−1 (orthonormality) .Consequently, φ(x) = V ⊤ log x is an isometry from 
+
+(∆ d−1, ⟨· , ·⟩ A) to (Rd−1, ⟨· , ·⟩ 2).Proof idea. The contrast property follows from each local contrast summing to zero. For orthonormality: vectors from the same node are orthonormal by construction; disjoint nodes have disjoint support. Nested nodes (one ancestor of the other) are orthogonal because the descendant’s spread vector sums to zero on each child clade. Full proof and algorithm details in Appendix A. 
+
+Interpretation. Given composition x, each coordinate 
+
+zj = v⊤ 
+
+> j
+
+log x is a balance : a log-ratio comparing geometric means of child clades at an internal node. The transforma-tion z = V ⊤ log x ∈ Rd−1 decomposes x into interpretable contrasts at every level of the hierarchy, see §5. 
+
+4.3. Properties of PolyILR Relation to existing methods. When T is binary ( ku = 2 
+
+for all u), each node contributes one contrast, and PolyILR reduces to PhILR (see Appendix A). Unlike greedy balance selection (Rivera-Pinto et al., 2018) or edge-based factor-ization, which yield isolated contrasts, PolyILR provides a complete orthonormal basis aligned with the full tree. Un-like arbitrary binarization, PolyILR respects the original topology without introducing artificial splits (Figure 1). 
+
+Uniqueness and recoverability. PolyILR provides a canon-ical basis V aligned with T as follows. 
+
+Proposition 4.2. Given a rooted tree T with fixed leaf labels and child orderings, PolyILR produces a unique basis V (T ).Moreover, T 7 → V (T ) is injective: T can be recovered from 
+
+V via the clade supports of its columns. 
+
+We point out that PolyILR’s canonicity rests on two struc-tural conventions: (i) a child ordering at each internal node and (ii) a sign convention for the Helmert columns (first nonzero entry positive). These fix the representation but not the underlying geometry: different orderings yield bases related by an orthogonal transformation within each node’s block (and permutations across blocks) where sign flips change the orientation of contrasts. In practice, the ordering is inherited from the input tree and held fixed. Full proofs are in Appendix A. 
+
+Summary. PolyILR provides a canonical, tree-aligned or-thonormal coordinate system for the Aitchison simplex. Each coordinate corresponds to a contrast at a specific inter-nal node, enabling interpretable analysis at any resolution. 
+
+## 5. Structured Analysis with PolyILR 
+
+We describe how PolyILR coordinates enable structured analysis beyond what standard log-ratio transforms provide. Let x ∈ ∆d−1 be a composition with components as leaves of T . The PolyILR transform yields z = φ(x) ∈ Rd−1.
+
+5.1. Tree-Aligned Coordinates Coordinate indexing. By construction, each coordinate index j corresponds bijectively to a pair (u, m ): an internal 5Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+node u and a contrast index m ∈ { 1, . . . , k u − 1}. The coordinate zj = z(u,m ) is a balance —a log-ratio comparing the geometric mean of leaves under child m + 1 against that under children 1, . . . , m at node u (see (6) ). This association is intrinsic. 
+
+Multiscale structure. By construction, each internal node 
+
+u contributes ku − 1 coordinates to the basis V (see §4.2). Because these coordinates are orthonormal, the coordinates at distinct nodes span orthogonal subspaces, yielding a dis-joint partition of Rd−1 indexed by tree nodes. We can thus reason about node u as a unit: do the coordinates at u jointly explain an outcome? Does variation concentrate at u?This node-level partition extends to coarser groupings. Ag-gregating nodes by tree depth or by subtree membership yields alternative orthogonal partitions of the same space (Table 1). PolyILR inherits them directly from the tree. We illustrate these partitions in Figure 5 (Appendix B). 
+
+Aggregation Question Answered 
+
+Node Which splits drive signal? Depth What resolution matters? Subtree Is an entire clade informative? 
+
+Table 1. Tree substructure aggregations enabled by PolyILR. 
+
+5.2. Implications for Inference 
+
+Given data {(xi, y i)}Ni=1 with outcome yi, we transform 
+
+zi = φ(xi) and fit any model on {(zi, y i)}. Since φ is an isometry, the full geometry is preserved. 
+
+Feature selection. Identifying which features drive out-comes is a key scientific goal. In genomics, neuroscience, and microbiome alike, the goal is often not just prediction but understanding which variables matter and why (Rudin, 2019; Marcos-Zambrano et al., 2021). With standard ILR, important coordinates are anonymous indices with no se-mantics. With PolyILR, when coordinate j = ( u, m ) is identified as important, we know which node and contrast drive the signal: a log-ratio comparing specific groups of leaves. This interpretability is intrinsic to the representation, no post-hoc processing needed. 
+
+Tree-level aggregation. The multiscale structure of Poly-ILR enables inference at any tree substructure. Let ωj de-note importance of coordinate j from any method (e.g., ran-dom forest). We aggregate per-coordinate importances over any disjoint set S of coordinates (node, depth, or subtree) via ω(S) = P 
+
+> j∈S
+
+ωj . This aggregation is well-defined because coordinates at distinct nodes span orthogonal sub-spaces, any partition of the tree into disjoint substructures yields a partition of Rd−1, and the corresponding impor-tances sum to the total without double-counting. 
+
+Leaf-level importance. To quantify importance of an in-dividual leaf ℓ (e.g., a taxon), we cannot directly aggre-                                                                                          
+
+> Task CLR PhILR PolyILR
+> RF / SVM / LR RF / SVM / LR RF / SVM / LR
+> Acc (%)
+> HMP  body sites (5) .956/.971/.962 .961/.971/.962 .963/.971/.962 body subsites (18) .597/.672/.646 .608/.672/.646 .622/.672/.646
+> cMD3  westernized (2) .972/.979/.968 .966/.979/.967 .967/.979/.967 age category (5) .785/.814/.739 .797/.814/.738 .797/.814/.738
+> DISCO
+> leukemia (2) .925/.932/.927 .940/.932/.927 .935/.932/.927 HCC (2) .921/.927/.944 .910/.927/.944 .910/.927/.944
+> AUROC
+> HMP  body sites (5) .987/.995/.994 .992/.995/.994 .992/.995/.994 body subsites (18) .957/.974/.967 .965/.974/.967 .966/.974/.967
+> cMD3  westernized (2) .975/.978/.967 .966/.978/.966 .966/.978/.967 age category (5) .836/.867/.833 .837/.867/.833 .843/.867/.833
+> DISCO
+> leukemia (2) .968/.984/.982 .984/.984/.982 .984/.984/.982 HCC (2) .921/.996/.998 .984/.996/.998 .974/.996/.998
+> Task PolyILR PhILR (index / semantic)
+> K=5 K=10 K=50 K=5 K=10 K=50
+> HMP  body sites (5) .66 .65 .84 .01 / .08 .01 / .06 .07 / .05 body subsites (18) .71 .72 .88 .01 / .22 .02 / .13 .07 / .04
+> cMD3  westernized (2) .43 .69 .81 .00 / .01 .00 / .01 .01 / .02 age category (5) .73 .58 .76 .12 / .04 .09 / .03 .03 / .03 healthy vs disease (2) .56 .86 .80 .00 / .02 .00 / .03 .02 / .02
+> DISCO
+> leukemia (2) .75 .81 .92 .05 / .09 .12 / .16 .73 / .12 HCC (2) .77 .78 .84 .03 / .07 .06 / .09 .35 / .11
+
+Table 2. (Top) Classification accuracy and AUROC (5 runs) across CLR, PhILR, and PolyILR. Each cell reports RF/SVM/LR. SVM and LR match across the three ILR representations within each task, as expected from isometry; differences are confined to RF but modest. Full statistical variability (95% CIs) is in Appendix B.7 but observed to be small. (Bottom) Feature stability (Jaccard of top-K
+
+features across CV folds). PolyILR stable; PhILR (index/semantic) unstable from arbitrary binarization. 
+
+gate coordinates because coordinates are not exclusive to any single leaf. Instead, we can distribute importance weighted by participation. By construction, Vℓj quantifies how much leaf ℓ participates in coordinate j. We define 
+
+ω(ℓ) = Pd−1 
+
+> j=1
+
+V 2 
+
+> ℓj
+
+· ωj . Since columns of V are unit vectors, 
+
+P 
+
+> ℓ
+
+V 2 
+
+> ℓj
+
+= 1 , so leaf importances sum to total importance. 
+
+## 6. Experiments 
+
+We evaluate PolyILR on standard microbiome and single-cell benchmarks. Our goals are to demonstrate PolyILR provides: (G1) valid ILR representations (§6.2), (G2) sta-ble feature selection, unlike PhILR with arbitrary binariza-tion (§6.3), (G3) interpretable features grounded in the tree (§6.4), and (G4) structured inference by tree subparts (§6.5). 
+
+6.1. Setup Datasets. We use three large datasets from two domains. For microbiome: HMP (Human Microbiome Project; 4,743 samples, 402 taxa) (Human Microbiome Project Con-sortium, 2012) and cMD3 (curatedMetagenomicData v3; 6Tree-Structured Orthonormal Decomposition of the Aitchison Simplex                                                              
+
+> Rank Contrast RF Importance (%) Rank range
+> HMP
+> body sites  1Streptococcaceae vs Lactobacillus + Leuconostocaceae 3.94 12Lactococcus vs Streptococcus 3.42 2–3 3Pseudomonadales vs Cardiobacteriaceae + Vibrionaceae + Legionellales + ... 3.40 2–3 4Bacillales vs Gemella + Exiguobacterium + Turicibacter + ... 2.95 4–5
+> cMD3
+> westernized  1Prevotella vs Alistipes + Anaerotruncus + Bacteroides + ... 1.77 12Murimonas vs Alistipes + Anaerotruncus + Bacteroides + ... 1.49 2–4 3Prevotella vs Bacteroides + Alistipes 1.45 2–5 4Lactobacillus vs Alistipes + Anaerotruncus + Bacteroides + ... 1.38 4–6
+> cMD3
+> health/dis.  1Lachnoclostridium vs Bacteroides + Turicibacter + Ruminococcus + ... 0.55 12Bifidobacterium vs Blautia + Enterococcus 0.38 2–5 3Flavonifractor vs Bifidobacterium + Actinomyces 0.35 2–6 4Fusicatenibacter vs Gemmiger 0.34 2–6
+> DISCO
+> leukemia  1Myeloid cell vs Erythrocyte/Megakaryocyte + Hematopoietic precursor cell 14.50 12Cycling T/NK cell vs ILC + T cell + NK cell 11.79 23Lymphoid cell vs Erythrocyte/Megakaryocyte + Hematopoietic precursor + Myeloid cell 6.30 3–4 4MAIT cell vs Naive T cell + Memory T cell + CD8 T cell + ... 5.45 3–5
+> DISCO
+> HCC  1Erythrocyte/Megakaryocyte vs Myeloid cell + Lymphoid cell + Hematopoietic precursor cell 10.08 12B cell precursor vs Plasma cell + INF-activated naive B cell + Memory B cell + ... 6.52 2–4 3Hematopoietic precursor cell vs Myeloid cell + Lymphoid cell 6.34 2–3 4Venous EC vs LSEC 5.45 2–8
+
+Table 3. Top-4 PolyILR contrasts by RF importance (%), with rank range across 5-fold CV. Each contrast is a coordinate representing the log-ratio of geometric means between two groups. “A vs B + C” means the log-ratio of geometric means of A’s descendants against the pooled descendants of B and C; “+ . . . ” marks additional siblings omitted. Full importance variability (mean ± std) is in Appendix B.7. 
+
+20,238 samples from 86 studies, 2,047 taxa) (Pasolli et al., 2017), with taxonomies from NCBI. For single-cell bi-ology: DISCO (Database of Immune Single-Cell Omics; 751 sample-level composition profiles derived from ∼5.3M cells, 62–99 cell types) (Li et al., 2022), with cell types or-ganized by the Cell Ontology. Tasks include predictions on body site (5–18 sites), westernization, age category, healthy vs. disease (microbiome), and healthy vs. leukemia/HCC (single-cell). As with any log-ratio method, PolyILR re-quires zero handling before the coordinate transform; we use a small additive pseudocount per dataset (Appendix B.4). 
+
+Methods. We compare PolyILR against CLR (same geome-try, no tree alignment) and unweighted PhILR with random binarization (tree-aligned, but defined on binary trees, so polytomies must be resolved arbitrarily). We use random forest (RF), SVM, and logistic regression (LR) with 5-fold cross-validation. Additional experiments, hyperparameter, and dataset construction details are in Appendix B. 
+
+Remark 6.1 . PolyILR is a representation (coordinate sys-tem), not a task-specific model. So, any downstream anal-ysis may be applied to the resulting coordinates. Conclu-sions and scientific validity depend on appropriate statistical methodology. 
+
+6.2. Representation Validity 
+
+We verify PolyILR is a geometrically valid representation 
+
+(G1) . CLR projects compositions into the tangent space H,spanned by PolyILR coordinates (Thm. 4.1). Table 2 (top) supports this equivalence: CLR, PhILR, and PolyILR yield identical SVM and LR accuracy, as expected from isometry. RF accuracy varies modestly across representations (within 
+
+±1.5% on most tasks), since RF is sensitive to the choice of axes; differences in either direction are consistent with the geometric equivalence. 
+
+6.3. Feature selection is stable 
+
+A key advantage of PolyILR over PhILR is canonical de-composition on any tree (G2) . PhILR requires binarizing polytomies, making feature selection unstable across bi-narizations with no correct choice . We measure stability via: (i) index stability (Jaccard similarity of top-K feature indices across runs) measuring if the same coordinate posi-tions are selected; and (ii) semantic stability (similarity of the corresponding taxonomic/ontological contrasts) measur-ing whether selected features represent the same biological comparisons regardless of index. The latter is fairer to PhILR as it ignores arbitrary index assignment. For PhILR, we vary the random binarization of the same polytomous tree across runs; for PolyILR, (i) and (ii) coincide since coordinates are canonical given the tree. Table 2 (bottom) shows PolyILR achieves high stability (0.43–0.92) while PhILR collapses (near 0) under both metrics across all three datasets. Even when comparing semantically, PhILR’s arti-ficial binary splits yield different partitions across binariza-tions, confirming that the instability is structural (Figure 1). 
+
+6.4. Features are interpretable 
+
+PolyILR coordinates are directly interpretable as taxo-nomic/ontological contrasts (G3) . Table 3 shows the top-4 features by RF importance, with rank range across 5 runs indicating stability of the ranking. Each feature is a log-ratio contrast between groups at a specific node (§5.2). 
+
+Scientific interpretation (Table 3). The recovered contrasts are consistent with previously reported observations in the 7Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 0 1 2 3 4 5 6            
+
+> Lactococcus
+> vs Streptococcus
+> 4
+> 2
+> 0
+> 2
+> Streptococcaceae
+> vs  Lactobacillus + ...
+> 10 010 20
+> Myeloid cell
+> vs Erythrocyte/Megakaryocyte + ...
+> 20
+> 15
+> 10
+> 5
+> 0
+> 5
+> 10
+> Cycling T/NK cell
+> vs  ILC + ...
+> Body Site : Airways Gastrointestinal Tract Oral Skin Urogenital Tract
+> Blood Condition : healthy leukemia
+
+Figure 4. Projection onto top-2 PolyILR features for HMP body site classification (left) and DISCO leukemia classification (right). Axes are the two most predictive contrasts (Table 3).                                                                   
+
+> body sites (5) body subsites (18) Structure Component Acc Imp. Component Acc Imp.
+> Depth
+> ≤0 (coarsest) .87 6.8% ≤0 (coarsest) .42 4.8%
+> ≤2.96 47% ≤2.59 44%
+> ≤4 (all) .96 100% ≤4 (all) .62 100% Subtree Firmicutes .95 47% Firmicutes .55 36% Proteobacteria .87 20% Proteobacteria .44 26% Actinobacteria .91 19% Actinobacteria .45 22% Node Actinomycetales –11% Actinomycetales –12% Lactobacillales –9.1% Lachnospiraceae –8.4% Gammaproteobacteria –8.0% Clostridiales –3.8% Taxon Streptococcus –3.1% Oribacterium –1.0% Lactococcus –3.1% Corynebacterium –1.0% Pasteurella –2.6% Lactococcus –1.0%
+
+Table 4. Tree-level inference on HMP . Importance aggregated by depth (cumulative), subtree (phylum), node, and taxon. 
+
+literature. For HMP body sites, Streptococcus vs. Lacto-coccus (3.4%) reflects known niche specialization within Streptococcaceae across oral subsites (Human Microbiome Project Consortium, 2012; Dewhirst et al., 2010), with Lac-tococcus lactis reported as a prevalent lactic-acid bacterium in the gut (Pasolli et al., 2020). For westernization, Pre-votella vs. Bacteroides/Alistipes (1.5–1.8%) captures the lifestyle axis, with Prevotella enriched in non-Western pop-ulations consuming plant-rich diets (De Filippo et al., 2010; Yatsunenko et al., 2012). For healthy vs. disease, Lachn-oclostridium (0.6%) aligns with documented links to col-orectal cancer and atherosclerosis (Cai et al., 2022; Liang et al., 2020). For leukemia, myeloid vs. erythroid/precursor imbalance (14.5%) reflects lineage disruption in hemato-logical malignancies (L ¨owenberg et al., 1999). For HCC, venous EC vs. LSEC (5.5%) captures the well-documented dedifferentiation of liver sinusoidal endothelial cells in hep-atocellular carcinoma (Sørensen et al., 2015). 
+
+Geometric structure. Figure 4 projects HMP samples onto the top-2 coordinates. Unlike PCA, each axis here is a sin-gle interpretable contrast rather than a linear combination of all features. We do not claim maximal variance explained; rather, biologically meaningful features alone suffice to sep-arate body sites. The linear substructures within classes may reflect shared sparsity: samples with identical zero-count taxa map to parallel manifolds in ILR space.                                      
+
+> westernized (2) healthy/disease (2) Structure Component Acc. Imp. Component Acc. Imp.
+> Depth
+> ≤0 (coarsest) .934 0.1% ≤0 (coarsest) .613 0.3%
+> ≤3.956 5.3% ≤3.667 6.4%
+> ≤6 (all) .967 100% ≤6 (all) .682 100% Taxon Prevotella –1.7% Lachnoclostridium –0.6% Murimonas –1.4% Bifidobacterium –0.3% Bacteroides –1.3% Enterococcus –0.3%
+
+Table 5. Tree-level inference on cMD3 . Importance aggregated by depth (cumulative) and taxon.                                                                   
+
+> leukemia (2) HCC (2) Structure Component Acc. Imp. Component Acc. Imp.
+> Depth
+> ≤0 (coarsest) .62 4.6% ≤0 (coarsest) .88 8.1%
+> ≤1.88 26% ≤1.91 38%
+> ≤6 (all) .94 100% ≤6 (all) .91 100% Subtree Immune cell .93 95% Immune cell .92 79% –––Endothelial cell .80 7.8% –––Epithelial cell .78 4.1% Node Immune cell –22% Immune cell –19% T cell –16% Hema. precursor –9.6% T/NK cell –14% Endothelial cell –7.8% Cell type Cycling T/NK cell –11.3% GMP –4.4% MAIT cell –5.0% Erythroblast (int.) –4.2% Naive CD8 T cell –4.1% Erythroblast (late) –4.2%
+
+Table 6. Tree-level inference on DISCO . Importance aggregated by depth (cumulative), subtree, node, and cell type. 
+
+6.5. Tree-Level Inference 
+
+PolyILR enables structured hypothesis testing at multiple resolutions (G4) . RF importance can be aggregated by depth, subtree, node, or leaf (see §5.2). We report all four levels for HMP (Table 4) and DISCO (Table 6), but only depth and taxon for cMD3 (Table 5) whose meta-analytic tree lacks consistent intermediate labels. Subtree-level parti-tions by root’s children (root omitted). 
+
+Scientific interpretation (Tables 4–6). Aggregations agree with known structure. For HMP, Firmicutes (47%) and Proteobacteria (19%) dominate body site signals (Human Microbiome Project Consortium, 2012; Costello et al., 2009; Ma et al., 2024). At node level, Actinomycetales (11%) and Lactobacillales (9%) capture skin vs. oral distinctions. For cMD3 westernization, coarse contrasts ( ≤3) achieve 95.6% acc., consistent with diet-associated shifts at coarse reso-lution (De Filippo et al., 2010; Arumugam et al., 2011). For DISCO leukemia (single-cell), 95% of importance con-centrates in Immune cells, with T cell (16%) and T/NK cell (14%) nodes dominating (L ¨owenberg et al., 1999). For HCC, importance distributes across Immune (79%), Endothelial (8%), and Epithelial (4%) subtrees, reflecting multi-compartment remodeling (Sørensen et al., 2015). We should note that the biological interpretations above are plausibility checks consistent with prior literature . Any causal or clinical conclusions will require much deeper anal-yses beyond the scope of this methodological work. 8Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+In summary, PolyILR addresses all goals (G1–G4) while recovering features consistent with known biomarkers. 
+
+## 7. Beyond Compositional Data 
+
+We establish a connection between compositional data and probabilistic modeling via shared underlying geometry. Fur-ther analysis and validation may be of independent interest. 
+
+Aitchison geometry as quotient. Compositional data identifies vectors up to equivalence classes [c] induced by c ∼c λc for λ > 0 (i.e., scaling), since only ratios carry information. We observe that the quotient Rd>0/∼c is the Aitchison simplex, whose tangent space is H via CLR (Aitchison, 1982; Egozcue et al., 2003). 
+
+Probabilistic modeling. Consider a model fθ outputting logits z = fθ (x) ∈ Rd, with predicted distribution p =softmax( z) trained via cross-entropy. Since softmax is 
+
+shift-invariant , i.e., softmax( z + c1) = softmax( z), this induces an equivalence relation z ∼ℓ z + c1. The loss and predictions are invariant to shifts along 1.
+
+Proposition 7.1. Let L = Rd/∼ℓ be the quotient of logits under shift equivalence. Then L ∼= H (isomorphism). For 
+
+p = softmax( z), we have z − ¯z1 = clr( p), where ¯z =
+
+> 1
+> d
+
+P 
+
+> i
+
+zi, and [z] → z − ¯z1 is well-defined. 
+
+The individual components (i.e., the CLR hyperplane, cen-tering map (Egozcue et al., 2003), and softmax shift-invariance) are well-known. Proposition 7.1 newly estab-lishes that after quotienting by the shift symmetry, logit space aligns with the CLR/Aitchison tangent space. 
+
+Implications. Many datasets have tree structure over classes, e.g., a superclass hierarchy for CIFAR-100 and WordNet for ImageNet (Deng et al., 2009; Miller, 1995). Given such a tree T , PolyILR can transform model log-its as a = V⊤z in tree-aligned coordinates where each component corresponds to a node and contrast. Since 
+
+p = softmax( Va ), predictions can be analyzed in this interpretable space. For instance, the gradient w.r.t. logits is 
+
+∇zℓ = p − ey , with one-hot target ey . The gradient w.r.t. PolyILR coordinates thus is ∇aℓ = V⊤∇zℓ = V⊤(p−ey ).Each (∇aℓ)(u,m ) measures how strongly the loss pushes probability mass along contrast m at node u, localizing model errors in T . See Appendix A and B.6 for proof and preliminary results. Practical applications to model training or analysis remain an open direction. 
+
+## 8. Related Work 
+
+Compositional hierarchy methods. ILR transform pro-vides orthonormal coordinates for compositional data (Egozcue et al., 2003). PhILR (Silverman et al., 2017) aligns this transform with phylogenetic trees, the setting it was designed for, where binary topology is the standard convention; applying it to polytomous trees requires arbi-trary binary resolution. UniFrac (Lozupone & Knight, 2005) incorporates phylogenetic information but produces a dis-similarity measure, not a coordinate system. Phylofactoriza-tion (Washburne et al., 2017) and selbal (Rivera-Pinto et al., 2018) target biomarker discovery and identify predictive bal-ances via greedy selection, but yield task-specific contrasts rather than a complete basis. Dirichlet-tree models (Mao & Ma, 2022) use tree structure for clustering but operate prob-abilistically, not geometrically. PolyILR complements this line of work by providing a complete orthonormal decompo-sition for any tree. Other work compares proportion-based and compositional normalizations (Yerke et al., 2024). 
+
+Trees and geometric representations. A separate line of work studies geometric representations of trees themselves. Hyperbolic embeddings learn representations of hierarchical data in spaces of constant negative curvature (Nickel & Kiela, 2017; Chami et al., 2019; Sala et al., 2018), while tropical geometry and BHV tree space study geodesics and statistics over spaces of trees (Billera et al., 2001; Owen & Provan, 2010; Monod et al., 2018). These embed trees or treat them as data; PolyILR differs in that the tree is a fixed input that structures a decomposition of the data space. 
+
+## 9. Conclusion 
+
+We introduced PolyILR, a canonical orthonormal decompo-sition of the Aitchison simplex for arbitrary tree topologies, including polytomous ones common in real taxonomies and ontologies. The construction equips each internal node with a weighted local geometry that assembles into a global ILR basis, addressing the incompatibility between Aitchi-son geometry and polytomous hierarchies. Experiments on microbiome and single-cell data show stable, interpretable features with inference at multiple tree resolutions. A con-nection to softmax classifiers suggests applications to hier-archical probabilistic modeling. 
+
+Limitations. PolyILR requires a known, fixed tree as input and does not accommodate topological uncertainty (e.g., bootstrap support, posterior distributions over trees). We also know that external trees such as taxonomies and phy-logenies may also contain noise. We provide a robustness analysis under nearest-neighbor interchange perturbations in Appendix B.5, and view extensions that propagate tree un-certainty into the coordinate system (e.g., support-weighted local geometries) as future work. PolyILR’s coordinates are also only locally interpretable by construction, as those under different internal nodes live in distinct weighted sub-spaces and are not directly comparable, though cross-subtree summaries are recovered via tree-substructure aggregation in Section 5.2. Finally, like all log-ratio methods, PolyILR requires zero replacement as preprocessing (Section 6.1; Appendix B.4). 9Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+## Acknowledgments 
+
+We thank the anonymous reviewers for their constructive feedback. We are grateful to Prof. Colin Dewey and Prof. Christina Kendziorski for discussions and feedback. Au-thors were all partly supported by NIH R01AG092220. 
+
+## Impact Statement 
+
+This paper presents work whose goal is to advance the field of Machine Learning. There are many potential societal consequences of our work, none which we feel must be specifically highlighted here. 
+
+## References 
+
+Aitchison, J. The statistical analysis of compositional data. 
+
+Journal of the Royal Statistical Society: Series B (Method-ological) , 44(2):139–160, 1982. Arumugam, M., Raes, J., Pelletier, E., Le Paslier, D., Ya-mada, T., Mende, D. R., Fernandes, G. R., Tap, J., Bruls, T., Batto, J.-M., et al. Enterotypes of the human gut microbiome. Nature , 473(7346):174–180, 2011. Ashburner, M., Ball, C. A., Blake, J. A., Botstein, D., Butler, H., Cherry, J. M., Davis, A. P., Dolinski, K., Dwight, S. S., Eppig, J. T., et al. Gene ontology: tool for the unification of biology. Nature Genetics , 25(1):25–29, 2000. Billera, L. J., Holmes, S. P., and Vogtmann, K. Geometry of the space of phylogenetic trees. Advances in Applied Mathematics , 27(4):733–767, 2001. Billheimer, D., Guttorp, P., and Fagan, W. F. Statistical inter-pretation of species composition. Journal of the American Statistical Association , 96(456):1205–1214, 2001. Brigham, E. O. The Fast Fourier Transform and Its Appli-cations . Prentice-Hall, Inc., 1988. Buettner, M., Ostner, J., Mueller, C. L., Theis, F. J., and Schubert, B. scCODA is a Bayesian model for composi-tional single-cell data analysis. Nature Communications ,12(1):6876, 2021. Cai, Y.-Y., Huang, F.-Q., Lao, X., Lu, Y., Gao, X., Alolga, R. N., Yin, K., Zhou, X., Wang, Y., Liu, B., et al. Integrated metagenomics identifies a crucial role for trimethylamine-producing lachnoclostridium in promot-ing atherosclerosis. NPJ Biofilms and Microbiomes , 8(1): 11, 2022. Chami, I., Ying, Z., R ´e, C., and Leskovec, J. Hyperbolic graph convolutional neural networks. Advances in neural information processing systems , 32, 2019. Costello, E. K., Lauber, C. L., Hamady, M., Fierer, N., Gor-don, J. I., and Knight, R. Bacterial community variation in human body habitats across space and time. Science ,326(5960):1694–1697, 2009. De Filippo, C., Cavalieri, D., Di Paola, M., Ramazzotti, M., Poullet, J. B., Massart, S., Collini, S., Pieraccini, G., and Lionetti, P. Impact of diet in shaping gut microbiota revealed by a comparative study in children from europe and rural africa. Proceedings of the National Academy of Sciences , 107(33):14691–14696, 2010. Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K., and Fei-Fei, L. ImageNet: A large-scale hierarchical image database. In 2009 IEEE conference on computer vision and pattern recognition , pp. 248–255. Ieee, 2009. Dewhirst, F. E., Chen, T., Izard, J., Paster, B. J., Tanner, A. C., Yu, W.-H., Lakshmanan, A., and Wade, W. G. The human oral microbiome. Journal of Bacteriology , 192 (19):5002–5017, 2010. Diehl, A. D., Meehan, T. F., Bradford, Y. M., Brush, M. H., Dahdul, W. M., Dougall, D. S., He, Y., Osumi-Sutherland, D., Ruttenberg, A., Sarntivijai, S., et al. The Cell Ontol-ogy 2016: enhanced content, modularization, and ontol-ogy interoperability. Journal of Biomedical Semantics , 7 (1):44, 2016. Egozcue, J. J. and Pawlowsky-Glahn, V. Groups of parts and their balances in compositional data analysis. Mathe-matical Geology , 37(7):795–828, 2005. Egozcue, J. J. and Pawlowsky-Glahn, V. Changing the reference measure in the simplex and its weighting effects. 
+
+Austrian Journal of Statistics , 45(4):25–44, 2016. Egozcue, J. J., Pawlowsky-Glahn, V., Mateu-Figueras, G., and Barcelo-Vidal, C. Isometric logratio transformations for compositional data analysis. Mathematical Geology ,35(3):279–300, 2003. Gloor, G. B., Macklaim, J. M., Pawlowsky-Glahn, V., and Egozcue, J. J. Microbiome datasets are compositional: and this is not optional. Frontiers in Microbiology , 8: 2224, 2017. Harmon, L. Phylogenetic comparative methods: learning from trees. 2019. Hu, Y., Satten, G. A., and Hu, Y.-J. LOCOM: A logistic regression model for testing differential abundance in compositional microbiome data with false discovery rate control. Proceedings of the National Academy of Sciences ,119(30):e2122788119, 2022. Human Microbiome Project Consortium. Structure, function and diversity of the healthy human microbiome. Nature ,486(7402):207–214, 2012. 10 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Jackson, D. A. Compositional data in community ecology: the paradigm or peril of proportions? Ecology , 78(3): 929–940, 1997. Kaul, A., Mandal, S., Davidov, O., and Peddada, S. D. Analysis of microbiome data in the presence of excess zeros. Frontiers in microbiology , 8:2114, 2017. Lancaster, H. The Helmert matrices. The American Mathe-matical Monthly , 72(1):4–12, 1965. Li, M., Zhang, X., Ang, K. S., Ling, J., Sethi, R., Lee, N. Y. S., Ginhoux, F., and Chen, J. DISCO: a database of deeply integrated human single-cell omics data. Nucleic acids research , 50(D1):D596–D602, 2022. Liang, J. Q., Li, T., Nakatsu, G., Chen, Y.-X., Yau, T. O., Chu, E., Wong, S., Szeto, C. H., Ng, S. C., Chan, F. K., et al. A novel faecal lachnoclostridium marker for the non-invasive diagnosis of colorectal adenoma and cancer. 
+
+Gut , 69(7):1248–1257, 2020. Lin, G. N., Zhang, C., and Xu, D. Polytomy identification in microbial phylogenetic reconstruction. BMC systems Biology , 5(Suppl 3):S2, 2011. L ¨owenberg, B., Downing, J. R., and Burnett, A. Acute myeloid leukemia. New England Journal of Medicine ,341(14):1051–1062, 1999. Lozupone, C. and Knight, R. Unifrac: a new phylo-genetic method for comparing microbial communities. 
+
+Applied and environmental microbiology , 71(12):8228– 8235, 2005. Ma, Z., Zuo, T., Frey, N., and Rangrez, A. Y. A systematic framework for understanding the microbiome in human health and disease: from basic principles to clinical trans-lation. Signal Transduction and Targeted Therapy , 9(1): 237, 2024. Maddison, W. Reconstructing character evolution on poly-tomous cladograms. Cladistics , 5(4):365–377, 1989. Malashin, R., Valeria, Y., and Mullin, A. V. Hyper-nym bias: Unraveling deep classifier training dynamics through the lens of class hierarchy. In The 28th Interna-tional Conference on Artificial Intelligence and Statistics ,2025. URL https://openreview.net/forum? id=DobXzInjnV .Mallat, S. G. A theory for multiresolution signal decom-position: the wavelet representation. IEEE transactions on pattern analysis and machine intelligence , 11(7):674– 693, 2002. Mandal, S., Van Treuren, W., White, R. A., Eggesbø, M., Knight, R., and Peddada, S. D. Analysis of composition of microbiomes: a novel method for studying microbial composition. Microbial ecology in health and disease ,26(1):27663, 2015. Mao, J. and Ma, L. Dirichlet-tree multinomial mixtures for clustering microbiome compositions. The Annals of Applied Statistics , 16(3):1476, 2022. Marcos-Zambrano, L. J., Karaduzovic-Hadziabdic, K., Lon-car Turukalo, T., Przymus, P., Trajkovik, V., Aasmets, O., Berland, M., Gruca, A., Hasic, J., Hron, K., et al. Applications of machine learning in human microbiome studies: a review on feature selection, biomarker identi-fication, disease prediction and treatment. Frontiers in Microbiology , 12:634511, 2021. Miller, G. A. WordNet: a lexical database for English. 
+
+Communications of the ACM , 38(11):39–41, 1995. Monod, A., Lin, B., Yoshida, R., and Kang, Q. Tropical geometry of phylogenetic tree space: a statistical perspec-tive. arXiv preprint arXiv:1805.12400 , 2018. Morton, J. T., Sanders, J., Quinn, R. A., McDonald, D., Gonzalez, A., V ´azquez-Baeza, Y., Navas-Molina, J. A., Song, S. J., Metcalf, J. L., Hyde, E. R., et al. Balance trees reveal microbial niche differentiation. MSystems , 2 (1):e00162–16, 2017. Nickel, M. and Kiela, D. Poincar ´e embeddings for learning hierarchical representations. Advances in neural informa-tion processing systems , 30, 2017. Owen, M. and Provan, J. S. A fast algorithm for computing geodesic distances in tree space. IEEE/ACM Transactions on Computational Biology and Bioinformatics , 8(1):2–13, 2010. Palumbo, E., Vandenhirtz, M., Ryser, A., Daunhawer, I., and Vogt, J. E. From logits to hierarchies: Hierarchical clustering made simple. In Forty-second International Conference on Machine Learning , 2025. URL https: //openreview.net/forum?id=t0x2VnBskT .Pasolli, E., Schiffer, L., Manghi, P., Renson, A., Obenchain, V., Truong, D. T., Beghini, F., Malik, F., Ramos, M., Dowd, J. B., et al. Accessible, curated metagenomic data through experimenthub. Nature Methods , 14(11): 1023–1024, 2017. Pasolli, E., De Filippis, F., Mauriello, I. E., Cumbo, F., Walsh, A. M., Leech, J., Cotter, P. D., Segata, N., and Ercolini, D. Large-scale genome-wide analysis links lactic acid bacteria from food with the gut microbiome. 
+
+Nature Communications , 11(1):2610, 2020. Pawlowsky-Glahn, V. and Egozcue, J. J. Geometric ap-proach to statistical analysis on the simplex. Stochastic 
+
+11 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Environmental Research and Risk Assessment , 15(5):384– 398, 2001. Phipson, B., Sim, C. B., Porrello, E. R., Hewitt, A. W., Pow-ell, J., and Oshlack, A. propeller: testing for differences in cell type proportions in single cell data. Bioinformatics ,38(20):4720–4726, 2022. Rivera-Pinto, J., Egozcue, J. J., Pawlowsky-Glahn, V., Pare-des, R., Noguera-Julian, M., and Calle, M. L. Balances: a new perspective for microbiome analysis. MSystems , 3 (4):10–1128, 2018. Rudin, C. Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead. Nature Machine Intelligence , 1(5):206– 215, 2019. Sala, F., De Sa, C., Gu, A., and R ´e, C. Representation trade-offs for hyperbolic embeddings. In International Con-ference on Machine Learning , pp. 4460–4469. PMLR, 2018. Silla Jr, C. N. and Freitas, A. A. A survey of hierarchical classification across different application domains. Data mining and knowledge discovery , 22(1):31–72, 2011. Silverman, J. D., Washburne, A. D., Mukherjee, S., and David, L. A. A phylogenetic transform enhances analysis of compositional microbiota data. elife , 6:e21887, 2017. Sørensen, K. K., Simon-Santamaria, J., McCuskey, R. S., and Smedsrød, B. Liver sinusoidal endothelial cells. Com-prehensive Physiology , 5(4):1751–1774, 2015. Washburne, A. D., Silverman, J. D., Leff, J. W., Bennett, D. J., Darcy, J. L., Mukherjee, S., Fierer, N., and David, L. A. Phylogenetic factorization of compositional data yields lineage-level associations in microbiome datasets. 
+
+PeerJ , 5:e2969, 2017. Yatsunenko, T., Rey, F. E., Manary, M. J., Trehan, I., Dominguez-Bello, M. G., Contreras, M., Magris, M., Hidalgo, G., Baldassano, R. N., Anokhin, A. P., et al. Hu-man gut microbiome viewed across age and geography. 
+
+Nature , 486(7402):222–227, 2012. Yerke, A., Fry Brumit, D., and Fodor, A. A. Proportion-based normalizations outperform compositional data transformations in machine learning applications. Mi-crobiome , 12(1):45, 2024. 12 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+## A. Proofs and Algorithm Details 
+
+This section contains full proofs of the main theoretical results and detailed algorithm specifications. 
+
+A.1. Proofs Theorem A.1 (Restatement of Theorem 4.1) . Let T be any rooted tree with d leaves. The matrix V ∈ Rd×(d−1) from Algorithm 1 satisfies: 1. V ⊤1 = 0 (contrast property) ,2. V ⊤V = Id−1 (orthonormality) .Consequently, φ(x) = V ⊤ log x is an isometry from (∆ d−1, ⟨· , ·⟩ A) to (Rd−1, ⟨· , ·⟩ 2).Proof. Let T be a rooted tree with d leaves. For each internal node u with ku children, let C(r) 
+
+> u
+
+denote the set of leaves descending from child r, and let nr = |C(r) 
+
+> u
+
+|. The construction produces a local basis ˜H(u) ∈ Rku×(ku−1) 
+
+that is orthonormal under the weighted inner product ⟨h, h ′⟩w = Pku 
+
+> r=1
+
+hr h′ 
+
+> r
+
+/n r and satisfies the contrast condition 
+
+Pku 
+
+> r=1
+
+˜H(u) 
+
+> r,m
+
+= 0 for all m. Each local vector is spread to a global vector v(u,m ) ∈ Rd via 
+
+v(u,m ) 
+
+> i
+
+=
+
+( ˜H(u)
+
+> r,m
+
+/n r if i ∈ C(r) 
+
+> u
+
+for some r ∈ { 1, . . . , k u},
+
+0 otherwise .
+
+The precise procedure is given in Algorithm 1. It suffices for us to show that V (i) satisfies the contrast property (hence its columns span the tangent space H), (ii) is orthonormal within each node, and (iii) is orthonormal across distinct nodes. 
+
+(i) Contrast property. For any internal node u and contrast index m,
+
+> d
+
+X
+
+> i=1
+
+v(u,m ) 
+
+> i
+
+=
+
+> ku
+
+X
+
+> r=1
+
+X
+
+> i∈C(r)
+> u
+
+˜H(u)
+
+> r,m
+
+nr
+
+=
+
+> ku
+
+X
+
+> r=1
+
+nr · ˜H(u)
+
+> r,m
+
+nr
+
+=
+
+> ku
+
+X
+
+> r=1
+
+˜H(u) 
+
+> r,m
+
+= 0 ,
+
+where the last equality holds because ˜H(u) is obtained by applying Gram-Schmidt to Helmert contrasts, which lie in the subspace Su = {h ∈ Rku : P 
+
+> r
+
+hr = 0 }, and Gram-Schmidt preserves this subspace. 
+
+(ii) Within-node orthonormality. For any internal node u and contrast indices m1, m 2 ∈ { 1, . . . , k u − 1},
+
+⟨v(u,m 1), v (u,m 2)⟩ =
+
+> d
+
+X
+
+> i=1
+
+v(u,m 1) 
+
+> i
+
+v(u,m 2) 
+
+> i
+
+=
+
+> ku
+
+X
+
+> r=1
+
+X
+
+> i∈C(r)
+> u
+
+˜H(u)
+
+> r,m 1
+
+nr
+
+· ˜H(u)
+
+> r,m 2
+
+nr
+
+=
+
+> ku
+
+X
+
+> r=1
+
+nr · ˜H(u) 
+
+> r,m 1
+
+˜H(u)
+
+> r,m 2
+
+n2
+
+> r
+
+=
+
+> ku
+
+X
+
+> r=1
+
+˜H(u) 
+
+> r,m 1
+
+˜H(u)
+
+> r,m 2
+
+nr
+
+= ⟨ ˜H(u) 
+
+> ·,m 1
+
+, ˜H(u) 
+
+> ·,m 2
+
+⟩w = δm1,m 2 ,
+
+where the last equality holds by construction of ˜H(u) as an orthonormal basis under ⟨· , ·⟩ w.
+
+(iii) Across-node orthogonality. Consider two distinct internal nodes u̸ = u′ with contrast indices m and m′ respectively. We consider two cases. (a) If the subtrees rooted at u and u′ share no leaves, then v(u,m ) and v(u′,m ′) have disjoint supports, so ⟨v(u,m ), v (u′,m ′)⟩ = 0 . (b) Suppose without loss of generality that u′ is a descendant of u. Then u′ lies entirely within the subtree of exactly one child of u, say child s, so the support of v(u′,m ′) is contained in C(s) 
+
+> u
+
+. On C(s) 
+
+> u
+
+, the vector v(u,m )
+
+takes the constant value ˜H(u)
+
+> s,m
+
+/n s. Since v(u′,m ′) 
+
+> i
+
+= 0 for i / ∈ C(s) 
+
+> u
+
+,
+
+⟨v(u,m ), v (u′,m ′)⟩ = X
+
+> i∈C(s)
+> u
+
+v(u,m ) 
+
+> i
+
+v(u′,m ′) 
+
+> i
+
+= ˜H(u)
+
+> s,m
+
+ns
+
+X
+
+> i∈C(s)
+> u
+
+v(u′,m ′) 
+
+> i
+
+= ˜H(u)
+
+> s,m
+
+ns
+
+· 0 = 0 ,
+
+13 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+where the last equality uses (i): the entries of v(u′,m ′) sum to zero, and all nonzero entries lie within C(s) 
+
+> u
+
+.
+
+Conclusion. (i), (ii), and (iii) establish that V ⊤1 = 0 and V ⊤V = Id−1. For the dimension count, let Nint denote the number of internal nodes. Every non-root node has exactly one parent, so the number of edges satisfies |E| = d + Nint − 1.Since |E| = P 
+
+> u
+
+ku, we have 
+
+X
+
+> u
+
+(ku − 1) = X
+
+> u
+
+ku − Nint = ( d + Nint − 1) − Nint = d − 1 = dim( H).
+
+By standard ILR theory, any V ∈ Rd×(d−1) satisfying V ⊤1 = 0 and V ⊤V = Id−1 has columns forming an orthonormal basis of H, the image of clr . Thus ϕ(x) = V ⊤ log x is an isometry from (∆ d−1, ⟨· , ·⟩ A) to (Rd−1, ⟨· , ·⟩ 2).
+
+Proposition A.2 (Restatement of Proposition 4.2) . Given a rooted tree T with fixed leaf labels, fixed child orderings, and a fixed ordering π of internal nodes (e.g., DFS), PolyILR produces a unique basis V (T ). Moreover, T 7 → V (T ) is injective: 
+
+T can be recovered constructively from V .Proof. We prove uniqueness and recoverability separately. 
+
+(i) Uniqueness. The PolyILR construction (Algorithm 1) is deterministic given the tree T , leaf labels, child orderings at each internal node, and an ordering π of internal nodes. At each node u with ku children, the construction follows: • The descendant sets C(r) 
+
+> u
+
+and counts nr = |C(r) 
+
+> u
+
+| are determined by T and the leaf labels, and the corresponding weighted inner product ⟨h, h ′⟩w = P 
+
+> r
+
+hr h′ 
+
+> r
+
+/n r is determined by {nr }.• The Helmert matrix H(u) ∈ Rku×(ku−1) is determined by ku and the child ordering. The weighted-orthonormal basis 
+
+˜H(u) is obtained by applying Gram-Schmidt to H(u) under ⟨· , ·⟩ w. Gram-Schmidt is made unique by normalizing each output vector to unit w-norm and adopting a fixed sign convention (e.g., the first nonzero entry in child order is positive). Gram-Schmidt works as the weighted inner product forms a Hilbert space over the subspace Su.• The spreading operation is deterministic given C(r) 
+
+> u
+
+and nr .Thus V (T ) is uniquely determined. This makes PolyILR canonical , i.e., the construction does not incur intractable randomness. 
+
+(ii) Recoverability. We show that the tree topology can be recovered from V .
+
+Support structure: By the structure of Helmert contrasts, column m of H(u) has nonzero entries only in rows 1, . . . , m + 1 .Since Gram-Schmidt orthonormalizes sequentially, ˜H(u) 
+
+> ·,m
+
+is a linear combination of H(u) 
+
+> ·,1
+
+, . . . , H (u)
+
+> ·,m
+
+, so ˜H(u) 
+
+> r,m
+
+= 0 for 
+
+r > m + 1 . Moreover, columns 1, . . . , m − 1 of H(u) have zeros in row m + 1 , so orthogonalizing against them does not affect entry (m + 1 , m ); thus ˜H(u) 
+
+> m+1 ,m
+
+= H(u)
+
+> m+1 ,m
+
+̸ = 0 . After spreading, the support of v(u,m ) is Sm+1  
+
+> r=1
+
+C(r) 
+
+> u
+
+, and the supports at node u form a strictly nested chain :
+
+supp( v(u, 1) ) ⊊ supp( v(u, 2) ) ⊊ · · · ⊊ supp( v(u,k u−1) ) = 
+
+> ku
+
+[
+
+> r=1
+
+C(r) 
+
+> u
+
+.
+
+Recovering the child clades of a fixed node. Fix an internal node u with children C(1)  
+
+> u
+
+, . . . , C (ku) 
+
+> u
+
+. From the support-structure argument above, 
+
+supp  v(u,m ) =
+
+> m+1
+
+[
+
+> r=1
+
+C(r) 
+
+> u
+
+.
+
+For m = 2 , . . . , k u−1, the child clades C(m+1)  
+
+> u
+
+= supp  v(u,m )\supp  v(u,m −1)  are determined by the support chain alone. It remains to recover C(1)  
+
+> u
+
+and C(2)  
+
+> u
+
+from supp( v(u, 1) ) = C(1)  
+
+> u
+
+∪ C(2)  
+
+> u
+
+. Since there are no previous columns to orthogonalize against, the first weighted Gram-Schmidt output satisfies ˜H(u) 
+
+> ·,1
+
+= α H (u) 
+
+> ·,1
+
+for some α > 0. The first Helmert column has opposite signs in rows 1 and 2, so ˜H(u)1,1 > 0 and ˜H(u)2,1 < 0. After spreading, the values ˜H(u)1,1 /n 1 > 0 > ˜H(u)2,1 /n 2 are distinct, so the two level sets of v(u, 1) on its support are precisely C(1)  
+
+> u
+
+and C(2)  
+
+> u
+
+.14 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Recovering the full tree. Applying the preceding child-clade recovery argument at the root and then recursively to each non-singleton child clade recovers all clades of T . A rooted tree with labeled leaves is uniquely determined by its clades via inclusion: u′ is a child of u iff the clade of u′ is a maximal proper subset of the clade of u (i.e., a strict subset C′ ⊊ C with no clade C′′ satisfying C′ ⊊ C′′ ⊊ C), and leaves are singleton clades. Thus T is recoverable from V .Here, we comment on child orderings. Different child orderings at node u yield local bases that differ by an orthogonal transformation on (Su, ⟨· , ·⟩ w). This induces an orthogonal transformation on the (ku − 1) -dimensional coordinate block of V corresponding to u. The geometry is preserved; only coordinate labels change. Now, we present the proof for Proposition 7.1. 
+
+Proposition A.3 (Restatement of Proposition 7.1) . Let L = Rd/∼ℓ be the quotient space of logits under shift equivalence. Then L ∼= H (linear isomorphism). Concretely, for p = softmax( z), we have 
+
+z − ¯z1 = clr( p), where ¯z = 1
+
+> d
+
+P 
+
+> i
+
+zi,
+
+and [z] → z − ¯z1 is well-defined. Proof. We establish both the concrete identity and the isomorphism. 
+
+(i) Centered logits equal CLR coordinates. Let p = softmax( z), so pi = ezi / P 
+
+> j
+
+ezj . Taking logarithms, 
+
+log pi = zi − log X
+
+> j
+
+ezj .
+
+The CLR transform is clr( p)i = log pi − 1
+
+> d
+
+P 
+
+> k
+
+log pk. Substituting, 
+
+clr( p)i =
+
+zi − log X
+
+> j
+
+ezj
+
+ − 1
+
+d
+
+X
+
+> k
+
+zk − log X
+
+> j
+
+ezj
+
+
+
+= zi − log X
+
+> j
+
+ezj − ¯z + log X
+
+> j
+
+ezj
+
+= zi − ¯z, 
+
+where ¯z = 1
+
+> d
+
+P 
+
+> k
+
+zk. Thus clr( p) = z − ¯z1.
+
+(ii) Isomorphism. Define the centering map π : Rd → H by π(z) = z − ¯z1. We show π induces a linear isomorphism from 
+
+L = Rd/∼ℓ to H. If z′ = z + c1 for some c ∈ R, then ¯z′ = ¯ z + c, so 
+
+π(z′) = z + c1 − (¯ z + c)1 = z − ¯z1 = π(z).
+
+Thus π is constant on equivalence classes and descends to a map ˜π : L → H . For any z ∈ Rd, 1⊤π(z) = P
+
+> i
+
+(zi − ¯z) = 
+
+d¯z − d¯z = 0 , so π(z) ∈ H . Now, for any h ∈ H , we have ¯h = 0 , so π(h) = h − 0 · 1 = h. Thus π is surjective onto H.Suppose π(z) = π(z′). Then z − ¯z1 = z′ − ¯z′1, which gives z − z′ = (¯ z − ¯z′)1. Thus z ∼ℓ z′, so ˜π is injective. Since 
+
+π is linear and constant on equivalence classes, the induced map ˜π is linear. Thus, ˜π : L → H is a linear isomorphism. Moreover, equipping L with the quotient metric dL([ z], [z′]) = inf c∈R ∥z − z′ + c1∥, the infimum is attained at c = ¯ z′ − ¯z,which gives dL([ z], [z′]) = ∥π(z) − π(z′)∥2. Thus ˜π is an isometry. 
+
+A.2. Algorithm Details Time complexity and runtime of PolyILR. Algorithm 1 constructs V in O(d2) time. For each internal node u with ku
+
+children, building the Helmert matrix takes O(k2
+
+> u
+
+) time, Gram-Schmidt orthonormalization takes O(k3
+
+> u
+
+) time, and spreading to the d-dimensional vectors takes O(nu · ku) time where nu = P 
+
+> r
+
+nr is the number of leaves in the subtree rooted at u.Summing over all internal nodes, the total cost is dominated by the spreading step: P 
+
+> u
+
+nu · ku ≤ d · P 
+
+> u
+
+ku = O(d2) in the worst case (e.g., a star tree). For balanced trees, the complexity reduces to O(d log d). In practice, V is computed once as a preprocessing step, so this cost is negligible compared to downstream tasks such as model training or statistical inference, which typically scale with sample size N and involve iterative optimization. In all of our experiments, constructing V using PolyILR took < 5 seconds. 15 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+On Gram-Schmidt. The weighted Gram-Schmidt procedure orthonormalizes the columns of the Helmert matrix H(u)
+
+under the inner product ⟨h, h ′⟩w = Pku 
+
+> r=1
+
+hr h′ 
+
+> r
+
+/n r . This is well-defined since (Su, ⟨· , ·⟩ w) is a finite-dimensional Hilbert space. Explicitly, for m = 1 , . . . , k u − 1:
+
+˜H(u) 
+
+> ·,m
+
+= H(u) 
+
+> ·,m
+
+−
+
+> m−1
+
+X
+
+> j=1
+
+⟨H(u)
+
+> ·,m
+
+, ˜H(u) 
+
+> ·,j
+
+⟩w ˜H(u) 
+
+> ·,j
+
+, then normalize: ˜H(u) 
+
+> ·,m
+
+← ˜H(u)
+
+> ·,m
+
+∥ ˜H(u)
+
+> ·,m
+
+∥w
+
+.
+
+The weighting by 1/n r accounts for clade sizes: larger clades contribute less per-component to the inner product, ensuring that the resulting ILR coordinates treat leaves uniformly regardless of tree imbalance. 
+
+On Child ordering conventions. The child ordering at each internal node affects which contrasts appear in which columns of V , but does not affect the subspace spanned or the geometric properties as mentioned before. Two natural conventions are: (i) Lexicographic: Order children by the smallest leaf index in each subtree. This is deterministic given leaf labels. (ii) 
+
+By clade size: Order children by descending nr . This places contrasts involving larger clades in earlier columns. As noted in Proposition 4.2, different child orderings yield bases related by orthogonal transformations within each node’s coordinate block. For reproducibility, we used the lexicographic ordering in all of our experiments. 
+
+Reduction to PhILR. When the tree T is strictly binary (every internal node has exactly ku = 2 children), PolyILR reduces to PhILR (Silverman et al., 2017). We verify this algebraically. For a binary node u with child clades C(1) 
+
+> u
+
+and C(2)  
+
+> u
+
+of sizes n1 and n2, the Helmert matrix is H(u) = [1 /√2, −1/√2] ⊤. Under the weighted inner product 
+
+⟨h, h ′⟩w = h1h′
+
+> 1
+
+/n 1 + h2h′
+
+> 2
+
+/n 2, the squared norm is 
+
+∥H(u)∥2 
+
+> w
+
+= 1/2
+
+n1
+
++ 1/2
+
+n2
+
+= n1 + n2
+
+2n1n2
+
+.
+
+Applying Gram-Schmidt under ⟨· , ·⟩ w gives ˜H(u) = [1 /√2, −1/√2] ⊤ · p2n1n2/(n1 + n2). After spreading via vi =˜Hr /n r :
+
+v(u) 
+
+> i
+
+=
+
+
+
++
+
+r n2
+
+n1(n1 + n2) if i ∈ C(1)  
+
+> u
+
+,
+
+−
+
+r n1
+
+n2(n1 + n2) if i ∈ C(2)  
+
+> u
+
+,
+
+0 otherwise .
+
+This matches the PhILR balance formula exactly (Silverman et al., 2017). Thus PolyILR is a strict generalization of PhILR to arbitrary tree structures, with the binary case recovering the original method. We note that PhILR also supports optional weighting schemes: taxon weights (Egozcue & Pawlowsky-Glahn, 2016) that modify the simplex metric itself, and branch length weights that scale coordinates. These define a different but well-posed weighted geometry on the simplex (Egozcue & Pawlowsky-Glahn, 2016), rather than the standard Aitchison geometry. PolyILR is built on the standard (unweighted) Aitchison geometry to make the construction directly comparable to canonical ILR; integrating weighted-simplex variants is compatible in principle and left to future work. 
+
+## B. Additional Experiments and Details 
+
+B.1. Microbiome Dataset and Taxonomy Construction Details Datasets. We use two microbiome datasets. HMP (Human Microbiome Project; 4,743 samples, 402 taxa) provides samples from 18 body sites with a curated NCBI-derived taxonomy. cMD3 (curatedMetagenomicData v3; 20,238 samples from 86 studies, 2,047 taxa) aggregates shotgun metagenomic data across diverse cohorts. Disease labels denote any non-healthy diagnosis, pooled across conditions and body sites. Note that 748 HMP samples also appear in cMD3 ; we do not deduplicate, as our focus is methodological comparison. The HMP data were obtained from the HMP16SData package in R. Operational taxonomic unit (OTU) abundances and sample metadata were extracted, and samples were filtered to those with complete body site annotations. The taxonomic tree was constructed from the NCBI-derived lineage strings provided with each OTU, parsed from Kingdom through Genus, and converted to Newick format using the ape package. The cMD3 metagenomic data were obtained from the curatedMetagenomicData package (v3.0) in R. We retrieved relative abundance data for all available studies, excluding IaniroG 2022 . Taxonomic abundance matrices and sample 16 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+By Node          
+
+> u1
+> 1u2
+> 23
+> u3
+> u4
+> 45
+> 67
+> u1u2u3u4
+> V∈R7×6
+
+By Depth         
+
+> u1
+> 1u2
+> 23
+> u3
+> u4
+> 45
+> 67
+> depth 0 depth 1 depth 2
+> V∈R7×6
+
+By Subtree              
+
+> u1
+> 1u2
+> 23
+> u3
+> u4
+> 45
+> 67
+> u1u2subtree u3subtree
+> V∈R7×6
+> Figure 5. Orthogonal subspace partitions. The coordinates of Vcan be grouped into orthogonal subspaces indexed by tree structure: by individual node, by depth level, or by subtree (one example). Each grouping enables inference at a different resolution.
+
+metadata were extracted from TreeSummarizedExperiment objects and merged using mergeData . Only samples present in both the abundance matrix and metadata were retained. Taxonomic lineages were parsed from strings of the form 
+
+k Kingdom|p Phylum|c Class|o Order|f Family|g Genus|s Species , with rank prefixes removed. Taxon identifiers were generated via MD5 hashing (first 8 characters, prefixed taxon ) for reproducibility. 
+
+Taxonomic Trees. For HMP , we use the NCBI-derived taxonomy provided with the dataset. For cMD3 , the taxonomic tree was constructed from lineage strings using the data.tree package with a common root, converted to Newick format via 
+
+ape , and assigned ultrametric branch lengths using Grafen’s method. Tip labels were replaced with hash-based identifiers to match the abundance matrix. Because cMD3 aggregates studies with heterogeneous taxonomic resolution, some internal nodes have children spanning multiple taxonomic ranks; we label such nodes by their lowest common rank (e.g., Bacteria (Kingdom) or Mixed ). 
+
+B.2. Single-Cell Dataset and Ontology Construction Details Single-Cell Dataset. We use DISCO (Database of Immune Single-Cell Omics), a curated atlas of human immune single-cell transcriptomes. Data were extracted via the DISCOtoolkit R package. We selected samples with ≥500 cells and randomly sampled up to 200 samples per condition. We extracted blood tissue (healthy, COVID-19, leukemia) and liver tissue (healthy, hepatocellular carcinoma). Cell type proportions were computed by counting cells per annotated type and normalizing to sum to one, following standard practice in single-cell compositional analysis (Phipson et al., 2022; Buettner et al., 2021). After processing: blood (199 healthy, 200 COVID-19, 199 leukemia; 62 cell types) and liver (200 healthy, 153 HCC; 99 cell types). For the main experiments, we use the leukemia and HCC tasks. 
+
+Cell Ontology Tree. The cell type hierarchy was obtained from DISCO’s cell ontology API (Li et al., 2022). For each tissue, we constructed a subtree by: (1) identifying cell types present in the data, (2) filtering to true leaves (types with no children in the data), and (3) tracing ancestor paths to the root. Unit branch lengths were assigned. The cell ontology contains extensive polytomies: blood has 14 nodes with >2 children (“T cell” has 9 children); liver has similar structure with 99 leaves and 72 internal nodes. 
+
+B.3. Software and Hyperparameters 
+
+Classification models were tuned via 5-fold cross-validation on training data. Grid search ranges and selected values are summarized in Table 7. Feature importance was computed via mean decrease in impurity (random forest), coefficient magnitude (logistic regression), or permutation importance (SVM). We compare PolyILR against: (i) CLR (centered log-ratio), which ignores tree structure; and (ii) PhILR (Silverman et al., 2017), which requires arbitrary binary refinement of polytomies. Both use identical zero handling. 17 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex                                   
+
+> Table 7. Hyperparameter search grid and selected values.
+> Model Parameter Search Range Used
+> Random Forest n estimators {100 ,300 ,500 }500
+> max depth {10 ,20 ,None }20
+> max features {sqrt ,log2 }sqrt
+> Logistic Reg. C(inverse reg.) {0.01 ,0.1,1,10 }1penalty {ℓ1, ℓ 2}ℓ2
+> SVM (RBF) C{0.1,1,10 }1
+> γ{scale ,0.01 ,0.1}scale
+
+B.4. Handling Zeros in PolyILR 
+
+The raw compositional data (e.g., microbiome counts, single-cell type counts) typically exhibit high sparsity, with zeros comprising 70% or more of entries. Since log-ratio transformations are undefined at zero, zero replacement is required as preprocessing. There is no consensus on the optimal choice; common choices include 0.5, 1, or smaller values, depending on whether the raw data are counts or proportions (Kaul et al., 2017; Hu et al., 2022). Because our focus is on comparing representations rather than zero-handling strategies, we adopt simple per-dataset choices appropriate to each data scale as follows. HMP and cMD3 are count data: HMP provides raw 16S counts, and cMD3 (curatedMetagenomicData v3) is retrieved with counts=TRUE , which multiplies relative abundances by read depth. For both, we add a pseudocount of 1 prior to normalization, i.e., ˜xi = ( xi + 1) / P 
+
+> j
+
+(xj + 1) , which is commonly done at count scale. For cMD3 , one study (IaniroG 2022 ) was excluded because read depth metadata was unavailable. DISCO provides cell-type proportions rather than counts, so we instead use ϵ = 10 −10 applied additively before renormalization. We note that PolyILR partially mitigates the effect of zero replacement, because each coordinate is a contrast between geometric means over clades rather than between individual taxa (Section 4.2), but a rigorous study is for future work. 
+
+B.5. PolyILR’s Robustness under Topological Noise 
+
+As discussed in Section 9, PolyILR assumes a fixed input tree T , and its coordinates are defined relative to T . This is reasonable because PolyILR is designed for curated scientific hierarchies provided by domain experts (e.g., phylogenies, taxonomies, or ontologies) which can largely be trusted. In practice, however, some tree noise or error is unavoidable. One common form is topological noise , e.g., small misestimations of branching order or leaf placement. Therefore, we provide a preliminary analysis of how the PolyILR basis and resulting representations respond to such local perturbations in the input tree, both empirically (as semantic stability of selected features) and structurally (as how much of the basis V is preserved). We introduce topological noise via random nearest-neighbor interchange (NNI) operations on the NCBI taxonomy of the 
+
+HMP dataset. Each NNI swaps two subtrees across an internal edge, locally rearranging the tree without changing leaf labels. We report perturbation strength as the absolute number of NNI applied randomly. We use the HMP body-subsite task (18 classes, d = 402 taxa), matching the setting of Table 2 (bottom).                     
+
+> #NNIs PolyILR semantic top-10 stability 00.73 ±0.10 10.71 ±0.11 20.68 ±0.09 30.65 ±0.08
+> Table 8. Semantic Jaccard similarity of top-10 PolyILR features under NNI perturbations on the HMP taxonomy (18 body subsites, 402 taxa). Mean ±std over 10 perturbed trees ×10 seeds.
+
+Semantic stability under NNI. For each NNI count, we perturb the original tree, recompute the PolyILR basis V , retrain the downstream RF model, and re-extract the top-10 important features. We then measure semantic Jaccard similarity of the top-10 features against the unperturbed baseline, averaged over 10 perturbed trees and 10 random seeds (Table 8). Other setups mirror those used for Table 2. At 0 NNIs (no noise), the result matches Table 2 (bottom). As we introduce more NNIs, PolyILR degrades smoothly but remains substantially more stable than PhILR even at 3 NNIs: PolyILR at 3 NNIs (0.65) is still well above PhILR at 0 NNIs (0.13, from Table 2 bottom), which suffers from binarization-induced instability on top of any tree noise. This shows that PolyILR remains effective even at moderate noise levels. 18 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Locality of NNI effects on the basis V . The robustness above has a structural explanation: the PolyILR basis factors node by node. For each internal node u with children c1, . . . , c ku , V contains exactly ku − 1 local basis vectors associated with u.Once child ordering is fixed, this local block depends only on the partition of descendant leaves induced by the children of u
+
+and their subtree sizes {nr } (Section 4.2). After spreading, each basis is supported only on the leaves descending from u,and no node’s construction references any other node’s local structure. Therefore, a local topological change has only a local effect on V .Consider an NNI at an internal edge (p, c ), where p is the parent of c. At p and c, the child partitions directly change, so the local coordinate blocks of p and c in V also change; above p, the swap happens entirely within p’s subtree, so the descendant leaf sets under each ancestor’s children, and their subtree sizes, are unchanged, so their local blocks in V are 
+
+exactly preserved ; below c, the internal structure of each subtree is untouched, so again their local blocks in V are exactly preserved . This way, an NNI perturbation modifies only the coordinate blocks attached to a small set of affected nodes; all others remain preserved.                
+
+> #NNIs Cols at perturbed nodes Cols changed Cols preserved (%) 118.8 8.4 392.6 / 401 (97.9%) 226.6 13.2 387.8 / 401 (96.7%) 336.6 18.6 382.4 / 401 (95.4%)
+> Table 9. NNI effects on V(HMP , 402 taxa, 401 coords; mean over 5 seeds). We report the number of cumulative NNIs, the numbers of columns at perturbed nodes, of columns that changed, and of columns that are preserved.
+
+We verify this empirically on the HMP taxonomy (402 taxa, 401 PolyILR coordinates) above. For each NNI count, we apply 
+
+{1, 2, 3} cumulative random NNI moves and compare V before and after, averaged over 5 seeds. In Table 9, we observe that the number of changed columns never exceeds the number of columns at perturbed nodes, and most of V remains exactly preserved. This empirically supports the structural argument and helps explain the mild degradation seen in Table 8. 
+
+B.6. Extended Classification Results 
+
+We provide a preliminary empirical illustration of the geometric connection described in Section 7. Using CIFAR-100 
+
+with its known 20-superclass hierarchy and a ResNet-34 trained to 80.4% test accuracy, we ask two questions: (i) Does the true semantic hierarchy capture structure in the model’s error distribution that arbitrary hierarchies do not? (ii) If so, how does this structure develop during training? 
+
+Setup and discussion. The CIFAR-100 hierarchy has 100 fine classes grouped into 20 superclasses, yielding a two-level tree with 19 depth-0 coordinates (superclass contrasts) and 80 depth-1 coordinates (within-superclass contrasts). For each test sample, we compute the gradient ∇aℓ = V⊤(p − ey ) in PolyILR coordinates and measure how gradient norm distributes across depths. We summarize this via gradient entropy : H = − P 
+
+> d
+
+pd log pd, where pd is the fraction of total gradient norm at depth d. Lower entropy indicates concentration at specific depths, which we view as some structure emerging. 
+
+(i) Known tree vs. shuffled trees. We compare the true hierarchy against 1000 random trees constructed by permuting leaf assignments while preserving structure. For the trained model, the true tree yields significantly lower entropy (0.576 vs. 
+
+0.632 ± 0.001 ; p < 0.001 ), indicating that errors concentrate at specific depths under the true hierarchy but not under arbitrary ones. For a randomly initialized model, no difference exists ( p = 0 .73 ). This confirms that this structure emerges from learning rather than architectural bias. This aligns with recent work showing that flat classifiers implicitly encode semantic hierarchies recoverable from logits alone (Palumbo et al., 2025). 
+
+(ii): Learning dynamics. We track gradient distribution across 200 training epochs. The fraction at depth 1 (within-superclass) increases from 0.68 to 0.74 over training, consistent with the model progressively resolving coarse superclass distinctions before fine-grained class boundaries. This coarse-to-fine pattern—recently termed hypernym bias (Malashin et al., 2025)—reflects curriculum-like learning where easier (coarser) distinctions are learned first. 
+
+Implication. These results suggest that PolyILR coordinates may provide a meaningful lens for analyzing softmax classifiers and steering model training when class hierarchies are available. The gradient decomposition partly reveals where in the hierarchy a model’s errors concentrate and how this evolves during training. We view this as opening a research direction rather than a complete empirical study, which we leave to future work. 19 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex       
+
+> Figure 6. Learning dynamics on CIFAR-100 .Left: Gradient norm distribution by tree depth across training. Depth 0 (superclass contrasts) decreases while depth 1 (within-superclass) increases, indicating coarse-to-fine learning. Right: Gradient entropy and test accuracy over training epochs.
+
+B.7. Full Experimental Results 
+
+This appendix provides complete experimental results; biological interpretation is in Section 6. The patterns are consistent with those discussed in the main text: PolyILR recovers interpretable taxonomic and ontological contrasts across all tasks. Deeper biological validation—including wet-lab experiments and large-scale cohort studies—is beyond the scope of this methodological work. Throughout these tables, we report point estimates alongside variability (e.g., 95% confidence intervals for accuracy and AUROC, std for importance, and rank range across CV folds), which are small in our observations and demonstrate robustness of the reported numbers. Table 10 reports classification accuracy and AUROC with 95% CIs across all tasks: body sites/subsites ( HMP ), westerniza-tion/age/health/body site ( cMD3 ), and COVID-19(blood)/leukemia(blood)/HCC(liver) ( DISCO ). SVM and LR are identical across CLR, PhILR, and PolyILR within each task, as expected from isometry; RF varies modestly. Table 11 reports feature stability (Jaccard similarity of top-K features across CV folds); PolyILR remains stable while PhILR suffers from arbitrary binarization for both index and semantic stabilities. Tables 12–14 list the top-10 PolyILR contrasts by RF importance for HMP (microbiome, body sites), cMD3 (microbiome, health/lifestyle), and DISCO (single-cell, disease), with mean importance, std, and rank range across 5-fold CV. Each contrast is a log-ratio of geometric means between two groups at a tree node. Tables 15–17 report tree-level aggregation results, with importance aggregated by depth (cumulative), subtree, node, and taxon/cell-type levels. Accuracy columns show predictive performance using only features at that level. 20 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Table 10. Classification accuracy and AUROC with 95% confidence intervals (all tasks). Each cell reports RF / SVM / LR. SVM and LR are identical across CLR, PhILR, and PolyILR within each task, as expected from isometry; RF varies modestly. Upper CI bounds clipped at 1.00. 
+
+Task CLR PhILR PolyILR 
+
+RF / SVM / LR RF / SVM / LR RF / SVM / LR 
+
+Acc (%) (95% CI) 
+
+> HMP
+
+body sites (5) .956 (.952–.959) / .971 (.968–.974) / .962 (.956–.968) .961 (.958–.965) / .971 (.968–.974) / .962 (.955–.968) .963 (.961–.966) / .971 (.968–.974) / .962 (.955–.968) body subsites (18) .597 (.584–.610) / .672 (.660–.685) / .646 (.637–.655) .608 (.588–.627) / .672 (.660–.685) / .646 (.638–.654) .622 (.608–.635) / .672 (.660–.685) / .646 (.637–.656) 
+
+> cMD3
+
+westernized (2) .972 (.967–.977) / .979 (.972–.986) / .968 (.956–.979) .966 (.959–.972) / .979 (.972–.986) / .967 (.955–.979) .967 (.962–.972) / .979 (.972–.986) / .967 (.956–.979) age category (5) .785 (.755–.815) / .814 (.796–.833) / .739 (.712–.766) .797 (.782–.813) / .814 (.796–.833) / .738 (.712–.765) .797 (.784–.811) / .814 (.796–.833) / .738 (.711–.765) healthy/disease (2) .692 (.665–.719) / .701 (.681–.721) / .664 (.638–.690) .686 (.651–.721) / .702 (.682–.721) / .664 (.638–.690) .681 (.648–.714) / .702 (.682–.721) / .664 (.638–.690) disease stool (2) .688 (.668–.707) / .691 (.662–.721) / .662 (.623–.701) .677 (.643–.710) / .691 (.662–.721) / .663 (.624–.701) .674 (.640–.707) / .691 (.662–.721) / .663 (.624–.701) body site (6) .982 (.976–.988) / .989 (.984–.994) / .987 (.983–.991) .987 (.980–.993) / .989 (.984–.994) / .987 (.983–.991) .987 (.982–.992) / .989 (.984–.994) / .987 (.983–.991) 
+
+> DISCO
+
+COVID-19 (2) .747 (.661–.832) / .777 (.688–.866) / .737 (.679–.794) .762 (.668–.856) / .777 (.688–.866) / .737 (.679–.794) .777 (.688–.865) / .777 (.688–.866) / .739 (.683–.796) leukemia (2) .925 (.883–.967) / .932 (.893–.971) / .927 (.880–.974) .940 (.900–.980) / .932 (.893–.971) / .927 (.880–.974) .935 (.891–.978) / .932 (.893–.971) / .927 (.880–.974) HCC (2) .921 (.807–1.00) / .927 (.835–1.00) / .944 (.863–1.00) .910 (.794–1.00) / .927 (.835–1.00) / .944 (.863–1.00) .910 (.800–1.00) / .927 (.835–1.00) / .944 (.863–1.00) 
+
+AUROC (95% CI) 
+
+> HMP
+
+body sites (5) .987 (.981–.992) / .995 (.994–.996) / .994 (.993–.996) .992 (.991–.994) / .995 (.994–.996) / .994 (.993–.996) .992 (.990–.994) / .995 (.994–.996) / .994 (.993–.996) body subsites (18) .957 (.954–.960) / .974 (.973–.975) / .967 (.966–.969) .965 (.962–.967) / .974 (.973–.975) / .967 (.966–.969) .966 (.964–.969) / .974 (.973–.975) / .967 (.966–.969) 
+
+> cMD3
+
+westernized (2) .975 (.965–.986) / .978 (.958–.999) / .967 (.940–.995) .966 (.951–.980) / .978 (.958–.999) / .966 (.938–.994) .966 (.951–.982) / .978 (.958–.999) / .967 (.939–.995) age category (5) .836 (.802–.870) / .867 (.838–.895) / .833 (.811–.855) .837 (.804–.871) / .867 (.838–.895) / .833 (.811–.855) .843 (.813–.873) / .867 (.838–.895) / .833 (.811–.855) healthy/disease (2) .662 (.634–.691) / .690 (.665–.715) / .629 (.598–.660) .637 (.607–.668) / .690 (.665–.715) / .629 (.598–.660) .631 (.596–.667) / .690 (.665–.715) / .629 (.598–.660) disease stool (2) .663 (.630–.696) / .683 (.645–.722) / .633 (.587–.680) .634 (.590–.678) / .683 (.645–.722) / .633 (.587–.680) .632 (.586–.677) / .683 (.645–.722) / .633 (.587–.680) body site (6) .945 (.907–.982) / .994 (.991–.997) / .996 (.993–.999) .998 (.996–1.00) / .994 (.992–.997) / .996 (.993–.999) .981 (.949–1.00) / .994 (.992–.997) / .996 (.993–.999) 
+
+> DISCO
+
+COVID-19 (2) .808 (.699–.918) / .897 (.818–.977) / .847 (.784–.910) .875 (.802–.948) / .897 (.818–.977) / .847 (.784–.911) .882 (.806–.957) / .897 (.817–.977) / .848 (.785–.911) leukemia (2) .968 (.946–.990) / .984 (.969–.999) / .982 (.963–1.00) .984 (.964–1.00) / .984 (.969–.999) / .982 (.963–1.00) .984 (.966–1.00) / .984 (.969–.999) / .982 (.963–1.00) HCC (2) .921 (.794–1.00) / .996 (.990–1.00) / .998 (.996–1.00) .984 (.960–1.00) / .996 (.990–1.00) / .998 (.996–1.00) .974 (.935–1.00) / .996 (.990–1.00) / .998 (.996–1.00) 
+
+Table 11. Feature stability : Jaccard similarity of top-K features across CV folds (all tasks). PolyILR stable; PhILR (index/semantic) unstable from arbitrary binarization. 
+
+Task PolyILR PhILR (index / semantic) 
+
+K=5 K=10 K=50 K=5 K=10 K=50 
+
+> HMP
+
+body sites (5) .66 .65 .84 .01 / .08 .01 / .06 .07 / .05 body subsites (18) .71 .72 .88 .01 / .22 .02 / .13 .07 / .04 
+
+> cMD3
+
+westernized (2) .43 .69 .81 .00 / .01 .00 / .01 .01 / .02 age category (5) .73 .58 .76 .12 / .04 .09 / .03 .03 / .03 healthy/disease (2) .56 .86 .80 .00 / .02 .00 / .03 .02 / .02 disease stool (2) .53 .67 .80 .00 / .02 .00 / .03 .02 / .03 body site (6) .33 .32 .62 .00 / .00 .00 / .00 .01 / .01 
+
+> DISCO
+
+COVID-19 (2) 1.0 .87 .99 .06 / .07 .12 / .11 .73 / .12 leukemia (2) .75 .81 .92 .05 / .09 .12 / .16 .73 / .12 HCC (2) .77 .78 .84 .03 / .07 .06 / .09 .35 / .11 
+
+Table 12. Top-10 contrasts by RF importance (%) with mean ± std and rank range across 5-fold CV: HMP .
+
+Rk Contrast Imp. (mean ± std) Rank range 
+
+> body sites (5 classes)
+
+1 Streptococcaceae vs Lactobacillus + Leuconostocaceae 3.94 ± 0.06 12 Lactococcus vs Streptococcus 3.42 ± 0.16 2–3 3 Pseudomonadales vs Cardiobacteriaceae + Vibrionaceae + Legionellales + ... 3.40 ± 0.17 2–3 4 Bacillales vs Gemella + Exiguobacterium + Turicibacter + ... 2.95 ± 0.07 4–5 5 Pasteurella vs Haemophilus + Actinobacillus + Aggregatibacter 2.85 ± 0.08 4–5 6 Veillonellaceae vs Dehalobacterium + Fusibacter + Peptococcus + ... 2.61 ± 0.06 67 Pasteurellaceae vs Cardiobacteriaceae + Vibrionaceae + Legionellales + ... 2.37 ± 0.06 7–9 8 Leuconostocaceae vs Lactobacillus 2.32 ± 0.14 7–9 9 Actinomycetaceae vs Streptomyces + Microbispora + Brevibacterium + ... 2.29 ± 0.08 7–9 10 Propionibacteriaceae vs Streptomyces + Microbispora + Brevibacterium + ... 1.81 ± 0.17 10–17 body subsites (18 classes) 1 Oribacterium vs Blautia + Coprococcus + Eubacterium + ... 1.22 ± 0.03 12 Clostridiales vs Bacilli 1.10 ± 0.07 2–4 3 Streptococcaceae vs Lactobacillus + Leuconostocaceae 1.08 ± 0.04 2–5 4 Lactococcus vs Streptococcus 1.03 ± 0.03 3–5 5 Corynebacterium vs Streptomyces + Microbispora + Brevibacterium + ... 1.02 ± 0.03 3–5 6 Bacillales vs Gemella + Exiguobacterium + Turicibacter + ... 0.92 ± 0.02 6–8 7 Propionibacteriaceae vs Streptomyces + Microbispora + Brevibacterium + ... 0.91 ± 0.01 6–8 8 Pseudonocardiaceae vs Streptomyces + Microbispora + Brevibacterium + ... 0.89 ± 0.05 6–12 9 Ruminococcaceae vs Dehalobacterium + Fusibacter + Peptococcus + ... 0.88 ± 0.01 8–11 10 Propionibacterium vs Tessaracoccus 0.85 ± 0.04 7–12 
+
+21 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Table 13. Top-10 contrasts by RF importance (%) with mean ± std and rank range across 5-fold CV: cMD3 .
+
+Rk Contrast Imp. (mean ± std) Rank range 
+
+> westernized (2 classes)
+
+1 Prevotella vs Alistipes + Anaerotruncus + Bacteroides + ... 1.77 ± 0.12 12 Murimonas vs Alistipes + Anaerotruncus + Bacteroides + ... 1.49 ± 0.07 2–4 3 Prevotella vs Bacteroides + Alistipes 1.45 ± 0.03 2–5 4 Lactobacillus vs Alistipes + Anaerotruncus + Bacteroides + ... 1.38 ± 0.04 4–6 5 Bacteroides vs Alistipes + Anaerotruncus + Bacteroides + ... 1.36 ± 0.11 3–8 6 Dialister vs Alistipes + Anaerotruncus + Bacteroides + ... 1.32 ± 0.15 2–13 7 Tissierellia unclassified vs Alistipes + Anaerotruncus + Bacteroides + ... 1.31 ± 0.09 5–10 8 Peptoniphilus vs Alistipes + Anaerotruncus + Bacteroides + ... 1.28 ± 0.05 5–10 9 Megasphaera vs Alistipes + Anaerotruncus + Bacteroides + ... 1.23 ± 0.04 6–10 10 Prevotella vs Citrobacter + Bacteroides + Leuconostoc + ... 1.18 ± 0.06 7–12 age category (5 classes) 1 Mixed vs Phascolarctobacterium + Tychonema + Sediminibacterium + ... 1.32 ± 0.04 1–2 2 Bacteria vs Bacteria + Bacteria + Bacteria + ... 1.24 ± 0.07 1–3 3 Mixed vs Bacteria + Mixed 1.21 ± 0.07 2–3 4 Mixed vs Phascolarctobacterium + Tychonema + Sediminibacterium + ... 0.90 ± 0.03 45 Holdemanella vs Faecalibacterium 0.75 ± 0.04 5–10 6 Enterococcus vs Blautia 0.73 ± 0.06 5–9 7 Mixed vs Dialister + Bacteria + Mixed + ... 0.69 ± 0.03 6–8 8 Mixed vs Mixed 0.69 ± 0.03 5–9 9 Bacteria vs Dialister + Bacteria + Mixed + ... 0.67 ± 0.05 7–14 10 Mixed vs Bacteria + Bacteria + Bacteria + ... 0.66 ± 0.04 6–11 healthy vs disease (2) 1 Lachnoclostridium vs Bacteroides + Turicibacter + Ruminococcus + ... 0.55 ± 0.06 12 Bifidobacterium vs Blautia + Enterococcus 0.38 ± 0.04 2–5 3 Flavonifractor vs Bifidobacterium + Actinomyces 0.35 ± 0.02 2–6 4 Fusicatenibacter vs Gemmiger 0.34 ± 0.02 2–6 5 Enterococcus vs Blautia 0.34 ± 0.02 3–6 6 Lachnoclostridium vs Parabacteroides + Bacteroides + Barnesiella + ... 0.33 ± 0.02 4–8 7 Coprococcus vs Ruthenibacterium + Coprobacter + Oscillibacter + ... 0.30 ± 0.02 3–9 8 Actinomyces vs Bifidobacterium + Actinomyces + Flavonifractor 0.29 ± 0.02 6–10 9 Streptococcus vs Enterococcus + Stenotrophomonas + Clostridioides 0.28 ± 0.02 8–10 10 Gemella vs Aeriscardovia + Enterococcus + Dickeya + ... 0.27 ± 0.02 7–16 stool disease (2 classes) 1 Lachnoclostridium vs Bacteroides + Turicibacter + Ruminococcus + ... 0.58 ± 0.04 12 Gemella vs Aeriscardovia + Enterococcus + Dickeya + ... 0.38 ± 0.03 2–5 3 Bifidobacterium vs Blautia + Enterococcus 0.37 ± 0.02 2–4 4 Fusicatenibacter vs Gemmiger 0.33 ± 0.02 4–10 5 Lachnoclostridium vs Parabacteroides + Bacteroides + Barnesiella + ... 0.33 ± 0.03 3–11 6 Flavonifractor vs Bifidobacterium + Actinomyces 0.32 ± 0.02 5–8 7 Enterococcus vs Blautia 0.31 ± 0.02 5–8 8 Actinomyces vs Bifidobacterium + Actinomyces + Flavonifractor 0.31 ± 0.04 4–14 9 Streptococcus vs Enterococcus + Stenotrophomonas + Clostridioides 0.30 ± 0.03 5–11 10 Coprococcus vs Ruthenibacterium + Coprobacter + Oscillibacter + ... 0.29 ± 0.03 3–14 body site (6 classes) 1 Bacillus vs Aggregatibacter + Prevotella + Leptotrichia + ... 1.43 ± 0.05 1–2 2 Bacteria vs Dialister + Bacteria + Mixed + ... 1.30 ± 0.12 1–4 3 Cutibacterium vs Parascardovia + Streptococcus + Erysipelatoclostridium + ... 1.30 ± 0.05 2–3 4 Arcobacter vs Aggregatibacter + Prevotella + Leptotrichia + ... 1.21 ± 0.14 2–7 5 Lactobacillus vs Aggregatibacter + Prevotella + Leptotrichia + ... 1.05 ± 0.05 6–11 6 Mixed vs Phascolarctobacterium + Tychonema + Sediminibacterium + ... 1.04 ± 0.10 5–15 7 Bacteria vs Bacteria 1.04 ± 0.03 4–11 8 Cand. Gastranaerophilales vs Aggregatibacter + Prevotella + Leptotrichia + ... 1.02 ± 0.06 6–13 9 Providencia vs Aggregatibacter + Prevotella + Leptotrichia + ... 1.00 ± 0.08 8–19 10 Helicobacter vs Aggregatibacter + Prevotella + Leptotrichia + ... 0.99 ± 0.04 5–14 
+
+22 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Table 14. Top-10 contrasts by RF importance (%) with mean ± std and rank range across 5-fold CV: DISCO .
+
+Rk Contrast Imp. (mean ± std) Rank range 
+
+> COVID-19 (blood)
+
+1 Treg cell vs Naive CD4 T cell + Memory CD4 T cell + Tfh cell 9.03 ± 0.88 12 CD4 T cell vs Naive T cell + Memory T cell + CD8 T cell + ... 7.34 ± 0.64 2–4 3 Cycling T/NK cell vs ILC + T cell + NK cell 6.68 ± 0.43 2–4 4 Tfh cell vs Naive CD4 T cell + Memory CD4 T cell 6.46 ± 0.28 3–4 5 Plasma cell vs Pre-GC B cell + B cell precursor + Memory B cell + ... 5.03 ± 0.26 56 INF-activated T cell vs Naive T cell + Memory T cell + CD8 T cell + ... 3.96 ± 0.35 6–8 7 Naive CD8 T cell vs Memory CD8 T cell 3.73 ± 0.48 6–8 8 Double negative T cell vs Naive T cell + Memory T cell + CD8 T cell + ... 2.93 ± 0.29 8–9 9 Gamma delta T cell vs Naive T cell + Memory T cell + CD8 T cell + ... 2.90 ± 0.73 6–18 10 Epithelial cell vs Immune cell + Neuron 2.37 ± 0.18 9–12 leukemia (blood) 1 Myeloid cell vs Erythrocyte/Megakaryocyte + Hematopoietic precursor cell 14.50 ± 0.46 12 Cycling T/NK cell vs ILC + T cell + NK cell 11.79 ± 0.54 23 Lymphoid cell vs Erythrocyte/Megakaryocyte + Hematopoietic precursor + Myeloid 6.30 ± 0.45 3–4 4 MAIT cell vs Naive T cell + Memory T cell + CD8 T cell + ... 5.45 ± 0.51 3–5 5 Naive CD8 T cell vs Memory CD8 T cell 4.73 ± 0.87 3–8 6 Monocyte vs Granulocyte 4.22 ± 0.37 6–7 7 T/NK cell vs B cell 4.09 ± 0.67 5–8 8 Dendritic cell vs Granulocyte + Monocyte 3.13 ± 0.44 7–10 9 Gamma delta T cell vs Naive T cell + Memory T cell + CD8 T cell + ... 2.83 ± 0.33 7–13 10 Cycling T cell vs Naive T cell + Memory T cell + CD8 T cell 2.66 ± 0.42 8–14 HCC (liver) 1 Erythrocyte/Megakaryocyte vs Myeloid + Lymphoid + Hematopoietic precursor 10.08 ± 0.32 12 B cell precursor vs Plasma cell + INF-activated naive B cell + Memory B cell + ... 6.52 ± 0.32 2–4 3 Hematopoietic precursor cell vs Myeloid cell + Lymphoid cell 6.34 ± 0.55 2–3 4 Venous EC vs LSEC 5.45 ± 0.85 2–8 5 Granulocyte-monocyte progenitor vs Multipotent progenitor + Megakaryocyte + ... 4.37 ± 0.51 5–7 6 Immune cell vs Cycling villous cytotrophoblast + CCL19/21 pericyte + Muscle + ... 4.37 ± 0.39 4–8 7 MHCII high CD14 monocyte vs MHCII low CD14 monocyte 3.97 ± 0.38 5–10 8 Intermediate EPCAM+ erythroblast vs Late hemoglobin+ erythroblast 3.78 ± 0.40 6–10 9 Alveolar macrophage vs Kupffer cell 3.52 ± 0.27 7–10 10 CD14 monocyte vs Placenta defensin+ monocyte + Placenta CAMP+ monocyte + ... 3.22 ± 0.34 8–12 
+
+Table 15. Tree-level inference : HMP . Importance (mean ± std) aggregated by depth (cumulative), subtree (phylum), node, and taxon. Accuracy uses only features at that level. 
+
+body sites (5) body subsites (18) Structure Component Acc Imp Component Acc Imp 
+
+Depth 
+
+≤0 (coarsest) .87 ± .01 6.8 ± 0.2% ≤0 (coarsest) .42 ± .01 4.8 ± 0.1% 
+
+≤1 .92 ± .01 12 ± 0.2% ≤1 .52 ± .01 12 ± 0.2% 
+
+≤2 .96 ± .01 47 ± 0.3% ≤2 .59 ± .03 44 ± 0.3% 
+
+≤3 .96 ± .01 86 ± 0.5% ≤3 .62 ± .02 87 ± 0.0% 
+
+≤4 (all) .96 ± .00 100% ≤4 (all) .62 ± .01 100% Subtree Firmicutes .95 ± .01 47 ± 0.7% Firmicutes .55 ± .02 36 ± 0.3% Proteobacteria .87 ± .01 20 ± 0.3% Proteobacteria .44 ± .02 27 ± 0.3% Actinobacteria .91 ± .01 19 ± 0.6% Actinobacteria .45 ± .02 22 ± 0.2% Bacteroidetes .82 ± .01 6.1 ± 0.2% Bacteroidetes .35 ± .01 7.4 ± 0.1% Node Actinomycetales – 11 ± 0.2% Actinomycetales – 12 ± 0.2% Lactobacillales – 9.1 ± 0.2% Lachnospiraceae – 8.4 ± 0.2% Gammaproteobacteria – 8.0 ± 0.2% Clostridiales – 3.8 ± 0.1% Taxon Streptococcus – 3.1% Oribacterium – 1.0% Lactococcus – 3.1% Corynebacterium – 1.0% Pasteurella – 2.6% Lactococcus – 1.0% Lactobacillus – 2.3% Streptococcus – 1.0% 
+
+23 Tree-Structured Orthonormal Decomposition of the Aitchison Simplex 
+
+Table 16. Tree-level inference : cMD3 . Importance (mean ± std) aggregated by depth (cumulative) and taxon across westernization, age, healthy/disease, body site, and stool disease tasks. 
+
+westernized (2) age category (5) healthy/disease (2) body site (6) stool disease (2) Struct. Comp. Acc Imp Comp. Acc Imp Comp. Acc Imp Comp. Acc Imp Comp. Acc Imp 
+
+Depth 
+
+≤0 .93 0.1% ≤0 .71 1.3% ≤0 .61 0.3% ≤0 .91 0.4% ≤0 .58 0.3% 
+
+≤1 .94 0.9% ≤1 .76 4.4% ≤1 .64 1.8% ≤1 .98 3.2% ≤1 .62 1.7% 
+
+≤2 .94 1.9% ≤2 .77 6.4% ≤2 .65 3.2% ≤2 .98 5.2% ≤2 .62 3.2% 
+
+≤3 .96 5.3% ≤3 .79 11% ≤3 .67 6.4% ≤3 .98 10% ≤3 .65 6.4% 
+
+≤4 .96 9.1% ≤4 .79 18% ≤4 .68 12% ≤4 .99 14% ≤4 .66 12% 
+
+≤5 .96 24% ≤5 .80 35% ≤5 .68 31% ≤5 .99 23% ≤5 .66 31% 
+
+≤6 .97 100% ≤6 .80 100% ≤6 .68 100% ≤6 .99 100% ≤6 .67 100% Taxon Prevotella – 1.7% Blastocystis – 0.6% Lachnoclost. – 0.6% Bacillus – 1.4% Lachnoclost. – 0.6% Murimonas – 1.4% Agathobaculum – 0.5% Bifidobact. – 0.3% Cutibacterium – 1.2% Gemella – 0.4% Tissierellia – 1.4% Staphylococcus – 0.5% Enterococcus – 0.3% Malassezia – 1.1% Bifidobact. – 0.3% Bacteroides – 1.4% Ruminococcus – 0.5% Coprococcus – 0.3% Arcobacter – 1.1% Coprococcus – 0.3% 
+
+Table 17. Tree-level inference : DISCO . Importance (mean ± std) aggregated by depth (cumulative), subtree, node, and cell type across COVID-19, leukemia, and HCC tasks. 
+
+COVID-19 (blood) leukemia (blood) HCC (liver) Structure Component Acc Imp Component Acc Imp Component Acc Imp 
+
+Depth 
+
+≤0 .50 6.9 ± 0.3% ≤0 .62 4.6 ± 0.4% ≤0 .88 8.1 ± 0.7% 
+
+≤1 .56 11 ± 0.4% ≤1 .88 26 ± 0.5% ≤1 .91 38 ± 1.5% 
+
+≤2 .64 20 ± 0.6% ≤2 .91 43 ± 1.4% ≤2 .91 55 ± 0.8% 
+
+≤3 .73 50 ± 0.5% ≤3 .94 68 ± 0.9% ≤3 .91 77 ± 0.5% 
+
+≤4 .77 76 ± 0.8% ≤4 .94 86 ± 1.1% ≤4 .91 96 ± 0.3% 
+
+≤5 .77 97 ± 0.2% ≤5 .94 98 ± 0.2% ≤5 .91 99 ± 0.1% 
+
+≤6 (all) .77 100% ≤6 (all) .94 100% ≤6 (all) .91 100% Subtree Immune cell .80 93 ± 0.3% Immune cell .93 95 ± 0.4% Immune cell .92 79 ± 1.4% Epithelial cell .51 0.0% Fibroblast .50 0.0% Endothelial cell .80 7.8 ± 1.0% Fibroblast .50 0.0% Epithelial cell .51 0.0% Epithelial cell .78 4.1 ± 0.4% Node T cell – 23 ± 0.6% Immune cell – 22 ± 0.5% Immune cell – 19 ± 1.0% CD4 T cell – 18 ± 0.8% T cell – 16 ± 0.4% Hema. precursor – 9.6 ± 0.8% T/NK cell – 10 ± 0.6% T/NK cell – 14 ± 0.3% Endothelial cell – 7.8 ± 1.0% B cell – 7.2 ± 0.6% Myeloid cell – 7.9 ± 0.5% B cell – 7.0 ± 0.4% Cell type Treg cell – 8.5% Cycling T/NK cell – 11.3% GMP – 4.4% Cycling T/NK cell – 6.5% MAIT cell – 5.0% Intermediate erythroblast – 4.2% Tfh cell – 6.2% Naive CD8 T cell – 4.1% Late erythroblast – 4.2% Plasma cell – 4.8% Gamma delta T cell – 3.2% MHCII high monocyte – 3.6% 
+
+24

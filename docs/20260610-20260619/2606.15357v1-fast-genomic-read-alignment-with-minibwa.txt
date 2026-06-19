@@ -1,0 +1,750 @@
+Title: Fast genomic read alignment with minibwa
+
+URL Source: https://arxiv.org/pdf/2606.15357v1
+
+Published Time: Tue, 16 Jun 2026 00:43:58 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+TBD, 2026, pp. 1–7 
+
+doi: TBD 
+
+Advance Access Publication Date: Day Month Year Preprint 
+
+## PREPRINT 
+
+# Fast genomic read alignment with minibwa 
+
+# Heng Li ,1,2,3, ∗ and Nils Homer 4 
+
+> 1
+
+Department of Data Science, Dana-Farber Cancer Institute, 450 Brookline Ave, Boston, MA 02215, USA, 2 Department of Biomedical Informatics, Harvard Medical School, 10 Shattuck St, Boston, MA 02215, USA, 3 Broad Institute of MIT and Harvard, 415 Main St, Cambridge, MA 02142, USA, and 4 Fulcrum Genomics LLC, 240 Elm Street, Somerville, MA, 02144, USA  
+
+> ∗
+
+Corresponding author. hli@ds.dfci.harvard.edu 
+
+# Abstract 
+
+Motivation: BWA-MEM remains a popular short-read mapper especially for the purpose of variant calling. Several groups have accelerated this algorithm as it has been the performance bottleneck of many current workflows. However, constrained by the original design, these drop-in replacements could only achieve limited speedup. Breaking changes to BWA-MEM are required for further improvement. 
+
+Results: We developed minibwa for aligning short and accurate long reads against a reference genome. It combines BWA-MEM variable-length seeding with minimap2 chaining and base alignment. It speeds up BWA-MEM2 further with additional prefetch for seeding, new heuristics to skip unnecessary mate rescue and reduced effort in highly repetitive regions where reads would anyway be wrongly mapped due to structural changes. Minibwa is about four times as fast as BWA-MEM and over twice as fast as BWA-MEM2 at comparable accuracy. It also natively supports directional bisulfite sequencing data to high mapping accuracy. 
+
+Availability and implementation: https://github.com/lh3/minibwa 
+
+# 1. Introduction 
+
+Read alignment is indispensable to most reference-based sequence analyses such as variant calling and methylation profiling. Although over 100 read mappers have been published (Alser et al., 2021; Prousalis et al., 2026), only several are maintained and remain widely used. The two most notable short-read mappers for DNA sequencing data are Bowtie2 (Langmead and Salzberg, 2012) and BWA-MEM (Li, 2013), both based on FM-index (Ferragina and Manzini, 2000). While Bowtie2 is equally popular for general purposes, BWA-MEM is more often used for variant calling. BWA-MEM is the primary performance and cost bottleneck in variant calling pipelines. Given that human Whole-Genome Sequencing (WGS) accounts for the vast majority of sequencing data volume, this inefficiency is particularly pronounced. There have been several efforts to accelerate the original BWA-MEM algorithm while maintaining identical output. BWA-MEM2 (Vasimuddin et al., 2019) revamps the memory layout of FM-index and accelerates extension alignment with Single Instruction Multiple Data (SIMD) instructions. It is 50–100% faster than BWA-MEM. BWA-MEME (Jung and Han, 2022) further speeds up BWA-MEM2 seeding with learned indices. BWA-MEM3 is a new fork of BWA-MEM2 with speedup from latency hiding and additional fast paths to skip full dynamic programming. Sentieon BWA is a proprietary drop-in replacement of BWA-MEM. Parabricks (O’Connell et al., 2023; Zhu et al., 2025) ports BWA-MEM to GPU. It does not promise identical output but still produces alignment qualitatively equivalent to BWA-MEM. However, designed more than a decade ago, BWA-MEM has several limitations that prevent further optimization without changing the output. First, BWA-MEM uses a complex algorithm to seed alignment (Li, 2012) which is slower than a recent algorithm (Gagie, 2024; Li, 2024). Second, BWA-MEM chaining is heuristic and inferior to the minimap2 chaining algorithm (Li, 2018). It does not work well for reads longer than 500bp, which will become more common with Roche’s SBX sequencing technology (Kokoris et al., 2025) — the boundary between short and long reads is blurring. Third, BWA-MEM uses a non-SIMD-based extension algorithm with intricate boundary conditions. This complicates SIMD-based equivalence in BWA-MEM2 and increases maintenance burden. Fourth, BWA-MEM tries too hard in highly repetitive regions. Due to rapid evolution in centromeres (Gao et al., 2025), exact base alignment in centromeres is challenging even with complete assemblies (Bzikadze et al., 2022). Exhaustive alignment in centromeres is a waste of effort as we cannot accurately place centromeric short reads anyway due to large structural differences. There is still room for improvement if breaking changes can be introduced. BWA-MEM does not natively support bisulfite sequencing (BS-seq) reads. BWA-Meth (Pedersen et al., 2014) is a wrapper around stock BWA-MEM that uses the so-called 3-base strategy to align directional BS-seq data. Without touching the BWA-MEM source code, BWA-Meth wastes compute on unsuccessful extension alignment and breaks the pairing logic. BISCUIT (Zhou et al., 2024) addresses these issues by customizing the BWA-MEM source code. As a tradeoff, though, the deep code integration makes it challenging to adopt the faster BWA-MEM2 implementation. Combining an efficient mapping algorithm with the BISCUIT strategy would yield an even more capable BS-seq mapper. In this article, we will describe minibwa, the next iteration of BWA-MEM. Minibwa aligns standard WGS short reads and Hi-C reads like BWA-MEM and additionally maps accurate long reads like minimap2 and it natively supports BS-seq data. 
+
+© The Author 2026. Published by Oxford University Press. All rights reserved. For permissions, please e-mail: journals.permissions@oup.com 
+
+1
+
+> arXiv:2606.15357v1 [q-bio.GN] 13 Jun 2026
+
+2 Fast read alignment with minibwa  
+
+> Table 1. Relationship with BWA-MEM, ropebwt3 and minimap2
+
+Component Source Modification FM-index BWA-MEM Near identical SMEM ropebwt3 Reimplemented and batched SA query ropebwt3 Batched differently Seeding BWA-MEM Different algorithm Chaining minimap2 Adapted for variable-length seeds Alignment minimap2 More frequent ungapped fast path Pairing BWA-MEM Ungapped fast path 
+
+# 2. Methods 
+
+In a nutshell, minibwa is a hybrid of BWA-MEM (Li, 2013) and minimap2 (Li, 2018), combining BWA-MEM variable-length seeding with minimap2 chaining and SIMD-based alignment. It additionally adapts the ropebwt3 (Li, 2024) algorithm for finding supermaximal exact matches (SMEMs). Table 1 summarizes the relationship between minibwa and other algorithms. BWA-MEM2 also batches suffix array (SA) query and implements SIMD-based alignment. Further performance gains in minibwa primarily come from the new SMEM algorithm, more frequent use of ungapped alignment and reduced effort in highly repetitive regions such as centromeres. For the completeness of the method section, we will describe the basic theory on FM-index in brief. Additional theoretical background can be found in Li (2024). Note that the original BWA paper (Li and Durbin, 2009) used closed intervals but here we adopt half-closed-half-open intervals for consistency with our recent work. 
+
+# 2.1. Definitions 
+
+Σ ≜ {A, C, G, T} is the DNA alphabet with lexicographical order A <
+
+C < G < T. P ∈ Σ∗ is a string of length |P |. P [i], 0 ≤ i < |P |, is the i-the symbol and P [i, j ) is the ( j − i)-long substring starting at position i. Operator ◦ concatenates two strings. It may be omitted if concatenation is apparent in the context. For a ∈ Σ, a is the Watson-Crick complement of a. P is the reverse complement of string P .
+
+R ∈ Σ∗ is the reference genome with all contigs concatenated and ambiguous bases converted to random bases. T ≜ R ◦ R ◦ $further concatenates R and its reverse complement with a trailing 
+
+sentinel $ that is smaller than all symbols in Σ. For convenience, let n = |T | and T [−1] = T [n − 1] = $. The suffix array (SA ) of T
+
+is an integer array S where S(i) is the position of the i-th smallest suffix of T . B is the Burrows-Wheeler Transform (BWT ) of T . By definition, B[i] = T [S(i) − 1]. The double-strand suffix array interval (ds-interval ) of P is a 3-tuple (lo( P ), lo( P ), occ( P )) with lo( P ) ≜ |{ i : T [i, n ) < P }| and occ( P ) ≜ |{ i : T [i, i + |P |) = P }| . If the ds-interval of P is ( k, k ′, s ), function BackwardExt() in Algorithm 1 calculates the ds-interval of aP and ForwardExt() calculates the ds-interval of P a , where 
+
+Algorithm 1 Backward and forward extension 
+
+1: function BackwardExt (( k, k ′, s ), a )
+
+2: for all b < a do ▷ b can be $
+
+3: k′ ← k′ + [π(b, k + s) − π(b, k )]
+
+4: s ← π(a, k + s) − π(a, k )
+
+5: k ← π(a, k )
+
+6: return (k, k ′, s )
+
+7: function ForwardExt (( k, k ′, s ), a )
+
+8: (k′, k, s ) ←BackwardExt (( k′, k, s ), a )
+
+9: return (k, k ′, s )
+
+π(a, k ) ≜ |{ i : B[i] < a }| + |{ i < k : B[i] = a}| is the LF-mapping. Please see Li (2024) for the proof of this algorithm. 4-tuple ( P, i, j, (k, k ′, s )) is a ( ℓ, c )-match if ( k, k ′, s ) is the ds-interval of P [i, j ), j − i ≥ ℓ and s ≥ c; it is a ( ℓ, c )-SMEM if there does not exist another ( ℓ, c )-match ( P [i′, j ′), (˜k, ˜k′, ˜s)) such that i′ ≤
+
+i < j ≤ j′. Intuitively, a ( ℓ, c )-match involves a P ’s substring that is ≥ ℓ in length and occurs ≥ c times in T ; a ( ℓ, c )-SMEM is a ( ℓ, c )-match that is not contained in other ( ℓ, c )-matches on the query string. Section 2.5 will describe the algorithm to find ( ℓ, c )-SMEMs. 
+
+# 2.2. The memory layout of BWT 
+
+Minibwa and BWA-MEM encode the BWT the same way. They split 
+
+B into blocks. In each block, the first four 64-bit integers store the counts of A/C/G/T ahead of the block; the next four 64-bit integers encode 128bp sequences in B in the 2-bit encoding. Each block takes 64 bytes both on disk and in memory. When calculating π(a, k ), minibwa finds the address of the block that contains B[k], reads the counts at the beginning of the block and scans the encoded sequences to get the exact count up to k. The BWT of the human genome takes ∼3 GB in RAM and is too large to fit the CPU cache. Most calls to π(a, k ) incur cache misses. 
+
+# 2.3. A brief introduction to prefetching 
+
+A CPU takes hundreds of CPU cycles to access data in RAM but only several cycles to read data in the L1 cache. If the data needed for computing is in RAM, the CPU has to wait for hundreds of CPU cycles before doing actual work. Take the standard backward search as a case study. With the classical algorithm, we process each query string in serial (Fig. 1a). Because the backward search at query position (2 , 2) depends on the result on (2 , 3), the CPU has to wait for hundreds of CPU cycles to fetch data, even though the computation itself only takes tens of CPU cycles approximately. A more efficient approach is to decouple data access and computation by batching query strings (Fig. 1b). For example, after backward extension at (2 , 3), we will know the address of data needed for computing (2 , 2). We can prefetch the data at this address, indicated by the red arrow from (2 , 3) to (2 , 2), and move onto position (3 , 3). When we come to (2 , 2) following the black arrows, the data will be ready in cache and the CPU can perform backward extension of (2 , 2) without waiting for the data. This way we keep the CPU busy and effectively hide the latency of accessing data in RAM. (1, 5) 
+
+(1, 4) 
+
+(1, 3) 
+
+(1, 2) 
+
+(1, 1) 
+
+(2, 5) 
+
+(2, 4) 
+
+(2, 3) 
+
+(2, 2) 
+
+(2, 1) 
+
+(3, 5) 
+
+(3, 4) 
+
+(3, 3) 
+
+(3, 2) 
+
+(3, 1) 
+
+(1, 5) 
+
+(2, 5) 
+
+(3, 5) 
+
+(1, 4) 
+
+(2, 4) 
+
+(3, 4) 
+
+Standard 
+
+backward search 
+
+Batched with 
+
+prefetch 
+
+(1, 3) 
+
+(2, 3) 
+
+(3, 3) 
+
+(1, 2) 
+
+(2, 2) 
+
+(3, 2) 
+
+(1, 1) 
+
+(2, 1) 
+
+(3, 1) 
+
+## (a) (b)           
+
+> Fig. 1. Example of memory prefetch. (a) Standard backward search for three 5bp query strings. (r, i ) denotes query rat its position i.Black arrows follow the computation order on a CPU. Red arrows indicate data access in RAM. (b) Batched backward search with prefetch.
+
+Fast read alignment with minibwa 3
+
+Algorithm 2 Retrieve chromosomal positions 
+
+1: ▷ S : suffix array with values only at a multiple of r ◁
+
+2: ▷ E : set of suffix array positions ◁
+
+3: function LocateSlow (S, r, E )
+
+4: F ← ∅ 
+
+5: for k ∈ E do 
+
+6: i ← 0
+
+7: while k mod r̸ = 0 do 
+
+8: k ← π(B[k], k )
+
+9: i ← i + 1 
+
+10: F ← F ∪ { i + S(k)}
+
+11: return F ▷ Set of chromosomal positions 
+
+12: function BatchLocate (S, r, E )
+
+13: i ← 0; F ← ∅ 
+
+14: while E̸ = ∅ do 
+
+15: E′ ← ∅ 
+
+16: for k ∈ E do 
+
+17: if k mod r = 0 then ▷ k is a multiple of r
+
+18: F ← F ∪ { i + S(k)}
+
+19: else 
+
+20: l ← π(B[k], k )
+
+21: E′ ← E′ ∪ { l}
+
+22: Prefetch the memory block containing B[l]
+
+23: i ← i + 1; E ← E′
+
+24: return F ▷ Set of chromosomal positions 
+
+# 2.4. Batched locate operation 
+
+Suppose the ds-interval of P is ( k, k ′, s ). [ k, k +s) only gives positions in the SA coordinate, while {S(i) : k ≤ i < k + s} is the set of P ’s positions in T . To reduce memory with FM-index, we only store S(i)when i is a multiple of parameter r. The “locate” operation finds the chromosomal positions of [ k, k + s) given a sampled suffix array. Function LocateSlow() in Algorithm 2 shows the canonical implementation of the locate operation which processes each SA position in turn. Line 8 triggers data access and computation at the same time. Function BatchLocate() leverages the latency hiding technique. Line 20 corresponds to black arrows in Fig. 1b where the CPU does work; line 21 corresponds to red arrows where prefetch happens. Furthermore, when the input set E consists of contiguous integers from a ds-interval, line 20 will hit cache often and also greatly reduce cache misses. To evaluate the performance of the two algorithms in Algorithm 2, we filled E with 20 random integers in range [0 , n ). On the FM-index of GRCh38, BatchLocate() was over four times as fast as LocateSlow() with identical output. Latency hiding is an effective technique. 
+
+# 2.5. Finding SMEMs 
+
+Minibwa uses ( ℓ, c )-SMEMs to seed alignment. Generalizing Gagie (2024) to the case of c > 1, Li (2024) provides an algorithm to find ( ℓ, c )-SMEMs given one query string. This algorithm involves multiple rounds of forward and backward extensions (Algorithm 1). For almost every extension, the CPU has to wait for the result of previous extension and then fetch the needed memory to cache. The memory latency is the bottleneck. Algorithm 3 alleviates this issue by batching query strings. Overall, it uses a queue Q to organize operations on all queries in a pipeline. Same as the original serial algorithm (Li, 2024), the batched version tests if P [i, i + ℓ) is a match with backward extension (line 7–11 in stage 1). If it is not a match, we jump and try again (line 32); otherwise, we use forward extension to find the end of the SMEM starting at i (line 12–21 in stage 2). A second 
+
+Algorithm 3 Find ( ℓ, c )-SMEMs in string set P
+
+1: function BatchFindSMEM (P, ℓ, c )
+
+2: for all P ∈ P do ▷ initialize queue Q
+
+3: if ℓ − 1 < |P | then 
+
+4: Q. push(1 , P, 0, ℓ − 1, (0 , 0, |B|)) 
+
+5: while Q is not empty do 
+
+6: (u, P, i, j, (k, k ′, s )) ← Q. shift() ▷ take out the head 
+
+7: if u = 1 then ▷ stage 1: backward extension 
+
+8: if j < i then ▷ move to stage 2 
+
+9: Q. push(2 , P, i, i + ℓ, (k, k ′, s )) 
+
+10: else 
+
+11: BackStep (Q, u, P, i, j, (k, k ′, s ), ℓ, c )
+
+12: else if u = 2 then ▷ stage 2: forward extension 
+
+13: if j = |P | then ▷ reach the end of P
+
+14: Output ( P, i, j, (k, k ′, s )) ▷ report an SMEM 
+
+15: continue 
+
+16: (l, l ′, t ) ←ForwardExt (( k, k ′, s ), P [j]) 
+
+17: if t ≥ c then ▷ 1-step forward ext. 
+
+18: Q. push(2 , P, i, j + 1 , (l, l ′, t )) 
+
+19: else ▷ move to stage 3 
+
+20: Output ( P, i, j, (k, k ′, s )) ▷ report an SMEM 
+
+21: Q. push(3 , P, i, j, (0 , 0, |B|)) 
+
+22: else if u = 3 then ▷ stage 3: backward ext. again 
+
+23: if j ≤ i then ▷ back to stage 1 
+
+24: Q. push(1 , P, j + 1 , j + ℓ, (0 , 0, |B|)) 
+
+25: else 
+
+26: BackStep (Q, u, P, i, j, (k, k ′, s ), ℓ, c )
+
+27: function BackStep (Q, u, P, i, j, (k, k ′, s ), ℓ, c ) ▷ helper func. 
+
+28: (l, l ′, t ) ←BackwardExt (( k, k ′, s ), P [j]) 
+
+29: if t ≥ c then 
+
+30: Q. push( u, P, i, j − 1, (l, l ′, t )) 
+
+31: else if j + ℓ < |P | then 
+
+32: Q. push(1 , P, j + 1 , j + ℓ, (0 , 0, |B|)) round of backward extension is applied to find the start of the next SMEM (line 22–26 in stage 3). Minibwa prefetches memory blocks containing B[l] and B[l′] after line 18 and 30. It additionally precomputes the ds-intervals of all 10-mers to reduce the number calls to BackStep (). BWA-MEM uses an older algorithm to find SMEMs (Li, 2012). On real short reads without batching, the minibwa algorithm is 10% faster to find (19 , 1)-SMEMs due to the 10-mer cache. With batching, minibwa is ∼2.5 times as fast. Minibwa is ∼4.6 times as fast as BWA-MEM for finding (19 , 2)-SMEMs. The gap is larger because Algorithm 3 skips short SMEMs more efficiently. 
+
+# 2.6. Seeding, chaining and base alignment 
+
+Minibwa seeds a query sequence P in two rounds. It first finds all (19 , 1)-SMEMs. Suppose ( P, i, j, (k, k ′, s )) is a resulting SMEM. If 
+
+j − i ≥ 38 and s ≤ 10, minibwa looks for ( ⌊(j − 1) /2⌋, s + 1)-SMEMs within P [i, j ). During early development of BWA-MEM, we tried the same seeding algorithm. However, as the old SMEM-finding algorithm is slow for (19 , 2)-SMEMs in the second round, we ended up with a different seeding strategy in BWA-MEM. Minibwa adapted the minimap2 chaining algorithm (Li, 2018) for variable-length seeds. It retains up to 50 best chains for a short read and uses the minimap2 algorithm to close gaps between seeds or extends the first or the last seeds. Minibwa first tries ungapped alignment. If that alignment contains many mismatches, minibwa falls back to SIMD-based dynamic programming (DP) with dual-gap penalty (Suzuki and Kasahara, 2018). For WGS short reads, the DP step is the performance bottleneck, taking ∼35% of total CPU time. 4 Fast read alignment with minibwa 
+
+Minibwa uses SSE4.1 intrinsics on x86 CPUs or NEON intrinsics on ARM CPUs. We experimented an AVX2-based implementation but did not see clear improvement. In comparison, BWA-MEM uses a heuristic chaining algorithm that is less accurate and does not work well for long reads. It performs extension alignment from each seed but does not attempt to close gaps between seeds. BWA-MEM uses the standard affine gap penalty and usually fills a smaller portion of the DP matrix given identical input sequences. It is less tolerant with long gaps. On the other hand, BWA-MEM tends to test more chains and still pays more effort overall for reads in centromeres or acrocentric short arms. 
+
+# 2.7. Paired-end mapping 
+
+Minibwa finds properly paired reads using the same logic as BWA-MEM. If a read is mapped but its mate is not mapped nearby, minibwa locally rescues the mate in a window close to the mapped read. On real data, this involves Smith-Waterman alignment (Smith and Waterman, 1981; Farrar, 2007) between a ∼150 bp read P and a reference substring R of several hundred basepairs. Unlike BWA-MEM that always initiates full alignment, minibwa prefilters the read-reference pair by testing q-mer matches ( q = 7). More exactly, 
+
+Mt = |{ (i, j ) : P [i, i + q) = R[j, j + q) and j − i = t}| 
+
+is the number of q-mer matches between P and R[t, t +|P |). max t Mt
+
+approximates the best ungapped alignment between P and R.Minibwa only initiates Smith-Waterman if max t Mt ≥ 10, effectively reducing unsuccessful alignment. It also applies mate rescue to fewer candidates in comparison to BWA-MEM. Overall, minibwa might gain considerable performance at this step. 
+
+# 2.8. Parameter setting based on read lengths 
+
+BWA-MEM is primarily developed for short reads. While minimap2 supports both short and long reads, users have to specify a preset specific for either short or long reads but not both. This is not ideal for mixed short and long reads. Minibwa adjusts several parameters based on the read length ℓ using the following formula: 
+
+θ(ℓ) = θl − (θl − θs) · 2− max( ℓ−ℓmin ,0)  
+
+> ℓmid −ℓmin
+
+where θl is the long-read value and θs is the short-read value. We hardcode ℓmin = 100 and ℓmid = 2000. The length-adjusted parameter θ(ℓ) reaches ( θs + θl)/2 at ℓ = ℓmid .
+
+# 2.9. Mapping directional bisulfite sequencing reads 
+
+The minibwa BS-seq read mapping algorithm is heavily influenced by BWA-Meth (Pedersen et al., 2014) and BISCUIT (Zhou et al., 2024). Like BWA-Meth, minibwa concatenates the C-to-T converted reference genome and the G-to-A converted reference genome and constructs one FM-index for both strands. This index consists of four copies of the reference genome: forward C-to-T converted genome, forward G-to-A genome, reverse G-to-A converted genome and reverse C-to-T genome. Given a BS-seq read pair, minibwa converts all C bases on read 1 to T and converts all G bases on read 2 to A. It finds seeds against the converted FM-index. A seed on read 1 is only retained if it comes from the forward C-to-T genome or the reverse G-to-A genome; similarly, a seed on read 2 is retained if it comes from the forward G-to-A or the reverse C-to-T genome. Due to base conversion, a reference T is considered a match to a read C, but this should not happen without SNPs. To avoid such T-to-C mismatches, minibwa retrieves the original reference and the original read sequences in each seed match, splits the seed match at T-to-C mismatches, and discards resulting split seeds shorter than 19 bp. Minibwa applies chaining normally. Like BISCUIT, it performs base alignment and mate rescue using the original reference and read sequences but with an asymmetric scoring matrix that permits C-to-T mismatches and penalizes T-to-C mismatches. 
+
+# 3. Results 
+
+We evaluated the mapping accuracy on simulated reads and measured the performance on real data. We tested BWA-MEM v0.7.19 (Li, 2013), BWA-MEM2 v2.2.1 (Vasimuddin et al., 2019), BWA-MEM3 v0.2.1 ( https://github.com/fg-labs/ bwa-mem3 ), Bowtie2 v2.5.5 (Langmead and Salzberg, 2012), minimap2 v2.30 (Li, 2018), strobealign v0.17.0 (Sahlin, 2022) and minibwa-rs ( https://github.com/henriksson-lab/minibwa-rs ) for short reads, rammap v1.0 (Wang and Li, 2026) and Winnowmap2 v2.03 (Jain et al., 2020, 2022) for long reads and BISCUIT v1.8.1 (Zhou et al., 2024), Bismark v0.25.1 (Krueger and Andrews, 2011) and BWA-Meth v0.2.9 (Pedersen et al., 2014) for BS-seq reads. Minibwa-rs is a Rust rewrite of minibwa that outputs identical alignment on several test datasets. Most code was written by directly coding agents. All tools were run on a Linux server equipped with two Xeon Gold 6130 CPUs at 2.10GHz. We used the recommended setting of each tool except for applying option “-b1 -i -I300,30 ” to BISCUIT which would assume non-directional input and ignore read pairing by default. 
+
+# 3.1. Mapping accuracy on simulated data 
+
+We simulated short reads using mason v2.0.9 (Holtgrewe, 2010) with “--illumina-read-length 150 --illumina-prob-mismatch-scale 2.5 ”. We simulated long reads using Badread v0.4.2 (Wick, 2019) with the default option for Nanopore reads and option “--error model pacbio2021 --qscore model pacbio2021 --length 15000,3000 --identity 27,3 ” for HiFi reads. We measured mapping errors by comparing the simulated position to the mapping position of each read (Fig. 2), stratified by mapping quality. Amapper of higher accuracy tends to yield a curve closer to the upper left corner. BWA-MEM is slightly more accurate than minibwa for WGS short-read alignment (Fig. 2a and 2b). The difference is primarily driven by centromeric or acrocentric regions (Fig. 2b versus 2c) as minibwa extends fewer reads and rescues fewer candidates in such regions (Section 2.6 and 2.7). We will show later that the difference in theoretical accuracy does not translate into a difference in variant calling accuracy (Seciton 3.3; Table 2). Minibwa competes with minimap2 and Winnowmap2 for long-read mapping (Fig. 2e and 2f). All BS-seq aligners in Fig. 2d use the 3-base strategy and are therefore also capable of mapping normal WGS reads. Both BWA-Meth and BISCUIT are built on top of BWA-MEM. BWA-Meth is not as accurate due to its limitations mentioned in Introduction. Bismark is known to map fewer reads than BWA-Meth (Gong et al., 2022). It is unclear why BISCUIT is less accurate than minibwa despite using a similar strategy (Section 2.9). Notably, without “ -i -I300,30 ”, BISCUIT would force reads to chromosomal contigs in GRCh38 and disable read pairing. Its accuracy would be a lot lower, comparable to BWA-Meth. We note that on real data, most false read alignment at high mapping quality is caused by large structural variants between individuals. For example, if the reference genome has one copy of a gene but the sequenced sample has an extra copy, all reads from the extra copy will be mismapped at high mapping quality. The Fast read alignment with minibwa 582 
+
+84 
+
+86 
+
+88 
+
+90 
+
+92 
+
+94 
+
+96 
+
+98 
+
+10 -8 10 -7 10 -6 10 -5 10 -4 10 -3 10 -2 10 -1 
+
+minibwa 
+
+bwa-mem 
+
+bowtie2 
+
+minimap2 
+
+strobealign 
+
+> % aligned
+
+Accumulative error rate (#wrong / #aligned) 
+
+Simulated 2 × 150bp to GRCh38 (a) (b) (c) 
+
+(d) (e) (f) 
+
+82 
+
+84 
+
+86 
+
+88 
+
+90 
+
+92 
+
+94 
+
+96 
+
+98 
+
+10 -8 10 -7 10 -6 10 -5 10 -4 10 -3 10 -2 10 -1 
+
+minibwa 
+
+bwa-mem 
+
+bowtie2 
+
+minimap2 
+
+strobealign 
+
+> % aligned
+
+Accumulative error rate (#wrong / #aligned) 
+
+Simulated 2 × 150bp to CHM13 
+
+82 
+
+84 
+
+86 
+
+88 
+
+90 
+
+92 
+
+94 
+
+96 
+
+98 
+
+10 -8 10 -7 10 -6 10 -5 10 -4 10 -3 10 -2 10 -1 
+
+minibwa 
+
+bwa-mem 
+
+bowtie2 
+
+minimap2 
+
+strobealign 
+
+> % aligned
+
+Accumulative error rate (#wrong / #aligned) 
+
+2 × 150bp to CHM13 excl. centromeres 
+
+50 
+
+55 
+
+60 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+95 
+
+10 -6 10 -5 10 -4 10 -3 10 -2 
+
+minibwa 
+
+minimap2 
+
+winnowmap2 
+
+> % aligned
+
+Accumulative error rate (#wrong / #aligned) 
+
+Simulated HiFi reads to HG002 
+
+92 
+
+93 
+
+94 
+
+95 
+
+96 
+
+97 
+
+98 
+
+99 
+
+100 
+
+10 -6 10 -5 10 -4 10 -3 10 -2 
+
+minibwa (HiFi) 
+
+minimap2 (HiFi) 
+
+winnowmap2 (HiFi) 
+
+minibwa (ONT) 
+
+minimap2 (ONT) 
+
+winnowmap2 (ONT) 
+
+> % aligned
+
+Accumulative error rate (#wrong / #aligned) 
+
+Simulated long reads to CHM13 
+
+82 
+
+84 
+
+86 
+
+88 
+
+90 
+
+92 
+
+94 
+
+96 
+
+98 
+
+10 -8 10 -7 10 -6 10 -5 10 -4 10 -3 10 -2 10 -1 
+
+minibwa 
+
+bwa-meth 
+
+biscuit 
+
+bismark 
+
+> % aligned
+
+Accumulative error rate (#wrong / #aligned) 
+
+2 × 150bp reads to GRCh38 (3-base) 
+
+Fig. 2. Mapping accuracy measured on simulated reads. Short and long reads are simulated from GRCh38, T2T-CHM13 or the HG002 diploid genomes and are mapped to the corresponding source genomes with various read aligners. Suppose a read is originated from genomic interval Gs in simulation and is mapped to interval Ga by an aligner. It is considered mapped correctly if |Gs ∩ Ga |/|Gs ∪ Ga | ≥ 10%. Each point in the figures gives the fraction of mapped reads and the fraction of correctly mapped at a mapping quality threshold. (a) 2 × 150 bp paired-end reads simulated from GRCh38. (b) 
+
+2 × 150 bp paired-end reads simulated from T2T-GRCh38. (c) Same reads in (b) but excluding reads from centromeres or acrocentric short arms. (d) 
+
+Same reads in (a) but mapped in the methylation mode. (e) HiFi and Nanopore reads simulated from T2T-CHM13. (f) HiFi reads simulated from the diploid HG002 genome consisting of two haplotypes. 
+
+theoretical accuracy as is shown in Fig. 2 may not reflect accuracy in downstream data processing. Nevertheless, such theoretical analysis helps to reveal subtle design flaws and hidden bugs in the implementation. It is invaluable to the development of minibwa. 
+
+# 3.2. Mapping performance on real data 
+
+We obtained multiple whole-genome real datasets (see Data Availability) and aligned them to GRCh38 (Fig. 3). For standard WGS short reads, strobealign is the fastest. BWA-MEM2 is 67% faster than BWA-MEM and both BWA-MEME and BWA-MEM3 are even faster (Fig. 3a). Minibwa is about four times as fast as BWA-MEM and more than twice as fast as BWA-MEM2. The speed advantage of minibwa over BWA-MEM2 narrows on Hi-C and SBX data where mate rescue is disabled. Here, the N50 read length of this duplex SBX dataset is 243 bp, not much longer than the rest of short reads. For long reads, minibwa is a little faster than minimap2 and both are an order of magnitude faster than Winnowmap2. For BS-seq data, minibwa is a few times faster than BWA-Meth and BISCUIT and over 10 times faster than Bismark. Across all six datasets, minibwa uses <20 GB memory at the peak, lower than most aligners except Bowtie2. Minibwa-rs, the Rust rewrite, closely matches minibwa in speed for short reads but for long reads, its relative performance to minibwa varies by ∼20% across testing environments. We thus did not show its timing in the figure. 
+
+# 3.3. Effect on short-read variant calling 
+
+We aligned HG002 short reads (Baid et al., 2020) to GRCh38, called small variants with DeepVariant v1.10.0 (Poplin et al., 2018) and compared the calls to the GIAB Q100 ground truth v1.1 (Hansen et al., 2025) with RTG vcfeval v3.13 (Cleary et al., 2015). Minibwa closely matched or slightly improved on BWA-MEM (Table 2): 528 fewer SNP FNs, 41 fewer SNP FPs, 1,104 fewer indel FNs, and 90 more indel FPs. We inspected BWA-MEM-specific indel FNs and found minibwa tends to align more reads with >10 bp indels, consistent with the algorithmic analysis (Section 2.6). Although strobealign is 10% faster than minibwa (Fig. 3), it does not compete with minibwa or BWA-MEM on small variant calling. 
+
+Table 2. Short-read variant calling accuracy with DeepVariant 
+
+SNP Indel Aligner #FN #FP #FN #FP minibwa 46,367 7,544 36,321 5,308 BWA-MEM 46,895 7,585 37,425 5,218 
+
+strobealign 57,545 8,108 37,828 5,655 
+
+FN: false negative; FP: false positive. Numbers in bold indicate the best performer on each metric. 6 Fast read alignment with minibwa 0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 
+
+160 bowtie2 bwa-mem bwa-mem2 bwa-mem3 bwa-meme minibwa minibwa-rs minimap2 strobealign 
+
+WGS 
+
+SBX 
+
+Hi-C 
+
+> Speed (Gbp/hr over 32 threads)
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 
+
+160 minibwa minimap2 rammap winnowmap2 
+
+HiFi 
+
+ONT 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 
+
+160 bismark biscuit bwa-meth minibwa 
+
+BS-seq 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 bowtie2 bwa-mem bwa-mem2 bwa-mem3 bwa-meme minibwa minibwa-rs minimap2 strobealign 
+
+WGS 
+
+SBX 
+
+Hi-C 
+
+> Peak memory (GB)
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 minibwa minimap2 rammap winnowmap2 
+
+HiFi 
+
+ONT 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+120 
+
+140 bismark biscuit bwa-meth minibwa 
+
+BS-seq    
+
+> Fig. 3. Speed and peak memory on real data. Reads are aligned to GRCh38. 32 CPU threads are specified for all mappers except for Winnowmap2 which automatically uses all available CPUs. Alignment output is redirected to /dev/null except for Bismark which has to generate BAM files. The exact memory usage of Bismark could not be captured.
+
+# 4. Discussions 
+
+We developed minibwa for aligning genomic short and long reads and bisulfite sequencing reads. It trades full compatibility with BWA-MEM for deeper algorithmic improvements. Although minibwa is not bit-identical to BWA-MEM in its output, it produces equivalent or slightly improved small variant calls, and more importantly, enables long-read alignment and doubles performance over BWA-MEM2. As the developers of BWA-MEM and minimap2, we consider minibwa the full replacement of BWA-MEM. The only BWA-MEM feature missing from minibwa is the support of alternate contigs in the reference genome which is not well implemented in BWA-MEM. We plan to redesign this feature for improved accuracy in future releases. 
+
+# Acknowledgments 
+
+We are grateful to Johan Henriksson for porting minibwa to Rust at https://github.com/henriksson-lab/minibwa-rs .
+
+# Author contributions 
+
+H.L. conceived the project, implemented the core algorithm, analyzed the data and drafted the manuscript. N.H. added new features, contributed to development and reviewed the draft. 
+
+# Conflict of interest 
+
+N.H. is an employee of Fulcrum Genomics LLC. 
+
+# Funding 
+
+This work is supported by National Institute of Health grant R01HG010040, R01HG014175 and U24CA294203 (to H.L.). 
+
+# Data availability 
+
+The minibwa source code: https://github.com/lh3/minibwa ;HG002 NovaSeq short reads: https://bit.ly/hg002-baid-sr-30x ;HG002 PacBio HiFi reads: https://bit.ly/hg002-hprc-revio ;HG002 Nanopore R10 reads: s3://ont-open-data/giab_2023. 05/ ; HG002 Hi-C short reads: https://bit.ly/hg002-hprc-hic1 ;HG002 SBX reads: https://bit.ly/hg002-sbx-091025 ; NA12878 directional bisulfite sequencing reads: SRR4235788. 
+
+# References 
+
+Alser, M., Rotman, J., Deshpande, D., Taraszka, K., Shi, H., et al. (2021). Technology dictates algorithms: recent developments in read alignment. 
+
+Genome Biol , 22:249. Baid, G., Nattestad, M., Kolesnikov, A., Goel, S., Yang, H., Chang, P.-C., and Carroll, A. (2020). An extensive sequence dataset of gold-standard samples for benchmarking and development. bioRxiv , page 2020.12.11.422022. Bzikadze, A. V., Mikheenko, A., and Pevzner, P. A. (2022). Fast and accurate mapping of long reads to complete genome assemblies with VerityMap. Genome Res , 32:2107–2118. Cleary, J. G., Braithwaite, R., Gaastra, K., Hilbush, B. S., Inglis, S., et al. (2015). Comparing variant call files for performance benchmarking of next-generation sequencing variant calling pipelines. bioRxiv , page 023754. Fast read alignment with minibwa 7
+
+Farrar, M. (2007). Striped Smith-Waterman speeds database searches six times over other SIMD implementations. Bioinformatics , 23:156–61. Ferragina, P. and Manzini, G. (2000). Opportunistic data structures with applications. In 41st Annual Symposium on Foundations of Computer Science, FOCS 2000, Redondo Beach, California, USA, November 12-14, 2000 , pages 390–398. IEEE Computer Society. Gagie, T. (2024). How to find long maximal exact matches and ignore short ones. In Day, J. D. and Manea, F., editors, Developments in Language Theory - 28th International Conference, DLT 2024, G¨ ottingen, Germany, August 12-16, 2024, Proceedings , volume 14791 of Lecture Notes in Computer Science , pages 131–140. Springer. Gao, S., Oshima, K. K., Chuang, S.-C., Loftus, M., Montanari, A., et al. (2025). A global view of human centromere variation and evolution. 
+
+bioRxiv , page 10.64898/2025.12.09.693231. Gong, W., Pan, X., Xu, D., Ji, G., Wang, Y., et al. (2022). Benchmarking DNA methylation analysis of 14 alignment algorithms for whole genome bisulfite sequencing in mammals. Computational and Structural Biotechnology Journal , 20:4704–4716. Hansen, N. F., Dwarshuis, N., Ji, H. J., Rhie, A., Loucks, H., et al. (2025). A complete diploid human genome benchmark for personalized genomics. 
+
+bioRxiv , page 2025.09.21.677443. Holtgrewe, M. (2010). Mason: A read simulator for second generation sequencing data. Technical Report FU Berlin .Jain, C., Rhie, A., Hansen, N. F., Koren, S., and Phillippy, A. M. (2022). Long-read mapping to repetitive reference sequences using winnowmap2. 
+
+Nat Methods , 19:705–710. Jain, C., Rhie, A., Zhang, H., Chu, C., Walenz, B. P., Koren, S., and Phillippy, A. M. (2020). Weighted minimizer sampling improves long read mapping. Bioinformatics , 36:i111–i118. Jung, Y. and Han, D. (2022). BWA-MEME: BWA-MEM emulated with a machine learning approach. Bioinformatics , 38:2404–2413. Kokoris, M., McRuer, R., Nabavi, M., Jacobs, A., Prindle, M., et al. (2025). Sequencing by expansion (SBX) – a novel, high-throughput single-molecule sequencing technology. bioRxiv , page 10.1101/2025.02.19.639056. Krueger, F. and Andrews, S. R. (2011). Bismark: a flexible aligner and methylation caller for bisulfite-seq applications. Bioinformatics ,27(11):1571–2. Langmead, B. and Salzberg, S. L. (2012). Fast gapped-read alignment with Bowtie 2. Nat Methods , 9:357–9. Li, H. (2012). Exploring single-sample SNP and INDEL calling with whole-genome de novo assembly. Bioinformatics , 28:1838–44. Li, H. (2013). Aligning sequence reads, clone sequences and assembly contigs with bwa-mem. arXiv:1303.3997 .Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. 
+
+Bioinformatics , 34:3094–3100. Li, H. (2024). BWT construction and search at the terabase scale. 
+
+Bioinformatics , 40:btae717. Li, H. and Durbin, R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics , 25:1754–60. O’Connell, K. A., Yosufzai, Z. B., Campbell, R. A., Lobb, C. J., Engelken, H. T., et al. (2023). Accelerating genomic workflows using nvidia parabricks. BMC Bioinformatics , 24(1):221. Pedersen, B. S., Eyring, K., De, S., Yang, I. V., and Schwartz, D. A. (2014). Fast and accurate alignment of long bisulfite-seq reads. arXiv ,page 1401.1129. Poplin, R., Chang, P.-C., Alexander, D., Schwartz, S., Colthurst, T., et al. (2018). A universal SNP and small-indel variant caller using deep neural networks. Nat Biotechnol , 36:983–987. Prousalis, K., Georgiou, K., Kalogeropoulos, A., Ntalaperas, D., Konofaos, N., et al. (2026). A survey on sequence alignment algorithms and state-of-the-art aligners. ACM Comput. Surv. , 58:70:1–70:40. Sahlin, K. (2022). Strobealign: flexible seed size enables ultra-fast and accurate read alignment. Genome Biol , 23:260. Smith, T. F. and Waterman, M. S. (1981). Identification of common molecular subsequences. J Mol Biol , 147:195–7. Suzuki, H. and Kasahara, M. (2018). Introducing difference recurrence relations for faster semi-global alignment of long sequences. BMC Bioinformatics , 19:45. Vasimuddin, M., Misra, S., Li, H., and Aluru, S. (2019). Efficient architecture-aware acceleration of BWA-MEM for multicore systems. In 
+
+2019 IEEE International Parallel and Distributed Processing Symposium, IPDPS 2019, Rio de Janeiro, Brazil, May 20-24, 2019 , pages 314–324. IEEE. Wang, J. R. and Li, H. (2026). Memory-safe high-performance sequence mapping with rammap. bioRxiv , page 2026.05.26.726289. Wick, R. R. (2019). Badread: simulation of error-prone long reads. Journal of Open Source Software , 4(36):1316. Zhou, W., Johnson, B. K., Morrison, J., Beddows, I., Eapen, J., et al. (2024). BISCUIT: an efficient, standards-compliant tool suite for simultaneous genetic and epigenetic inference in bulk and single-cell studies. Nucleic Acids Res , 52(6):e32. Zhu, T., Vats, P., Onken, S., Dunstan, A., Zamirai, B., et al. (2025). Parabricks: GPU accelerated universal pan-instrument genomics analysis software suite. bioRxiv , page 10.1101/2025.07.23.666378.
