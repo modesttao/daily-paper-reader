@@ -1,5 +1,5 @@
 github:
-  owner: ''
+  owner: modesttao
   repo: daily-paper-reader
 arxiv_paper_setting:
   mode: standard
@@ -25,3 +25,126 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: sc-methods
+      description: "单细胞方法学 - 重点关注新算法、新工具、benchmark"
+      enabled: true
+      paper_sources:
+        - arxiv
+        - biorxiv
+      keywords:
+        - keyword: "single-cell RNA-seq"
+        - keyword: "scRNA-seq"
+        - keyword: "single cell sequencing"
+        - keyword: "single-cell multiomics"
+        - keyword: "single-cell ATAC-seq"
+        - keyword: "spatial transcriptomics"
+        - keyword: "cell type annotation"
+        - keyword: "batch correction"
+        - keyword: "trajectory inference"
+        - keyword: "lineage tracing"
+        - keyword: "RNA velocity"
+        - keyword: "single-cell clustering"
+        - keyword: "doublet detection"
+        - keyword: "gene imputation"
+        - keyword: "cell-cell communication"
+        - keyword: "ligand-receptor"
+        - keyword: "single-cell foundation model"
+        - keyword: "scGPT"
+        - keyword: "scBERT"
+        - keyword: "single-cell benchmark"
+      intent_queries:
+        - query: "novel computational method for single-cell RNA-seq analysis benchmark"
+        - query: "state-of-the-art single-cell clustering algorithm evaluation"
+        - query: "deep learning model for single-cell multiomics integration"
+        - query: "single-cell trajectory inference new method"
+        - query: "cell type annotation automated tool"
+        - query: "single-cell data denoising imputation"
+        - query: "spatial transcriptomics deconvolution method"
+        - query: "RNA velocity estimation improvement"
+        - query: "single-cell foundation model pretrained"
+    - tag: als-organoid
+      description: "肌肉神经类器官构建渐冻症模型 (ALS disease model)"
+      enabled: true
+      paper_sources:
+        - arxiv
+        - biorxiv
+        - medrxiv
+      keywords:
+        - keyword: "amyotrophic lateral sclerosis"
+        - keyword: "ALS"
+        - keyword: "motor neuron disease"
+        - keyword: "neuromuscular organoid"
+        - keyword: "motor neuron organoid"
+        - keyword: "skeletal muscle organoid"
+        - keyword: "neuromuscular junction"
+        - keyword: "NMJ"
+        - keyword: "iPSC-derived motor neuron"
+        - keyword: "patient-derived organoid"
+        - keyword: "disease modeling organoid"
+        - keyword: "neurodegenerative disease model"
+        - keyword: "SOD1"
+        - keyword: "TDP-43"
+        - keyword: "C9orf72"
+        - keyword: "FUS"
+        - keyword: "muscle-on-chip"
+        - keyword: "nerve-muscle co-culture"
+      intent_queries:
+        - query: "neuromuscular organoid ALS disease modeling"
+        - query: "iPSC-derived motor neuron amyotrophic lateral sclerosis"
+        - query: "skeletal muscle motor neuron co-culture ALS"
+        - query: "organoid model neurodegeneration motor neuron"
+        - query: "patient-specific ALS organoid drug screening"
+    - tag: scz-model
+      description: "精神分裂症模型 (Schizophrenia model)"
+      enabled: true
+      paper_sources:
+        - arxiv
+        - biorxiv
+        - medrxiv
+      keywords:
+        - keyword: "schizophrenia"
+        - keyword: "SCZ"
+        - keyword: "psychiatric disorder model"
+        - keyword: "brain organoid"
+        - keyword: "cerebral organoid"
+        - keyword: "neural organoid"
+        - keyword: "iPSC-derived neuron"
+        - keyword: "cortical organoid"
+        - keyword: "synaptic dysfunction"
+        - keyword: "excitation-inhibition imbalance"
+        - keyword: "GABAergic neuron"
+        - keyword: "glutamatergic neuron"
+        - keyword: "patient-derived iPSC"
+        - keyword: "psychiatric disease modeling"
+        - keyword: "DISC1"
+        - keyword: "NRG1"
+        - keyword: "COMT"
+        - keyword: "22q11.2 deletion"
+      intent_queries:
+        - query: "brain organoid schizophrenia disease modeling"
+        - query: "iPSC-derived cortical neuron schizophrenia"
+        - query: "organoid model psychiatric disorder neural circuit"
+        - query: "patient-specific schizophrenia neuron functional analysis"
+        - query: "excitation inhibition imbalance schizophrenia organoid"
+    - tag: single-cell-omics
+      description: "单细胞组学 - 综合覆盖"
+      enabled: true
+      paper_sources:
+        - arxiv
+        - biorxiv
+      keywords:
+        - keyword: "single-cell proteomics"
+        - keyword: "single-cell epigenomics"
+        - keyword: "CITE-seq"
+        - keyword: "Multiome"
+        - keyword: "single-cell multi-omics"
+        - keyword: "single-cell chromatin accessibility"
+        - keyword: "single-cell methylation"
+        - keyword: "single-cell Hi-C"
+        - keyword: "Perturb-seq"
+        - keyword: "CRISPR screen single-cell"
+      intent_queries:
+        - query: "single-cell multiomics integration method"
+        - query: "single-cell proteomics transcriptomics joint analysis"
+        - query: "Perturb-seq CRISPR screening analysis"
