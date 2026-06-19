@@ -295,3 +295,24 @@ jobs:
           git fetch origin "$branch"
           git rebase -X theirs "origin/$branch"
           git push origin HEAD:"$branch"
+
+      - name: Notify via ServerChan
+        if: always()
+        env:
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+        run: |
+          STATUS="${{ job.status }}"
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+
+          if [ "$STATUS" = "success" ]; then
+            TITLE="📚 论文推荐更新成功"
+            DESP="每日论文推荐已更新！\n\n👉 [查看论文推荐]($SITE_URL)\n\n📊 [查看运行日志]($RUN_URL)"
+          else
+            TITLE="❌ 论文推荐更新失败"
+            DESP="工作流运行失败，请检查。\n\n📊 [查看运行日志]($RUN_URL)"
+          fi
+
+          curl -s "https://sctapi.ftqq.com/${SERVERCHAN_KEY}.send" \
+            -d "title=$TITLE" \
+            -d "desp=$DESP"
