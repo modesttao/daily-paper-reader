@@ -336,12 +336,16 @@ jobs:
           papers = data.get('papers', [])[:15]
           lines = []
           for i, p in enumerate(papers, 1):
-              title = p.get('title', 'N/A')
-              score = p.get('score', p.get('llm_score', ''))
-              tags = ', '.join(p.get('tags', []))
-              abstract = p.get('abstract', p.get('summary', ''))[:200]
-              link = p.get('link', p.get('url', ''))
-              line = f'{i}. **{title}**'
+              title = p.get('title_en', p.get('title', 'N/A'))
+              score = p.get('score', '')
+              tags = p.get('tags', '')
+              if isinstance(tags, str):
+                  tags = tags.replace('query:', '').replace('keyword:', '')
+              elif isinstance(tags, list):
+                  tags = ', '.join(tags)
+              abstract = p.get('abstract_en', p.get('abstract', ''))[:200]
+              link = p.get('pdf', p.get('link', ''))
+              line = f'{i}. {title}'
               if score:
                   line += f' (评分: {score})'
               if tags:
