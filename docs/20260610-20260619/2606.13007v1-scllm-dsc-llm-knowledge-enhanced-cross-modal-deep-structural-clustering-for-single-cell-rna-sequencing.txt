@@ -1,0 +1,416 @@
+Title: scLLM-DSC: LLM-Knowledge Enhanced Cross-Modal Deep Structural Clustering for Single-Cell RNA Sequencing
+
+URL Source: https://arxiv.org/pdf/2606.13007v1
+
+Published Time: Fri, 12 Jun 2026 00:37:29 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# scLLM-DSC: LLM-Knowledge Enhanced Cross-Modal Deep Structural Clustering for Single-Cell RNA Sequencing 
+
+Ping Xu 1,2 , Pengjiang Li 1,2 , Tian Du 1,2 , Zaitian Wang 1,2 , Jiawei Gu 4 , Zhiyuan Ning 5 ,
+
+Ziyue Qiao 4 , Pengfei Wang 1,2,3 and Yuanchun Zhou 1,2,3∗
+
+> 1
+
+Computer Network Information Center, Chinese Academy of Sciences, Beijing, China 
+
+> 2
+
+University of Chinese Academy of Sciences, Beijing, China 
+
+> 3
+
+Hangzhou Institute for Advanced Study, University of Chinese Academy of Sciences, Hangzhou, China 
+
+> 4
+
+School of Computing and Information Technology, Great Bay University, Dongguan, China 
+
+> 5
+
+School of Engineering, Westlake University, Hangzhou, China xuping0098@gmail.com, zyc@cnic.cn 
+
+Abstract 
+
+Clustering is fundamental to scRNA-seq analysis, serving as a cornerstone for identifying cell pop-ulations and resolving tissue heterogeneity. How-ever, existing methods focus on mining numerical statistical patterns, suffering from semantic agnosti-cism by neglecting the intrinsic biological functions encoded by genes. While Large Language Mod-els (LLMs) offer promising semantic capabilities, their direct adaptation to cell clustering is hindered by the structural mismatch between generative pre-training objectives and discriminative downstream tasks. To bridge this gap, we propose scLLM-DSC ,a novel LLM -Knowledge Enhanced Cross-Modal 
+
+Deep Structural Clustering framework. Diverging from data-driven paradigms, scLLM-DSC estab-lishes a semantically-grounded representation by synergizing two views: a Knowledge-Driven Se-mantic View derived from NCBI gene priors and contextualized Cell2Sentence embeddings, and a 
+
+Structure-Aware Topological View extracted via a graph-guided encoder. Crucially, we introduce a cross-modal contrastive alignment mechanism to en-force consistency between biological semantics and transcriptomic features within a unified latent space. Extensive benchmarks demonstrate that scLLM-DSC significantly outperforms eleven state-of-the-art baselines in clustering accuracy. 
+
+1 Introduction 
+
+Single-cell RNA sequencing (scRNA-seq) has revolutionized the characterization of tissue heterogeneity by providing high-resolution cellular atlases [Svensson et al. , 2018 ]. As a pivotal analytical step, cell clustering aims to define functional identi-ties based on expression similarity, serving as the cornerstone for downstream biological discovery [Kiselev et al. , 2019]. In retrospect, the evolution of clustering algorithms has been a pursuit of optimal numerical representations. From early 
+
+> *Corresponding authors.
+
+statistical linear reductions (e.g., PCA, t-SNE [ Maaten and Hinton, 2008 ] ) to deep autoencoder-based non-linear embed-dings (e.g., scDeepCluster [Tian et al. , 2019 ], scNAME [ Wan 
+
+et al. , 2022 ]), and further to structure-constrained learning (e.g., scGNN [Wang et al. , 2021 ] and scCDCG [ Xu et al. ,2024 ]), existing methods have achieved maturity in mining statistical distributions and topological structures. However, these methods suffer from a fundamental limitation: semantic agnosticism [ Cui et al. , 2024; Theodoris et al. , 2023 ] . By reducing genes to abstract numerical indices, existing frame-works prioritize expression patterns over functional logic. Con-sequently, while adept at identifying distributional shifts, they lack the semantic grounding required for biological reasoning and interpretability [Xu et al. , 2025d]. To address this limitation, the field is witnessing a paradigm shift toward Foundation Models (FMs) [ Zhang et al. , 2025 ] .Inspired by LLMs in NLP, these approaches analogize genes as "tokens" and cells as "sentences," pre-training on massive at-lases to learn universal representations. Pioneering works like scBERT [ Yang et al. , 2022 ] and Geneformer [ Theodoris et al. ,2023 ] adopted the BERT paradigm, capturing genome-wide context via masked modeling. Subsequently, generative mod-els such as scGPT [Cui et al. , 2024 ] and scFoundation [Hao 
+
+et al. , 2024 ] scaled up parameters to reconstruct complex ex-pression patterns across species. More recently, researchers have sought to enhance interpretability by integrating biolog-ical priors, such as gene regulatory networks in GeneCom-pass [Yang et al. , 2024 ] or leveraging textual embeddings in GenePT [Chen and Zou, 2024]. Despite their potential, directly adapting these general-purpose models to the specific downstream task of cell cluster-ing presents structural contradictions [Kedzierska et al. , 2025; Li et al. , 2025 ]: (1) Objective Mismatch between Pre-training and Clustering: Most models (e.g., scGPT) rely on "generative" pre-training focused on reconstructing global statistics rather than distinguishing local subpopulation bound-aries. When applied to clustering (a discriminative task), this lack of boundary constraints often leads to "over-smoothing" representations, failing to separate subtle transitional states. (2) Numerical representations lack biological semantic sup-port: While treating genes as tokens, existing methods es-
+
+> arXiv:2606.13007v1 [cs.LG] 11 Jun 2026
+
+sentially capture numerical co-occurrence rather than explicit functional attributes (e.g., transcription factor regulation). Pri-oritizing probabilistic associations over causal logic makes them prone to hallucinations, thereby generating biologically implausible patterns driven by noise. (3) Missing Cross-Modal Alignment: There is a lack of effective mechanisms to align "external biological knowledge" with "internal transcrip-tomic features" in the latent space. This modal disconnection results in clustering outputs that remain mathematical labels rather than biologically attributable entities [Dip et al. , 2025 ] .To address these impediments, we propose scLLM-DSC ,an LLM -Knowledge Enhanced Cross-Modal Deep Structural 
+
+Clustering framework for single-cell RNA Sequencing. Di-verging from the purely generative paradigm of general foun-dation models, scLLM-DSC is formulated as a task-specific 
+
+knowledge-integrated framework anchored in three core pil-lars: Knowledge-Driven Priors, Structure-Aware Topology, and Cross-Modal Semantic Alignment . The core logic is to utilize LLMs not as data generators but as semantic mappers, explicitly integrating biological semantics from knowledge bases (e.g., NCBI) into the clustering process and enforc-ing alignment with numerical features via cross-modal con-trastive learning. scLLM-DSC comprises three coupled mod-ules: (1) Dual-Path Cell Semantic Encoding (Knowledge-driven): It incorporates external priors by encoding NCBI gene summaries and using a Cell2Sentence strategy to capture dynamic regulation contexts. (2) Structure-Aware Cell Fea-ture Encoding(Structure-aware): Leveraging the scCDCG backbone, it extracts high-order topological information to ensure the fidelity of the native data manifold. (3) Cross-Modal Alignment and Fusion (Semantic-alignment): Uti-lizing bidirectional InfoNCE loss and variance regularization, this module bridges the cognitive gap between "data-driven" structural signals and "knowledge-driven" semantic signals. Extensive benchmarks demonstrate that scLLM-DSC signifi-cantly outperforms 11 mainstream baselines in both accuracy and efficiency, while uniquely endowing clustering results with explicit biological attribution. Our contributions are summarized as follows: • A Knowledge-Data Dual-Driven Paradigm: We tran-scend the limitations of traditional numerical indexing by systematically incorporating NCBI functional priors. This establishes a novel paradigm that bridges the gap between ‘structure-aware’ deep learning and semantic-aware’ biological reasoning. • Task-Specific Synergistic Optimization: To overcome the objective mismatch of FMs for clustering, we devise a specialized optimization objective. By integrating seman-tic alignment with discriminative structural constraints, we ensure the model focuses on defining precise cell sub-population boundaries rather than global reconstruction. • Unified Interpretable Representation: We leverage cross-modal alignment to construct a unified latent space that preserves both topological fidelity and biological meaning, enabling interpretable mechanism discovery. 
+
+> Figure 1: Details of Generating Gene Embedding Generation.
+
+2 Related Work 
+
+Conventional scRNA-seq Clustering. Early pipelines like Seurat [ Butler et al. , 2018 ] and Scanpy [ Wolf et al. , 2018 ]rely on linear reduction and community detection. To capture non-linear manifolds and data sparsity, deep generative mod-els such as scVI [Lopez et al. , 2018 ] and DCA [Eraslan et al. , 2019 ] utilize ZINB-integrated autoencoders for explicit count modeling. Subsequent frameworks, including scDeep-Cluster [ Tian et al. , 2019 ] and scDCC [Tian et al. , 2021 ] ,introduced joint optimization of reconstruction and clustering-constrained objectives. To incorporate intercellular topolog-ical information, initial frameworks like scGNN [ Wang et al. , 2021 ] and scDSC [Gan et al. , 2022 ] utilize graph convo-lutional networks for neighborhood aggregation, while scSi-ameseClu [ Xu et al. , 2025a ] employs contrastive learning to bolster representation robustness. To enhance scalability and circumvent GCN-induced over-smoothing, structural mod-els based on deep graph-cut objectives have emerged. sc-CDCG [ Xu et al. , 2024 ] and its extension scSGC [ Xu et al. ,2025b ] utilize deep spectral clustering to efficiently capture global topological constraints. Despite these advancements, these numerical-driven methods often lack explicit biological semantics, limiting their interpretability in complex tissues. 
+
+Biological Foundation Models. The focus has recently shifted toward Transformer-based foundation models that learn universal biological representations from large-scale cell atlases. scBERT [ Yang et al. , 2022 ] and Gene-former [ Theodoris et al. , 2023 ] pioneered this paradigm by em-ploying masked gene modeling to capture complex genomic contexts. To enhance generalization, scGPT [ Cui et al. , 2024 ]and scFoundation [ Hao et al. , 2024 ] further scaled parameter capacities for multi-species generative embeddings. Beyond sequence-only modeling, knowledge-enhanced frameworks such as GeneCompass [ Yang et al. , 2024 ] and GenePT [Chen and Zou, 2024 ] integrate gene regulatory networks and textual semantics, respectively, to infuse prior biological constraints. Recently, scMamba [ Yuan et al. , 2025 ] was introduced to achieve linear computational complexity for ultra-long ge-nomic sequences. Despite their powerful representation, these foundation models are not inherently optimized for partition-ing tasks, suffering from a objective mismatch between general pre-training and downstream structural clustering. 
+
+3 Methodology 
+
+3.1 Problem Formulation 
+
+The core challenge addressed in this study is Knowledge-Enhanced Structural Clustering . Let X ∈ RN ×D be the single-cell gene expression matrix, where N denotes the num-ber of cells and D is the number of genes. Unlike traditional Figure 2: Framework Overview of the Proposed scLLM-DSC. (a) Dual-path cell semantic encoding (Knowledge-driven); (b) Structure-aware cell feature encoding(Structure-aware); (c) Cross-modal alignment and fusion (Semantic-alignment). 
+
+data-driven methods, we incorporate an external gene seman-tic knowledge base, denoted as G, derived from LLMs. Our objective is to learn a mapping function f : ( X, G) → Z that projects cells into a unified latent space Z by aligning transcrip-tomic structural features with biological semantic information. Ultimately, we aim to partition Z into O cell populations, yield-ing the clustering assignment C = {c1, c 2, . . . , c N }, where 
+
+ci ∈ { 1, . . . , O } denotes the cluster label of the i-th cell. 
+
+3.2 Framework Overview 
+
+The scLLM-DSC framework, illustrated in Fig. 2, establishes a novel paradigm for LLM-Knowledge enhanced cross-modal deep structural clustering by synergizing large-scale biological priors with data-driven representation learning. To integrate biological semantic knowledge, we first retrieve structured biological annotations from NCBI and encode them into gene-level textual representations using a frozen large language model. Subsequently, we construct a unified cell embedding through three modules: (1) Semantic View : creating comple-mentary cell-level textual embeddings by aggregating gene semantics and serializing cell profiles; (2) Structural View :capturing the intrinsic data manifold via a graph-cut–guided deep structural encoder; and (3) Cross-Modal Contrastive Fusion : performing alignment between LLM-encoded biologi-cal semantics (Text) and expression-derived structural features (Feature), yielding a biologically grounded latent space opti-mized for the downstream clustering task. 
+
+3.3 Gene Semantic Encoding 
+
+To explicitly incorporate biological priors, we leverage a pre-trained LLM as a universal knowledge encoder, as illustrated in Fig. 1. Specifically, we systematically collected comprehen-sive metadata covering genome-wide genes from the NCBI database [Li et al. , 2024 ]. For the j-th gene ( j ∈ { 1, . . . , M }), this heterogeneous information (e.g., symbol, functional sum-mary) is serialized into a structured prompt Tj . We then extract the dense vector representation via the LLM encoder: 
+
+gj = fLLM (Tj ). (1) Consequently, we construct a global gene semantic matrix 
+
+G = [ g1, g2, . . . , gM ]⊤ ∈ RM ×d1 , (2) which projects discrete gene entities into a continuous, machine-interpretable semantic manifold. 
+
+3.4 Dual-Path Cell Semantic Encoding 
+
+To bridge the gap between gene-level knowledge and cell-level identity, we design a dual-path encoding strategy. Crucially, both paths operate on the most informative genes to filter noise and ensure computational efficiency. For each cell, we strictly select the top-K genes ranked by expression intensity (experimentally set to K = 2048 ). Let eX ∈ RN ×K denote this filtered and sorted expression matrix, where each row contains the expression values of the top-K genes for a cell. 
+
+Abundance-Weighted Semantic Aggregation. This branch explicitly utilizes the expression magnitudes in eX as impor-tance weights. Let eG ∈ RK×d1 be the subset of LLM-derived gene embeddings corresponding to the genes in eX. The first cell-level embedding Z(1) is obtained by aggregating these gene semantics weighted by their expression values: 
+
+Z(1) = eX eG ∈ RN ×d1 , (3) which projects the cell’s gene expression abundance directly into the semantic manifold defined by G.
+
+Sequence-Based Contextual Modeling. To capture non-linear dependencies and gene co-occurrence patterns, we adopt a serialization approach inspired by Cell2Sentence [ Levine 
+
+et al. , 2024 ]. We adopt a serialization approach where the row vector ˜xi from eX is treated as a sentence. Specifically, the names of the top-K genes (ordered by their rank in eX)are tokenized into a sequence Si. These sequences are then encoded by the shared LLM encoder fLLM :
+
+Z(2)  
+
+> i
+
+= fLLM (Si), Z(2) ∈ RN ×d1 . (4) Unlike Z(1) , this representation leverages the LLM’s attention mechanism to perceive the underlying regulatory logic of gene expressions preserved in the sorted gene list. 
+
+Dual-Path Semantic Fusion. We integrate the abundance-based and context-based representations to yield the final uni-fied cell semantic embedding Ztext :
+
+Ztext = ωZ(1) + (1 − ω)Z(2) , (5) where ω ∈ [0 , 1] is a balancing coefficient. This fused repre-sentation Ztext ∈ RN ×d1 serves as the semantic anchor for the subsequent structure-aware alignment. 
+
+3.5 Structure-Aware Cell Feature Encoding 
+
+To capture the intrinsic topological manifold of the cell pop-ulation, we utilize the deep graph clustering framework sc-CDCG [ Xu et al. , 2024 ] as our structural backbone. Given input X, the backbone functions as a non-linear mapping en-coder fstruc (·) to extract the cell feature embedding: 
+
+Zfeat = fstruc (X) ∈ RN ×d2 . (6) This encoding process is governed by three complementary unsupervised objectives: • Topology Preservation ( LN Cut ): A differentiable Nor-malized Cut loss that captures high-order structural infor-mation via long-range dependencies, effectively preserv-ing the global manifold while circumventing the over-smoothing limitations of traditional GCNs. • Expression Fidelity ( LM SE ): An autoencoder-based reconstruction loss that guarantees the latent embeddings retain essential gene expression information. • Cluster Refinement ( LKL ): A KL-divergence objective that aligns soft assignments with a target distribution optimized via Optimal Transport (OT). This mechanism enforces a global balance constraint to prevent cluster collapsing and stabilize the partitioning manifold. The resulting Zfeat encapsulates the data-driven structural priors, serving as the topological anchor for the subsequent cross-modal alignment. 
+
+3.6 Cross-Modal Alignment and Fusion 
+
+To bridge the heterogeneity between biological semantics and topological features, we align the semantic embedding Ztext 
+
+and the structural embedding Zfeat into a unified latent space via contrastive learning. 
+
+Projection and Similarity. We first map the modality-specific embeddings to a shared d-dimensional space using two sepa-rate non-linear projection heads (two-layer MLPs with ReLU), denoted as fϕ(·) and gψ (·):
+
+ˆZtext = fϕ(Ztext ), ˆZfeat = gψ (Zfeat ), (7) where ˆZ ∈ RN ×d. We then compute the cross-modal cosine similarity matrix S ∈ RN ×N . By normalizing the projected embeddings to the unit hypersphere (i.e., ∥ˆz∥ = 1 ), the simi-larity is efficiently calculated via scaled dot product: 
+
+S = ( ˆZtext (ˆZfeat )⊤)/τ, (8) where τ is a temperature parameter. 
+
+Bidirectional Alignment Objective. To enforce semantic consistency, we minimize the symmetric InfoNCE loss. For a mini-batch of N cells, considering the paired representations 
+
+(i, i ) as positives and all other pairs as negatives, the loss is formulated as:                  
+
+> LCL =−12N
+> NX
+> i=1
+> log exp( Sii )
+> PNk=1 exp( Sik )
+> |{z }
+> Text →Feature
+> + log exp( Sii )
+> PNk=1 exp( Ski )
+> |{z }
+> Feature →Text
+> .
+> (9)
+
+The first term aligns the textual view to the structural view, while the second aligns the structural view to the textual view. 
+
+Variance Regularization. To prevent the projection heads from mapping diverse cells to a trivial point (i.e., dimensional collapse), we impose a hinge loss on the standard deviation of each feature dimension:        
+
+> Lvar =X
+> V∈{ ˆZtext ,ˆZfeat }
+> 1
+> d
+> dX
+> k=1
+> max
+> 
+> 0,1−pVar( V:,k ) + ϵ
+> 
+> ,
+> (10)
+
+where V:,k ∈ RN denotes the column vector corresponding to the k-th dimension across the batch, and ϵ = 10 −4 is a constant for numerical stability. The overall loss for the cross-modal alignment module is formulated as: 
+
+Lalign = LCL + λLvar , (11) where λ is a hyperparameter. 
+
+3.7 Optimization and Inference 
+
+Joint Training. The framework is optimized end-to-end via a weighted composite objective: 
+
+L = αLalign + βLN Cut + γLM SE + δLKL , (12) where α, β, γ , and δ are hyperparameters balancing cross-modal semantic alignment, global topology preservation, re-construction fidelity, and cluster refinement, respectively. 
+
+Inference. Upon convergence, we obtain the unified embed-dings by averaging the aligned semantic and structural views: 
+
+Zcluster = 12
+
+ˆZtext + ˆZfeat 
+
+. (13) The final clustering assignments C are then generated by ap-plying K-Means (or Leiden) directly to Zcluster .
+
+4 Experiments 
+
+4.1 Experimental Setup 
+
+Dataset. We utilized a subset of datasets provided by sc-CluBench [Xu et al. , 2025c ], consisting of 6 real scRNA-seq datasets from human and mouse tissues (Table 1). All data were used as provided, without further preprocessing. (a) scDeepCluster (b) scMAE (c) scSiameseClu (d) scCDCG (e) scLLM-DSC Figure 3: Visualization of scLLM-DSC and four typical baselines on Mauro Pancreas in 2D t-SNE projection.                              
+
+> Species Dataset Name #Cell #Gene #Cluster Sparsity (%) Human
+> Mauro Pancreas 2,122 19,046 973.02 Sonya Liver 8,444 4,999 11 90.77 Sapiens Liver 2,152 61,759 15 95.42
+> Mouse
+> Muris Brain 13,417 21,609 291.83 Muris Liver 2,859 21,609 11 88.20 Muris Limb Muscle 3,855 21,609 691.38
+> Table 1: Details of single-cell RNA-seq Datasets.
+
+Baseline Methods. We compare scLLM-DSC against 11 baselines across three categories: (1) Deep Non-linear Embed-ding Models: These models utilize deep autoencoders to learn latent representations, including scDeepCluster [Tian et al. ,2019 ], scziDesk [ Chen et al. , 2020 ] , and masked autoencoder variants scNAME [Wan et al. , 2022 ] and scMAE [ Fang et al. ,2024 ]. (2) Deep Structural Clustering Models: These meth-ods explicitly incorporate cellular topological information via graph-based architectures, comprising scGNN [ Wang et al. ,2021 ], scDSC [Gan et al. , 2022 ] , the contrastive scSiamese-Clu [ Xu et al. , 2025a ] , and the cut-informed scCDCG [Xu 
+
+et al. , 2024 ]. (3) Foundation Models: These large-scale pre-trained frameworks leverage expansive atlases for down-stream transfer, represented by scGPT [ Cui et al. , 2024 ] , Gene-Former [ Theodoris et al. , 2023 ], and the knowledge-informed GeneCompass [Yang et al. , 2024 ] . All methods were imple-mented using their publicly available Python packages, with hyperparameters tuned for optimal performance. 
+
+Implementation Details. Implemented in Python 3.12 (Py-Torch ≥2.9.1, CUDA 13.0), scLLM-DSC follows a two-stage protocol: autoencoder pre-training (joint NCut/MSE) followed by contrastive clustering. We generate gene embed-dings from NCBI metadata using OpenAI’s text-embedding-3-small . Cell embeddings are extracted from NCBI meta-data via OpenAI’s text-embedding-3-small . Cell embeddings aggregate the top-2048 highly expressed genes ( k = 2048 )weighted by expression vi: ecell = Pki=1 vi · egene i . The architecture features a [256, 16] autoencoder producing 16-dimensional latent vectors. A 128-dimensional projection head aligns modalities via bi-directional InfoNCE loss ( τ = 0 .1)with variance regularization ( λ = 10 −2). Training spans 200 epochs/stage using Adam, with hyperparameters opti-mized via Optuna. Clusters are initialized by KMeans and refined via Sinkhorn ( λ = 5 , 1k iters). We report the mean of 5 independent runs on an NVIDIA A800-80GB GPU. All datasets and code for scLLM-DSC are available at the link: https://github.com/XPgogogo/scLLM-DSC. 
+
+Evaluation Metrics. We assess the clustering quality by mea-suring the congruence between predicted partitions and biolog-ical ground truth using three benchmark indices: Clustering Accuracy (ACC), Normalized Mutual Information (NMI), and Adjusted Rand Index (ARI). While ACC and NMI range from 0 to 1, ARI can be negative if clustering performs worse than random assignment. For all metrics, higher values indicate superior clustering fidelity. 
+
+4.2 Overall Performance 
+
+Qualitative Analysis. (1) Comparison with Deep Clustering Baselines. Tab. 2 shows that scLLM-DSC achieves SOTA performance , outperforming all baselines in both average metrics (ACC: 88.80%, NMI: 85.35%, ARI: 83.04%) and overall ranking. The superiority stems from its ability to syn-ergize LLM-derived semantic anchors with global structural manifolds. Specifically, the performance margin over deep non-linear embedding models underscores the necessity of integrating both textual semantics and topological structures. Furthermore, compared to deep structural clustering models 
+
+(e.g., scCDCG), scLLM-DSC yields higher clustering fidelity, validating that LLM-based priors provide more discriminative guidance for structural alignment than raw numerical features. This robustness is further exemplified on the Muris Brain 
+
+dataset (#Cell=13,417, #Cluster=2). While many baselines (e.g., scziDesk) achieve misleadingly high ACC by predicting majority classes, their near-zero NMI and ARI indicate a col-lapse into trivial partitions. Such failure occurs because raw numerical features often lack sufficient margin to define clear boundaries in high-volume but low-cluster scenarios, causing structural models to suffer from oscillation or over-smoothing. scLLM-DSC overcomes this by injecting LLM-based seman-tic anchors, which provide the contrastive signals required to maintain cluster separation and prevent manifold collapse. (2) 
+
+Comparison with Biological Foundation Models. Evaluation against large-scale foundation models (Tab. 3) reveals that scLLM-DSC provides more robust partitioning across most datasets. Unlike general-purpose models, scLLM-DSC is specialized for clustering tasks, effectively capturing discrete cell-type boundaries. While Geneformer and GeneCompass show localized peaks on Sonya Liver , likely due to pre-training data overlap, scLLM-DSC demonstrates superior generaliza-tion elsewhere. This strongly underscores that for effectively resolving highly complex cellular heterogeneity, dedicated structural objectives specifically tailored for clustering are indispensable compared to universal embeddings. 
+
+Quantitative Analysis. As depicted in Fig. 3, we project the Dataset Metrics Deep Non-linear Embedding Models Deep Structural Clustering Models 
+
+scDeepCluster scMAE scNAME scziDesk scGNN scDSC scSiameseClu scCDCG OURS 
+
+Mauro Pancreas ACC 73 .55 ±1.37 95 .62 ±0.16 89 .73 ±9.92 69 .97 ±17 .08 79 .32 ±3.96 79 .42 ±1.34 94 .95 ±0.15 92 .65 ±2.93 96.94 ±1.00 
+
+NMI 78 .89 ±0.98 88 .49 ±0.44 85 .31 ±5.11 64 .94 ±14 .21 78 .76 ±5.60 75 .89 ±0.61 86 .19 ±0.34 86 .81 ±0.98 92.43 ±1.49 
+
+ARI 64 .90 ±1.07 92 .38 ±0.35 84 .51 ±13 .42 50 .31 ±29 .92 78 .81 ±3.17 75 .42 ±1.22 94 .59 ±0.35 91 .37 ±1.21 96.08 ±0.67 
+
+Sonya liver ACC 69 .21 ±2.47 80 .73 ±1.86 79 .97 ±8.80 76 .58 ±1.52 72 .33 ±3.40 70 .90 ±2.23 88 .33 ±1.74 75 .34 ±3.67 90.47 ±6.44 
+
+NMI 79 .69 ±0.68 85 .59 ±1.44 85 .04 ±3.65 83 .34 ±0.70 73 .56 ±2.70 71 .63 ±2.75 88 .82 ±1.24 79 .34 ±2.59 91.92 ±9.22 
+
+ARI 69 .71 ±1.18 88 .92 ±1.78 83 .96 ±13 .63 83 .87 ±1.17 76 .01 ±2.60 75 .34 ±3.56 91 .90 ±0.48 81 .26 ±2.69 92.01 ±5.58 
+
+Sapiens Liver ACC 49 .08 ±1.90 67 .51 ±2.30 63 .33 ±1.70 68 .19 ±0.60 73 .83 ±3.00 64 .67 ±4.40 62 .34 ±0.84 73 .09 ±1.40 75.19 ±2.82 
+
+NMI 60 .98 ±2.20 78 .25 ±0.60 74 .83 ±0.70 75 .10 ±1.20 77 .21 ±2.00 68 .21 ±5.20 68 .96 ±1.60 62 .54 ±3.20 79.09 ±5.97 
+
+ARI 34 .52 ±2.00 63 .82 ±4.10 58 .94 ±2.50 66 .12 ±1.90 72 .36 ±1.70 56 .94 ±7.90 51 .10 ±1.29 41 .11 ±4.40 78.03 ±0.97 
+
+Muris Limb Muscle ACC 59 .57 ±3.90 66 .13 ±3.40 61 .34 ±3.10 53 .31 ±4.30 48 .62 ±2.30 64 .37 ±4.00 81 .32 ±6.88 94 .50 ±7.10 95.54 ±3.86 
+
+NMI 34 .55 ±4.90 59 .44 ±3.80 63 .51 ±1.30 36 .66 ±6.40 22 .10 ±4.70 33 .30 ±4.50 80 .04 ±4.44 56 .54 ±7.60 91.69 ±8.60 
+
+ARI 35 .95 ±8.10 51 .54 ±3.30 54 .70 ±2.30 32 .59 ±7.20 21 .90 ±3.20 34 .28 ±6.40 75 .49 ±8.34 53 .37 ±8.50 82.91 ±5.60 
+
+Muris Brain ACC 85 .36 ±18 .10 71 .37 ±0.00 90 .24 ±0.30 OOM 91 .40 ±0.10 96 .02 ±2.50 99 .17 ±5.19 95 .55 ±1.10 99.42 ±0.51 
+
+NMI 59 .48 ±44 .40 1.33 ±0.00 0.01 ±0.00 OOM 0.31 ±0.10 0.07 ±0.00 33 .01 ±1.79 22 .48 ±8.30 68.58 ±1.25 
+
+ARI 60 .11 ±46 .80 −2.22 ±0.00 0.34 ±0.10 OOM 2.77 ±0.50 −0.37 ±0.80 30 .87 ±1.22 35 .56 ±7.80 79.36 ±1.96 
+
+Muris Liver ACC 42 .62 ±3.20 53 .48 ±0.40 49 .72 ±4.10 44 .50 ±3.40 51 .58 ±2.90 55 .76 ±7.50 66 .81 ±4.50 68 .13 ±1.40 75.24 ±6.58 
+
+NMI 45 .07 ±2.20 65 .39 ±1.00 61 .21 ±1.70 43 .17 ±3.40 55 .15 ±1.10 35 .07 ±4.70 71 .46 ±1.51 62 .06 ±2.40 88.38 ±6.54 
+
+ARI 27 .92 ±3.90 47 .55 ±0.60 38 .55 ±3.40 27 .27 ±4.60 45 .58 ±3.20 43 .74 ±12 .30 49 .56 ±3.16 46 .96 ±3.70 69.85 ±1.99 
+
+AVG ACC 63 .23 ±5.16 72 .47 ±1.35 72 .39 ±4.65 62 .51 ±5.38 69 .51 ±2.61 71 .85 ±3.66 82 .15 ±3.22 83 .21 ±2.93 88.80 ±3.54 
+
+NMI 59 .78 ±9.23 63 .08 ±1.21 61 .65 ±2.08 60 .64 ±5.18 51 .18 ±2.70 46 .03 ±2.96 71 .41 ±1.82 61 .63 ±4.18 85.35 ±5.51 
+
+ARI 48 .85 ±10 .50 57 .00 ±1.69 53 .50 ±5.89 50 .03 ±7.45 49 .44 ±2.40 47 .55 ±5.36 65 .59 ±2.47 58 .27 ±4.72 83.04 ±2.80 
+
+RANK ALL 6 4 5 6 9 8 2 3 1
+
+Table 2: Clustering performance compared with deep embedding and structural clustering models (mean ±std ). Bold and underline denote best/runner-up. (OOM: Out-of-Memory; Rank: avg. of ACC/NMI/ARI; scDeepCluster and scziDesk tied for 6th). 
+
+Figure 4: All Biological Analysis of scLLM-DSCon Mauro Pancreas Dataset. 
+
+Dataset Metric scGPT Geneformer GeneCompass OURS 
+
+Mauro Pancreas ACC 56 .61 ±1.35 17 .14 ±0.67 25 .19 ±0.95 96 .94 ±1.00 
+
+NMI 53 .91 ±1.26 0.87 ±0.15 7.00 ±0.11 92 .43 ±1.49 
+
+ARI 37 .15 ±1.49 0.02 ±0.04 3.00 ±0.19 96 .08 ±0.67 
+
+Sonya Liver ACC 57 .75 ±8.35 100 .00 ±0.00 100 .00 ±0.00 90 .47 ±6.44 
+
+NMI 76 .47 ±3.40 100 .00 ±0.00 100 .00 ±0.00 91 .92 ±9.22 
+
+ARI 53 .74 ±9.45 100 .00 ±0.00 100 .00 ±0.00 92 .01 ±5.58 
+
+Sapiens Liver ACC 43 .47 ±3.91 24 .49 ±0.98 27 .77 ±1.31 75 .19 ±2.82 
+
+NMI 59 .75 ±1.25 23 .78 ±0.78 24 .23 ±0.78 79 .09 ±5.97 
+
+ARI 36 .11 ±6.46 10 .75 ±0.64 13 .48 ±2.19 78 .03 ±0.97 
+
+Muris Limb Muscle ACC 29 .22 ±0.25 23 .25 ±1.15 24 .47 ±0.04 95 .54 ±3.86 
+
+NMI 9.44 ±0.06 1.05 ±0.20 4.16 ±0.01 91 .69 ±8.60 
+
+ARI 5.64 ±0.31 0.77 ±0.30 2.40 ±0.00 82 .91 ±5.60 
+
+Muris Brain ACC 59 .54 ±0.57 62 .71 ±0.10 54 .82 ±0.02 99 .42 ±0.51 
+
+NMI 0.04 ±0.02 0.02 ±0.00 0.00 ±0.00 68 .58 ±1.25 
+
+ARI 0.20 ±0.05 0.17 ±0.00 −0.01 ±0.00 79 .36 ±1.96 
+
+Muris Liver ACC 32 .44 ±2.20 13 .84 ±0.45 28 .80 ±2.44 75 .24 ±6.58 
+
+NMI 29 .40 ±1.25 2.01 ±0.15 19 .70 ±0.79 83 .88 ±6.54 
+
+ARI 13 .61 ±0.44 −0.03 ±0.17 13 .48 ±2.16 69 .85 ±1.99 
+
+Table 3: Clustering performance comparison with biological founda-tion models (mean ±std ). The bold values represent the best results. 
+
+latent representations of scLLM-DSC and four representative baselines into a 2D space. The visualization results demon-strate that scLLM-DSC yields substantial advantages in both boundary clarity and intra-cluster compactness. Regarding the cluster boundaries, baselines such as scDeepCluster and scCDCG exhibit discernible "bridge" structures, resulting in marginal overlaps between distinct cell populations. Con-versely, scLLM-DSC effectively eliminates such structural ambiguity; by leveraging LLM-based semantic priors to pro-vide robust discriminative signals, it defines sharp and clean biological boundaries. Notably, from the perspective of intra-cluster compactness, scLLM-DSC facilitates a higher degree of aggregation within the manifold space, forming a more dense and robust cluster structure than the baselines. This dual enhancement in boundary separation and compactness validates the efficacy of cross-modal alignment in constraining the latent space to capture fine-grained cellular heterogeneity. 
+
+4.3 Biological Analysis 
+
+We conduct an in-depth analysis of the biological relevance of our clustering results following the standard evaluation pipeline of scCluBench [ Xu et al. , 2025c ] . Taking the Mauro Pancreas dataset as a case study, we first identify the top 100 marker genes for each predicted cluster via SCANPY, with their expression specificity visualized in the tracksplot in Fig. 4(a). Subsequently, Fig. 4(b) illustrates the marker-overlap calculation process, which establishes a statistical ACC 
+
+> NMI ARI
+> w/o NCut
+> w/o align
+> w/o KL
+> w/o MSE
+> 89.70
+> 92.28
+> 94.86
+> 86.16
+> 88.42
+> 90.68
+> 88.01
+> 90.87
+> 93.72
+
+(a) Framework Component Study ACC  
+
+> NMI ARI
+> w/o align
+> w/o AW
+> w/o SC
+> scLLM-DSC
+> 95.59
+> 96.21
+> 96.83
+> 91.18
+> 91.76
+> 92.34
+> 95.32
+> 95.74
+> 96.16
+
+(b) Semantic Component Study Figure 5: Ablation Study on Mauro Pancreas Dataset.                      
+
+> VARIANTS ACC NMI ARI
+> Jasper-Token-Compression-600M 96 .27 ±1.12 91 .63 ±1.42 95 .70 ±0.83
+> granite-embedding-small-english-r2 96 .36 ±0.90 91 .53 ±1.51 95 .71 ±0.69
+> Qwen3-Embedding-0.6B 96 .02 ±1.26 91 .42 ±1.48 95 .57 ±0.77
+> all-MiniLM-L6-v2 96 .64 ±0.98 91 .89 ±1.62 95 .85 ±0.77
+> bge-m3 96 .60 ±1.13 91 .99 ±1.39 95 .85 ±0.74
+> OURS (text-embedding-3-small) 96.94 ±1.00 92.43 ±1.49 96.08 ±0.67
+
+Table 4: Robustness to LLM Variants on Mauro Pancreas .
+
+foundation for biological identity assignments by calculating the intersection (overlap score) between predicted markers and gold-standard reference sets. Furthermore, in the Sankey diagram of Fig. 4(c), we compare two annotation paradigms: the purely numerical Best-Mapping (BM) strategy, which op-erates independently of external biological priors, and the biology-guided Marker-Overlap (MO) strategy. Analytical re-sults demonstrate that while the BM strategy tends to "enforce mappings" for all nine potential cell types, the MO strategy exhibits superior biological rigor. Concretely, for cluster 1 in Fig. 4(b) mislabeled as " epsilon cell " by BM, the MO strat-egy deliberately labels the cluster as " pancreatic ductal cell "according to its highest overlap score, as shown in Fig. 4(c), ensuring higher fidelity cellular identification. 
+
+4.4 Ablation Study 
+
+Framework Component Study. To evaluate the contribu-tion of each module, we compare scLLM-DSC with four variants on the Mauro Pancreas dataset by systematically re-moving Lalign (w/o align ), LN Cut (w/o NCut ), LM SE (w/o MSE ), and LKL (w/o KL). Results visualized in Fig. 5a re-veal that scLLM-DSC consistently outperforms all ablation variants across all metrics, confirming that each component is vital for optimal performance. Notably, the significant per-formance degradation in w/o NCut and w/o align underscores the indispensable roles of both high-order structural manifolds and LLM-derived biological semantics. The performance gain demonstrates that scLLM-DSC effectively synergizes high-order topological structures with explicit biological semantics, leading to more robust and interpretable cell clustering. 
+
+Semantic Component Study. We evaluate the contribution 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> Value
+> 0.80
+> 0.85
+> 0.90
+> 0.95
+> 1.00
+> Score
+> ACC
+> NMI
+> ARI
+
+Figure 6: Parameter Sensitivity of ω on Mauro Pancreas dataset .
+
+of each semantic path by comparing scLLM-DSC with three variants: w/o AW (removing Abundance-Weighted Semantic Aggregation), w/o SC (removing Sequence-based Contextual Encoding), and w/o align (discarding both). Results in Fig. 5b show that while either path alone improves performance, their combination consistently yields the highest accuracy. This confirms that expression-weighted magnitudes and gene-order regulatory logic provide complementary biological insights into complex cellular states. 
+
+4.5 Robustness to LLM Variants 
+
+To assess the model’s dependence on a specific language model, we investigate its robustness by substituting the de-fault text-embedding-3-small with various LLM backbones of differing architectures and scales. As reported in Tab. 4, scLLM-DSC maintains remarkably stable performance across all evaluation metrics, with negligible fluctuations despite sig-nificant variations in the underlying embedding models. This stability indicates that scLLM-DSC is highly compatible with diverse LLM architectures, as the specific backbone choice is not the primary determinant of performance. Combined with Fig. 5, these results underscore that integrating LLM-based semantics remains indispensable for superior accuracy, demonstrating the broad applicability of our framework. 
+
+4.6 Parameter Sensitivity 
+
+We evaluate the impact of the balancing coefficient ω (Eq. 5) on clustering performance. As illustrated in Fig. 6, metrics including ACC, NMI, and ARI fluctuate with varying fusion ratios of abundance and context semantics. Optimal results across all metrics are achieved at ω = 0 .5, confirming that the synergy of dual-path representations is essential for capturing comprehensive cell semantics. The performance decline at 
+
+ω ∈ { 0, 1} further proves that relying on a single semantic source is insufficient for maintaining peak clustering precision. 
+
+5 Conclusion 
+
+scLLM-DSC presents a novel paradigm that integrates LLM-derived biological knowledge with deep structural clustering to address the persistent omission of semantic context in tra-ditional scRNA-seq analysis. By synergizing functional gene priors with graph-guided topological encoding, our framework establishes a unified latent space that aligns numerical tran-scriptomic features with high-level biological meaning. Bench-marks confirm that this task-specific cross-modal alignment not only achieves state-of-the-art accuracy but also provides an interpretable foundation for mechanism-aware discovery. Looking ahead, we plan to scale this framework to atlas-level datasets and incorporate spatial transcriptomics to further de-code complex tissue architectures. Acknowledgements 
+
+This work is partially supported by the National Natural Sci-ence Foundation of China (Grant No. 92470204, 62406306, and 62406056) and the Guangdong Basic and Applied Basic Research Foundation (Grant No. 2024A1515140114). 
+
+Contribution Statement 
+
+Ping Xu and Pengjiang Li contributed equally to this work. Specifically, they led the project, provided theoretical support, and were responsible for overall model design, code imple-mentation, experimental design, and paper writing. Tian Du, Zaitian Wang, Jiawei Gu, and Zhiyuan Ning provided guid-ance in solving complex problems and assisted with paper writing. Ziyue Qiao, Pengfei Wang, and Yuanchun Zhou pro-vided valuable feedback on manuscript drafts. All authors reviewed and approved the final version. 
+
+References 
+
+[Butler et al. , 2018] Andrew Butler, Paul Hoffman, Peter Smibert, Efthymia Papalexi, and Rahul Satija. Integrat-ing single-cell transcriptomic data across different condi-tions, technologies, and species. Nature biotechnology ,36(5):411–420, 2018. [Chen and Zou, 2024] Yiqun Chen and James Zou. Genept: a simple but effective foundation model for genes and cells built from chatgpt. bioRxiv , pages 2023–10, 2024. [Chen et al. , 2020] Liang Chen, Weinan Wang, Yuyao Zhai, and Minghua Deng. Deep soft k-means clustering with self-training for single-cell rna sequence data. NAR genomics and bioinformatics , 2(2):lqaa039, 2020. [Cui et al. , 2024] Haotian Cui, Chloe Wang, Hassaan Maan, Kuan Pang, Fengning Luo, Nan Duan, and Bo Wang. scgpt: toward building a foundation model for single-cell multi-omics using generative ai. Nature methods , 21(8):1470– 1480, 2024. [Dip et al. , 2025] Sajib Acharjee Dip, Adrika Zafor, Bikash Kumar Paul, Uddip Acharjee Shuvo, Muhit Islam Emon, Xuan Wang, and Liqing Zhang. Llm4cell: Asurvey of large language and agentic models for single-cell biology. arXiv preprint arXiv:2510.07793 , 2025. [Eraslan et al. , 2019] Gökcen Eraslan, Lukas M Simon, Maria Mircea, Nikola S Mueller, and Fabian J Theis. Single-cell rna-seq denoising using a deep count autoencoder. Na-ture communications , 10(1):390, 2019. [Fang et al. , 2024] Zhaoyu Fang, Ruiqing Zheng, and Min Li. scmae: a masked autoencoder for single-cell rna-seq clustering. Bioinformatics , 40(1):btae020, 2024. [Gan et al. , 2022] Yanglan Gan, Xingyu Huang, Guobing Zou, Shuigeng Zhou, and Jihong Guan. Deep structural clustering for single-cell rna-seq data jointly through au-toencoder and graph neural network. Briefings in Bioinfor-matics , 23(2):bbac018, 2022. [Hao et al. , 2024] Minsheng Hao, Jing Gong, Xin Zeng, Chiming Liu, Yucheng Guo, Xingyi Cheng, Taifeng Wang, Jianzhu Ma, Xuegong Zhang, and Le Song. Large-scale foundation model on single-cell transcriptomics. Nature methods , 21(8):1481–1491, 2024. [Kedzierska et al. , 2025] Kasia Z Kedzierska, Lorin Craw-ford, Ava P Amini, and Alex X Lu. Zero-shot evaluation re-veals limitations of single-cell foundation models. Genome Biology , 26(1):101, 2025. [Kiselev et al. , 2019] Vladimir Yu Kiselev, Tallulah S An-drews, and Martin Hemberg. Challenges in unsupervised clustering of single-cell rna-seq data. Nature Reviews Ge-netics , 20(5):273–282, 2019. [Levine et al. , 2024] Daniel Levine, Syed Asad Rizvi, Sacha Lévy, Nazreen Pallikkavaliyaveetil, David Zhang, Xingyu Chen, Sina Ghadermarzi, Ruiming Wu, Zihe Zheng, Ivan Vrkic, et al. Cell2sentence: teaching large language models the language of biology. BioRxiv , pages 2023–09, 2024. [Li et al. , 2024] Cong Li, Qingqing Long, Yuanchun Zhou, and Meng Xiao. screader: Prompting large language mod-els to interpret scrna-seq data. In 2024 IEEE International Conference on Data Mining Workshops (ICDMW) , pages 665–672. IEEE, 2024. [Li et al. , 2025] Longfan Li, Wangzilu Lu, Yuxin Ji, Zhiwen Gu, Huajie Huang, Yuhang Zhang, Jian Zhao, and Yongfu Li. Sceval: An open-source platform for standardized evaluation and optimization of standard cell libraries in next-generation process nodes. In 2025 International Con-ference on Electronics, Information, and Communication (ICEIC) , pages 1–4. IEEE, 2025. [Lopez et al. , 2018] Romain Lopez, Jeffrey Regier, Michael B Cole, Michael I Jordan, and Nir Yosef. Deep generative modeling for single-cell transcriptomics. 
+
+Nature methods , 15(12):1053–1058, 2018. [Maaten and Hinton, 2008] Laurens van der Maaten and Ge-offrey Hinton. Visualizing data using t-SNE. Journal of machine learning research , 9(Nov):2579–2605, 2008. [Svensson et al. , 2018] Valentine Svensson, Roser Vento-Tormo, and Sarah A Teichmann. Exponential scaling of single-cell rna-seq in the past decade. Nature protocols ,13(4):599–604, 2018. [Theodoris et al. , 2023] Christina V Theodoris, Ling Xiao, Anant Chopra, Mark D Chaffin, Zeina R Al Sayed, Matthew C Hill, Helene Mantineo, Elizabeth M Brydon, Zexian Zeng, X Shirley Liu, et al. Transfer learning enables predictions in network biology. Nature , 618(7965):616– 624, 2023. [Tian et al. , 2019] Tian Tian, Ji Wan, Qi Song, and Zhi Wei. Clustering single-cell rna-seq data with a model-based deep learning approach. Nature Machine Intelligence , 1(4):191– 198, 2019. [Tian et al. , 2021] Tian Tian, Jie Zhang, Xiang Lin, Zhi Wei, and Hakon Hakonarson. Model-based deep embedding for constrained clustering analysis of single cell rna-seq data. 
+
+Nature communications , 12(1):1873, 2021. [Wan et al. , 2022] Hui Wan, Liang Chen, and Minghua Deng. scname: neighborhood contrastive clustering with ancil-lary mask estimation for scrna-seq data. Bioinformatics ,38(6):1575–1583, 2022. [Wang et al. , 2021] Juexin Wang, Anjun Ma, Yuzhou Chang, Jianting Gong, Yuexu Jiang, Ren Qi, Cankun Wang, Hongjun Fu, Qin Ma, and Dong Xu. scgnn is a novel graph neural network framework for single-cell rna-seq analyses. Nature communications , 12(1):1882, 2021. [Wolf et al. , 2018] F Alexander Wolf, Philipp Angerer, and Fabian J Theis. Scanpy: large-scale single-cell gene expres-sion data analysis. Genome biology , 19:1–5, 2018. [Xu et al. , 2024] Ping Xu, Zhiyuan Ning, Meng Xiao, Guihai Feng, Xin Li, Yuanchun Zhou, and Pengfei Wang. sccdcg: efficient deep structural clustering for single-cell rna-seq via deep cut-informed graph embedding. In International Conference on Database Systems for Advanced Applica-tions , pages 172–187. Springer, 2024. [Xu et al. , 2025a] Ping Xu, Zhiyuan Ning, Pengjiang Li, Wenhao Liu, Pengyang Wang, Jiaxu Cui, Yuanchun Zhou, and Pengfei Wang. scsiameseclu: A siamese clustering framework for interpreting single-cell rna sequencing data. 
+
+arXiv preprint arXiv:2505.12626 , 2025. [Xu et al. , 2025b] Ping Xu, Pengfei Wang, Zhiyuan Ning, Meng Xiao, Min Wu, and Yuanchun Zhou. Soft graph clustering for single-cell rna sequencing data. BMC bioin-formatics , 26(1):195, 2025. [Xu et al. , 2025c] Ping Xu, Zaitian Wang, Zhirui Wang, Pengjiang Li, Jiajia Wang, Ran Zhang, Pengfei Wang, and Yuanchun Zhou. scclubench: Comprehensive benchmark-ing of clustering algorithms for single-cell rna sequencing. 
+
+arXiv preprint arXiv:2512.02471 , 2025. [Xu et al. , 2025d] Ping Xu, Zaitian Wang, Zhirui Wang, Pengjiang Li, Ran Zhang, Gaoyang Li, Hanyu Xie, Jia-jia Wang, Yuanchun Zhou, and Pengfei Wang. scunified: An ai-ready standardized resource for single-cell rna se-quencing analysis. arXiv preprint arXiv:2509.25884 , 2025. [Yang et al. , 2022] Fan Yang, Wenchuan Wang, Fang Wang, Yuan Fang, Duyu Tang, Junzhou Huang, Hui Lu, and Jian-hua Yao. scbert as a large-scale pretrained deep language model for cell type annotation of single-cell rna-seq data. 
+
+Nature Machine Intelligence , 4(10):852–866, 2022. [Yang et al. , 2024] Xiaodong Yang, Guole Liu, Guihai Feng, Dechao Bu, Pengfei Wang, Jie Jiang, Shubai Chen, Qin-meng Yang, Hefan Miao, Yiyang Zhang, et al. Genecom-pass: deciphering universal gene regulatory mechanisms with a knowledge-informed cross-species foundation model. 
+
+Cell Research , pages 1–16, 2024. [Yuan et al. , 2025] Zhen Yuan, Shaoqing Jiao, Yihang Xiao, and Jiajie Peng. scmamba: A scalable foundation model for single-cell multi-omics integration beyond highly variable feature selection. arXiv preprint arXiv:2506.20697 , 2025. [Zhang et al. , 2025] Fan Zhang, Hao Chen, Zhihong Zhu, Zi-heng Zhang, Zhenxi Lin, Ziyue Qiao, Yefeng Zheng, and Xian Wu. A survey on foundation language models for single-cell biology. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 528–549, 2025.

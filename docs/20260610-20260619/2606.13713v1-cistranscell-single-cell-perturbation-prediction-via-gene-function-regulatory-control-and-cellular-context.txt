@@ -1,0 +1,223 @@
+Title: CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context
+
+URL Source: https://arxiv.org/pdf/2606.13713v1
+
+Published Time: Mon, 15 Jun 2026 00:01:26 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context 
+
+Wei Zhang * 1 Xun Jiang * 2 Yuesi Xi 3 Ming Tang 1
+
+Abstract 
+
+Predicting cellular transcriptional responses to ge-netic perturbations is a central problem in single-cell biology, especially in the zero-shot setting where the perturbed gene or gene combination is unseen during training. A major difficulty is that perturbation effects are not determined by expression state alone: they depend on how the perturbed gene product influences other genes and proteins, how those downstream factors act on cis-regulatory elements, and which regula-tory programs are active in the current cell state. To better capture this biological complexity, we propose CisTransCell, a cell-conditioned multi-modal framework for single-cell perturbation pre-diction that augments each gene with two com-plementary priors: a regulatory-sequence prior that captures how the gene is controlled, and a coding-sequence prior that captures what the gene product does. By integrating these priors with cel-lular expression state, CisTransCell models per-turbation response as a cascade from gene func-tion to regulatory control to downstream transcrip-tional change. Experiments on benchmark single-cell perturbation datasets show that CisTransCell achieves strong performance in zero-shot pertur-bation prediction. 
+
+1. Introduction 
+
+A central goal of single-cell perturbation biology is to pre-dict how genetic perturbations reshape cellular transcrip-tional states. Accurate in silico perturbation prediction could help prioritize experiments, improve mechanistic un-derstanding, and accelerate functional genomics. This task 
+
+> 1
+
+L3S Research Center, Leibniz Universit ¨at Hannover, Germany 
+
+> 2
+
+School of Clinical Medicine & Laboratory Medicine, Jiangsu Uni-versity, China 3Institute for Information Processing (tnt), Leibniz Universit ¨at Hannover, Germany. Correspondence to: Xun Jiang 
+
+<18627180758@163.com >.
+
+Preprint. June 15, 2026. 
+
+Figure 1. Perturbation response: perturbation propagates through three coupled components: gene function, gene regulation, and cell state. Gene function captures the downstream molecular influ-ence of the perturbed gene product, gene regulation captures the cis-regulatory control of target genes, and cell state provides the cellular context that modulates both. Together, these components determine the post-perturbation transcriptional response. 
+
+is especially challenging in the zero-shot setting, where the perturbed gene or gene combination is unseen during training. Existing methods for single-cell perturbation prediction of-ten model perturbation effects in latent transcriptomic space or other learned representation spaces, including disentan-gled latent models, graph-based models, and foundation-model approaches (Lotfollahi et al., 2023; Roohani et al., 2024; Cui et al., 2024; Hao et al., 2024; Adduri et al., 2025). In these models, perturbed genes are typically represented through perturbation embeddings, graph nodes, or other learned features rather than explicit molecular priors. Al-though such representations can capture statistical regulari-ties in the training data, they usually do not explicitly encode the molecular properties that govern how a perturbation propagates through the cell. From a biological perspective, a gene participates in pertur-bation response through at least two distinct molecular roles. First, its regulatory-sequence determines how the gene is controlled, including which upstream factors can influence it and under what cellular conditions it can respond. Sec-ond, its coding-sequence determines what the gene product does, for example whether it functions as a transcriptional 1
+
+> arXiv:2606.13713v1 [q-bio.GN] 10 Jun 2026 CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context
+
+regulator, signaling component, enzyme, or structural factor. As shown in Figure 1, a perturbation propagates through a molecular cascade rather than a direct gene-to-expression mapping. The effect of knocking out a gene first depends on what the perturbed gene product normally does—that is, which genes, proteins, or pathways it can influence. Those affected downstream factors can then alter the activity of cis-regulatory elements, such as enhancers, promoters, in-sulators, and silencers, which determine the transcriptional output of target genes. Whether these regulatory effects are realized further depends on the current cell state, which spec-ifies which regulators, pathways, and chromatin programs are active. Thus, perturbation response is jointly determined by gene function, regulatory control, and cellular context. Motivated by this principle, we propose CisTransCell, a cell-conditioned multi-modal framework that integrates genomic sequence priors with dynamic transcriptomic states. Our main contributions are: • We propose to augment each gene with complemen-tary regulatory- and coding-sequence priors, thereby providing a molecular context for each gene. • We develop a biologically structured framework to model perturbation response. • We demonstrate that CisTransCell achieves strong per-formance in zero-shot perturbation prediction across benchmark datasets. 
+
+2. Method 
+
+2.1. Problem formulation 
+
+Let G denote the number of genes. Each training example is represented as a control-to-perturbation pair (xctrl , y, p ),where xctrl ∈ RG is the expression profile of a control cell, 
+
+y ∈ RG is the expression profile of a perturbed cell, and 
+
+p denotes the perturbation target genes. To support both single-gene and two-gene perturbations in a unified form, we represent p as a length-two gene-index vector; for single-gene perturbations, the same index is repeated. The goal is to learn a perturbation-conditioned predictor: 
+
+ˆy = fθ (xctrl , p ; R, C ),
+
+where R ∈ RG×dr is a gene-level regulatory-sequence prior matrix derived from regulatory DNA sequence, and 
+
+C ∈ RG×dc is a gene-level coding-sequence prior matrix de-rived from coding-sequence. Given a control cell and pertur-bation target(s), the model predicts the full post-perturbation expression profile ˆy ∈ RG.
+
+2.2. Gene-level sequence priors 
+
+Each gene is associated with two sequence-derived priors: a regulatory-sequence prior and a coding-sequence prior. Regulatory priors are derived from strand-aware genomic windows centered on the transcription start site, using a de-fault window of 5500 bp upstream and 500 bp downstream. These sequences are embedded with DNABERT-2 (Zhou et al., 2023) to produce one regulatory representation per gene. Coding priors are derived from gene-associated transcript sequences. For each gene, we select the longest available cDNA transcript when possible, and otherwise fall back to an ncRNA sequence. Since transcript sequences can be long, we embed them with the Nucleotide Transformer (Dalla-Torre et al., 2025) using overlapping chunks and combine the chunk-level representations into a single coding prior for each gene. Both prior tables are aligned to the gene list of the dataset. Genes without a matched sequence prior are assigned zero-valued rows, preserving gene order and output dimensional-ity. 
+
+2.3. Model architecture 
+
+As shown in Figure 2, CisTransCell combines the control-cell expression profile with gene-level regulatory and coding priors to construct one token per gene. These tokens then pass through gene-to-gene contextualization, perturbation conditioning, regulatory-proxy propagation, and a latent bot-tleneck, before a final decoder predicts the post-perturbation expression profile. 2.3.1. G ENE TOKEN CONSTRUCTION 
+
+CisTransCell combines static gene-level sequence priors with dynamic control-cell expression. For each gene g, the regulatory prior Rg and coding prior Cg are first projected separately into modality-specific token spaces: 
+
+˜Rg = ϕr (Rg ), ˜Cg = ϕc(Cg ),
+
+where ˜Rg , ˜Cg ∈ RH are the projected regulatory and coding representations. The two projected priors are then concate-nated and fused to obtain a static gene token: 
+
+Sg = ϕf ([ ˜Rg ; ˜Cg ]) , Sg ∈ RH ,
+
+where [·; ·] denotes concatenation and ϕf is the fusion MLP. Stacking all gene tokens yields a static gene token matrix 
+
+S ∈ RG×H .For a given control cell, we also construct dynamic per-gene features, including log-transformed expression, library-size-normalized expression, and a binary indicator of whether the gene is perturbed. These features are mapped into expres-sion tokens E ∈ RG×H , and the initial gene representation 2CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context  
+
+> Figure 2. CisTransCell starts from the control-cell expression profile together with gene-level regulatory- and coding-sequence priors to construct one token per gene. These tokens then undergo gene-to-gene contextualization, perturbation conditioning, regulatory-proxy propagation, and a latent bottleneck, before being decoded into the predicted post-perturbation expression profile.
+
+is: 
+
+Z0 = E + S. 
+
+This construction yields one hidden token per gene that jointly encodes sequence-level prior information and the current control-cell state. 2.3.2. G ENE -TO -GENE (G2G) CONTEXTUALIZATION 
+
+The initial gene tokens are first contextualized through a self-attention mechanism, which allows each gene representation to incorporate information from all other genes: 
+
+Z1 = G2G( Z0),
+
+where G2G denotes a self-attention block followed by a feed-forward update. This step captures gene-gene depen-dencies in the current cellular state before perturbation-specific conditioning. 2.3.3. P ERTURBATION CONDITIONING 
+
+Next, the model constructs a perturbation context from the target genes and uses it to condition all gene tokens. Let 
+
+p denote the set of perturbed genes. We first aggregate the projected regulatory and coding priors of the perturbed genes: 
+
+¯rp = 1
+
+|p|
+
+X
+
+> k∈p
+
+˜Rk, ¯cp = 1
+
+|p|
+
+X
+
+> k∈p
+
+˜Ck,
+
+where ˜Rk and ˜Ck are the projected regulatory and cod-ing representations of perturbed gene k. These aggregated priors are then fused into a perturbation context vector 
+
+hp ∈ RH :
+
+hp = ϕp([¯ rp; ¯ cp]) ,
+
+where ϕp is a fusion MLP that maps the aggregated regula-tory and coding priors into the hidden space. The perturbation context is then applied to all gene tokens using feature-wise linear modulation (FiLM). To allow dif-ferent genes to respond with different strengths, the model computes a gene-specific regulatory gate: 
+
+ag = σ (Wa ˜Rg )⊤hp
+
+√H
+
+!
+
+,
+
+where ag ∈ (0 , 1) measures how strongly gene g is modu-lated by the perturbation context. The modulated represen-tation of gene g is: 
+
+γp = Wγ hp, βp = Wβ hp,Z2,g = Z1,g ⊙ (1 + ag γp) + ag βp,
+
+where γp, β p ∈ RH are perturbation-specific scale and shift vectors, and Z1,g is the contextualized gene token from the previous block, ⊙ denotes element-wise multiplication, and 
+
+Z2,g is the perturbation-conditioned gene representation. This mechanism allows the same perturbation to induce dif-ferent responses across genes depending on their regulatory context. 2.3.4. R EGULATORY -PROXY PROPAGATION 
+
+To model structured propagation of perturbation effects, CisTransCell introduces a smaller set of learned regulatory proxy tokens. These proxies serve as trainable latent rep-resentations of regulatory programs. Let A(s) ∈ RK×H
+
+denote the proxy-token matrix at propagation step s, where 
+
+K is the number of proxy tokens, and let Z(s) ∈ RG×H
+
+denote the current gene-token matrix. For each gene g, the model first computes a coding-prior-derived weight 
+
+cg = σ(ϕtf ( ˜Cg )) ,
+
+where ˜Cg is the projected coding representation of gene g,
+
+ϕtf is a learned scoring function, and cg ∈ (0 , 1) controls how strongly gene g contributes to regulatory-proxy updates. Let c ∈ RG denote the vector of all gene-wise weights. At propagation step s, the regulatory proxy tokens A(s) first attend to the gene tokens Z(s), with the value stream gated 3CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context 
+
+Table 1. Perturbation Prediction Performance Comparison (in %)                                                                                                                                                               
+
+> Norman. Rep1. K562. Models rpred ,truth ↑rDEG pred ,truth ↑ACC pred ,truth ↑ACC DEG pred ,truth ↑rpred ,truth ↑rDEG pred ,truth ↑ACC pred ,truth ↑ACC DEG pred ,truth ↑rpred ,truth ↑rDEG pred ,truth ↑ACC pred ,truth ↑ACC DEG pred ,truth ↑
+> AverageKnown 39.64 58.98 27.23 61.94 54.53 57.89 53.66 32.33 36.86 46.11 59.18 56.14 Linear 37.68 55.54 26.87 61.94 38.01 40.70 47.65 30.15 25.70 32.42 52.54 52.36 Linear-scGPT 39.20 58.66 27.23 61.94 50.09 53.95 49.69 31.31 33.86 42.97 54.79 54.37 CellOracle 9.80 12.48 19.20 16.35 39.91 7.40 37.55 23.70 4.44 5.89 41.41 41.15 samsVAE 12.48 32.05 37.42 49.63 12.59 36.45 33.04 25.08 8.51 29.03 36.44 43.55 GraphVCI 12.02 30.66 27.95 33.95 14.39 36.30 41.41 25.08 9.73 28.91 45.66 43.55 scFoundation 60.79 65.65 35.66 62.26 47.60 59.46 53.38 43.96 25.15 47.30 57.11 57.32 scGPT 61.48 65.87 61.96 74.43 50.32 65.54 61.72 67.07 32.72 43.15 57.44 57.32 GEARS-Ens-10% 50.91 67.42 29.86 71.43 48.05 50.07 51.99 34.06 31.29 43.84 56.42 56.91 PRESCRIBE-10% 64.32 68.61 64.73 75.93 60.28 66.13 67.89 80.03 38.58 47.52 61.04 71.21 CisTransCell 82.14 85.18 64.74 92.19 59.98 67.30 64.55 70.34 32.45 49.98 58.93 67.32
+
+by the coding-derived gene weights: 
+
+A(s+1) = A(s) + Attn 
+
+
+
+A(s), Z (s), c ⊙ Z(s)
+
+,
+
+followed by a feed-forward block with a residual connection. The updated proxy tokens are then read back by the gene tokens, 
+
+Z(s+1) = Z(s) + Attn 
+
+
+
+Z(s), A (s+1) , A (s+1) 
+
+,
+
+again followed by a feed-forward block with a residual connection. The implementation repeats this two-step gene-to-proxy-to-gene exchange twice: 
+
+Z(0) → A(1) → Z(1) → A(2) → Z(2) .
+
+The output remains one token per gene, but the commu-nication path now includes a learned regulatory-program bottleneck. We denote the final output of this block by Z3.2.3.5. L ATENT BOTTLENECK 
+
+After regulatory-proxy propagation, the gene-token matrix 
+
+Z3 ∈ RG×H is refined with a Perceiver-style latent bottle-neck. A learned latent set Λ ∈ RM ×H first attends to the gene tokens, undergoes two self-attention updates, and is then read back by the genes: 
+
+B0 = Attn(Λ , Z 3, Z 3), B2 = SelfAttn (2) (B0)
+
+Z4 = Attn( Z3, B 2, B 2).
+
+The refined gene tokens are decoded into a gene-wise ex-pression change: 
+
+∆g = ϕo(Z4,g ),
+
+and the final perturbed expression profile is predicted resid-ually as: 
+
+ˆy = xctrl + ∆ .
+
+2.4. Training objective 
+
+Training data consists of paired control and perturbed cells. For each perturbed cell, a control cell is paired to form an example (xctrl , y, p ). The model is optimized with AdamW using a loss that combines full-profile reconstruction with a perturbation-delta objective: 
+
+L = MSE(ˆ y, y ) + λ∆ MSE(ˆ y − xctrl , y − xctrl ),
+
+where λ∆ is the weight of the delta-from-control term. The first term supervises the predicted perturbed profile, while the second term encourages accurate prediction of perturbation-induced expression change relative to the con-trol state. We use the default setting λ∆ = 0 .5.
+
+3. Experiment 
+
+We follow the same experimental setup and evaluation protocol as PRESCRIBE (Cheng et al., 2025), a recent state-of-the-art uncertainty-aware method for single-cell perturbation prediction published at NeurIPS 2025, so that our results are directly comparable to those reported in Ta-ble 2. Specifically, we evaluate on the Norman, Rep1, and K562 benchmark datasets, and report the same four pre-diction metrics: rpred ,truth , rDEG pred ,truth , ACC pred ,truth , and 
+
+ACC DEG pred ,truth .Table 1 compares CisTransCell against the strongest re-ported variant in the PRESCRIBE paper, namely PRE-SCRIBE-10%. Under the same benchmark setting, Cis-TransCell shows its clearest advantage on the Norman dataset, where it outperforms PRESCRIBE-10% on all four metrics. On Rep1 and K562, CisTransCell remains competitive overall and achieves the best DEG correlation. These results highlight the advantage of CisTransCell in cap-turing structured downstream transcriptional effects induced by perturbation. 
+
+4. Conclusion 
+
+We propose CisTransCell, a biologically motivated frame-work for single-cell perturbation prediction. By unifying gene function, regulatory control, and cellular context, Cis-TransCell models how perturbation effects propagate from perturbed genes to downstream transcriptional responses. Across benchmark datasets, the model achieves strong over-all performance. These findings underscore the value of 4CisTransCell: Single-Cell Perturbation Prediction via Gene Function, Regulatory Control, and Cellular Context 
+
+biologically grounded priors for improving zero-shot pertur-bation prediction. In future work, integrating genomic priors with epigenomic context may further improve both accuracy and interpretability, and move toward more realistic models of how perturbations reshape cellular state. 
+
+References 
+
+Adduri, A. K., Gautam, D., Bevilacqua, B., Imran, A., Shah, R., Naghipourfar, M., Teyssier, N., Ilango, R., Nagaraj, S., Dong, M., et al. Predicting cellular responses to perturbation across diverse contexts with state. BioRxiv ,pp. 2025–06, 2025. Cheng, J., Chi, C., Zhou, J., Xin, H., and Xia, J. Prescribe: Predicting single-cell responses with bayesian estimation. 
+
+arXiv preprint arXiv:2510.07964 , 2025. Cui, H., Wang, C., Maan, H., Pang, K., Luo, F., Duan, N., and Wang, B. scgpt: toward building a foundation model for single-cell multi-omics using generative ai. Nature methods , 21(8):1470–1480, 2024. Dalla-Torre, H., Gonzalez, L., Mendoza-Revilla, J., Lopez Carranza, N., Grzywaczewski, A. H., Oteri, F., Dallago, C., Trop, E., De Almeida, B. P., Sirelkhatim, H., et al. Nucleotide transformer: building and evaluating robust foundation models for human genomics. Nature Methods , 22(2):287–297, 2025. Hao, M., Gong, J., Zeng, X., Liu, C., Guo, Y., Cheng, X., Wang, T., Ma, J., Zhang, X., and Song, L. Large-scale foundation model on single-cell transcriptomics. Nature methods , 21(8):1481–1491, 2024. Lotfollahi, M., Klimovskaia Susmelj, A., De Donno, C., Hetzel, L., Ji, Y., Ibarra, I. L., Srivatsan, S. R., Naghipour-far, M., Daza, R. M., Martin, B., et al. Predicting cellular responses to complex perturbations in high-throughput screens. Molecular systems biology , 19(6): MSB202211517, 2023. Roohani, Y., Huang, K., and Leskovec, J. Predicting tran-scriptional outcomes of novel multigene perturbations with gears. Nature Biotechnology , 42(6):927–935, 2024. Zhou, Z., Ji, Y., Li, W., Dutta, P., Davuluri, R., and Liu, H. Dnabert-2: Efficient foundation model and benchmark for multi-species genome. arXiv preprint arXiv:2306.15006 ,2023. 5

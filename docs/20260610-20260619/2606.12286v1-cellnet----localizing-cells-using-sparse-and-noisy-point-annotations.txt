@@ -1,0 +1,81 @@
+Title: CellNet – Localizing Cells using Sparse and Noisy Point Annotations
+
+URL Source: https://arxiv.org/pdf/2606.12286v1
+
+Published Time: Thu, 11 Jun 2026 01:18:27 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+# CellNet - Localizing Cells using Sparse and Noisy Point Annotations 
+
+Benjamin Eckhardt 1,3 benjamin.eckhardt@stud.uni-goettingen.de 
+
+Stuart Fawke 2 sf24@sanger.ac.uk 
+
+Andrew Curtis 2 ac64@sanger.ac.uk 
+
+Bo Fussing 2 bf15@sanger.ac.uk 
+
+Dmytro Fishman ∗3 dmytro.fishman@ut.ee 
+
+Constantin Pape ∗1 constantin.pape@informatik.uni-goettingen.de  
+
+> 1
+
+University of G¨ ottingen, 2 Wellcome Sanger Institute, 3 University of Tartu 
+
+Abstract 
+
+Counting living cells is an important step in many biological research workflows. Our col-laborators at the Wellcome Sanger Institute study vital genes in humans via large scale saturation genome editing screening, which requires repeatedly counting cells a great num-ber of times. Computer Vision based automation is crucial for high throughput and resource efficiency. In this work, we develop a regression-based deep learning computer vision algo-rithm to detect and count cells in phase-contrast microscopy images. To reduce annotation effort, which in practice often becomes a bottleneck, we focus on counting cells only using sparse point annotations, which are fast and easy to acquire. By comparison to state-of-the-art 0-shot methods, we show that regression-based counting is a promising alternative in low data regimes. Through developing methods to automatically count living cells in microscopy images, we contribute to valuable research on the human genome. Code 1.
+
+Keywords: computational pathology 
+
+1. Introduction 
+
+Automated cell counting is essential for high-throughput genome research, such as mapping vital genes by quantifying surviving cells after targeted mutations. Current semi-manual workflows using devices like the Countess 3 FL (ThermoFisher) are costly, time-consuming, and prone to inaccuracies. Approaches for counting cells can be categorized as counting by detection and counting by regression (Lempitsky and Zisserman, 2010). On the detection side, Kirillov et al.’s Segment Anything (SAM) (Kirillov et al., 2023) achieves zero-shot instance segmentation across diverse domains. Recently, Pachitariu et al. introduced Cell-poseSAM (Pachitariu et al., 2025), combining Cellpose and SAM for state-of-the-art zero-shot cellular segmentation without manual prompts or domain-specific fine-tuning. On the regression side, Lempitsky et al. (Lempitsky and Zisserman, 2010) introduced counting ob-jects via density maps constructed as superpositions of Gaussian distributions around point annotations, requiring only minimal ground truth. Xie et al. (Xie et al., 2018) applied fully convolutional networks to predict such density maps. This idea has been extended to   
+
+> ∗Equal Supervision 1. https://github.com/beijn/cellnet
+> ©CC BY-NC-SA 4.0, B. Eckhardt, S. Fawke, A. Curtis, B. Fussing, D. Fishman & C. Pape.
+> arXiv:2606.12286v1 [cs.CV] 10 Jun 2026 Eckhardt Fawke Curtis Fussing Fishman Pape
+
+sparse point annotations and 3D data (Malin-Mayor et al., 2023) as well as to objects of varying size (Jeremias and Pape, 2025). We build on these ideas with CellNet, a U-Net (Ronneberger et al., 2015) with a ResNet (He et al., 2016) backbone, and demonstrate that this lightweight, point-annotation-based approach can be promising to replace 0-shot detection-based methods while minimizing annotation effort and computational cost. 
+
+2. Methods 
+
+2.1. Model 
+
+Figure 1: Construction of cell in-dicator ground truth from sparse point annotations of cells. (Left) Sparse point annotations of cell centers (blue), 2D projection. (Middle) Blurring with Gaussian distributions. (Right) Exclusion of unannotated regions from training (bright shade). We develop CellNet, a fully convolutional neural net-work (CNN), to predict an object density map, simi-lar to the work by Xie et al. (Xie et al., 2018). The local maxima in the density map correspond to the locations of the objects, in our case cells. The num-ber of objects in an image patch is determined by the integral of its density map (Lempitsky and Zisserman, 2010). The ground truth density map is constructed as the sum of Gaussian probability distributions centered around each point annotation with constant standard deviation (Lempitsky and Zisserman, 2010; Xie et al., 2018), as shown in Figure 1. We chose the standard deviation as high as possible without visually merging the distributions of the two pairwise closest annota-tions. Areas without annotations are excluded from training by multiplying the pixel-wise loss with a mask similar to (Malin-Mayor et al., 2023). We train using MSE+BCE loss until convergence. 
+
+2.2. Datasets, Metrics and Baselines 
+
+We evaluate our approach on a dataset of 3 sparsely point-annotated phase-contrast images dubbed Sanger23 , two of which we use for training and one for testing. Secondly we apply our approach to the LivECell dataset (Edlund et al., 2021) by training on the centers of mass of the segmentation masks from the 2% train split. As a baseline for counting by detection, we employ CellposeSAM (Pachitariu et al., 2025). To assess counting performance, we report the symmetric mean absolute percentage error (sMAPE) and mean absolute error (MAE), which quantify the accuracy of predicted cell counts relative to the ground truth. Additionally, we use the F1 score to evaluate the localization performance of detected cells based on local maxima detection and Hungarian matching. Furthermore, we compared our predicted counts to a Countess 3 FL Automated Cell Counter (ThermoFisher) 2 using a dataset of 840 phase-contrast images from 105 flasks across 6 cell lines and up to 8 time points without annotations. There we averaged over 8 images per flask and scaled by the flask area over the microscope’s field of vision. 
+
+> 2. https://www.thermofisher.com/tw/zt/home/life-science/cell-analysis/cell-analysis-instruments/automated-cell-counters/models/countess-3-fl.html [thermofisher.com, retrieved 13.04.2026]
+> 2CellNet
+
+3. Results 
+
+Dataset Model sMAPE MAE F1 
+
+LiveCell Cellpose 7.94% 57.80 0.02 CellNet 30.50% 148.06 0.02 Sanger23 Cellpose 19.09% 452.00 0.05 CellNet* 51.04% 1186.12 0.01 Table 1: Results comparing CellNet to CellposeSAM on LiveCell and Sanger23 datasets. * = evaluation us-ing only one image. 
+
+Figure 2: (Left) Test image overlayed with predicted density map (blue shade), local maxima used for local-ization and F1-scoring (blue dots), and ground-truth annotation points (black circles); (Right) Comparison with Countess 3 FL. Table 1 summarizes the count-ing performance of CellposeSAM and CellNet on the LiveCell and Sanger23 datasets. On LiveCell, CellposeSAM achieves an sMAPE of 7.94% and MAE of 57.80, sub-stantially outperforming the cur-rent version of CellNet (sMAPE 30.50%, MAE 148.06). On the 3-image dataset Sanger23, Cell-poseSAM leads as well with an sMAPE of 19.09% and MAE of 452.00, while CellNet, evaluated on only a single image, yields an sMAPE of 51.04% and MAE of 1186.12. The low F1 scores across both datasets and methods proba-bly indicate a methodological flaw in the matching procedure. Fig-ure 2 (left) illustrates a represen-tative CellNet prediction, showing the regressed density map and lo-cal maxima overlayed on a test im-age alongside ground-truth anno-tations. While predicted cell densities coincide with the overall concentration of cells, exact localization of cell centers is still challenging, possibly due to label noise. Figure 2 (right) compares our results to the Countess 3 FL device on a larger dataset of 105 flasks with an 8-average of image counts each. We report a strong correlation ( r = 0 .83 , p = 4 .22 × 10 −27 )which seems to degrade slightly at very high cell densities. A possible reason for this might be that the model is not generalizing well to images of much higher density than the training images; possibly due to overlap and cell deformation. The spread might be partly due to the random sampling effects of counting only a small subset of the whole flask area. 
+
+4. Conclusion 
+
+We present a regression-based counting method, CellNet using few sparse point annotations. Our preliminary results are outperformed by the SOTA 0-shot generalization capacities of CellposeSAM. However, counting by regression remains promising due to its very low data need, the sufficiency of approximate locations, and architectural light-weightedness. Par-ticularly, a counting model with performance comparable to specialized wet lab techniques could be trained with only two partially annotated images. Future directions include adopt-ing a pretrained backbone similar to CellposeSAM, improving the loss to reflect integrated counts directly, and improving the density map generation for high confluency. Thereby, we hope to increase the accuracy of this approach in order to match or outperform 0-shot methods in challenging settings such as bad data quality due to label efficiency. 
+
+> 3Eckhardt Fawke Curtis Fussing Fishman Pape
+
+Acknowledgments 
+
+I am grateful for Dmytro Fishman, for being an invested supervisor, caring for my personal wellbeing and academic success during and beyond this work. I thank Stuart Fawke, our numinous collaborator from the Welcome Sanger Institute, for this opportunity to make a contribution to meaningful research, and for kindly spending his time and energy to provide us data and explanations; in what felt like a prosperous collaboration transcending occasional misunderstandings. I thank Constantin Pape for being a strong source of ideas and guidance, whenever his time allowed, and I asked early enough. I thank the University of Tartu Institute of Computer Science for providing me access to research-accelerating hardware. I especially thank Anne-Kathrin Schultz for being a very awesome and invested study advisor, making possible my globe spanning academic trajectories. 
+
+References 
+
+Christoffer Edlund, Timothy R Jackson, Nabeel Khalid, Nicola Bevan, Timothy Dale, An-dreas Dengel, Sheraz Ahmed, Johan Trygg, and Rickard Sj¨ ogren. Livecell—a large-scale dataset for label-free live cell segmentation. Nature methods , 18(9):1038–1045, 2021. Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 770–778, 2016. Julia Jeremias and Constantin Pape. Stamped counting for biomedical images. Methods in Microscopy , 2(2):203–213, 2025. Alexander Kirillov, Eric Mintun, Nikhila Ravi, Hanzi Mao, Chloe Rolland, Laura Gustafson, Tete Xiao, Spencer Whitehead, Alexander C Berg, Wan-Yen Lo, et al. Segment anything. 
+
+arXiv preprint arXiv:2304.02643 , 2023. Victor Lempitsky and Andrew Zisserman. Learning to count objects in images. Advances in neural information processing systems , 23, 2010. Caroline Malin-Mayor, Peter Hirsch, Leo Guignard, Katie McDole, Yinan Wan, William C Lemon, Dagmar Kainmueller, Philipp J Keller, Stephan Preibisch, and Jan Funke. Auto-mated reconstruction of whole-embryo cell lineages by learning from sparse annotations. 
+
+Nature biotechnology , 41(1):44–49, 2023. Marius Pachitariu, Michael Rariden, and Carsen Stringer. Cellpose-sam: superhuman gen-eralization for cellular segmentation. BioRxiv , pages 2025–04, 2025. Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net: Convolutional networks for biomedical image segmentation. In Medical image computing and computer-assisted intervention–MICCAI 2015: 18th international conference, Munich, Germany, October 5-9, 2015, proceedings, part III 18 , pages 234–241. Springer, 2015. Weidi Xie, J Alison Noble, and Andrew Zisserman. Microscopy cell counting and detection with fully convolutional regression networks. Computer methods in biomechanics and biomedical engineering: Imaging & Visualization , 6(3):283–292, 2018.
