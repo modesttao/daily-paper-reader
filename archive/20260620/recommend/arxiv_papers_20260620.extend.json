@@ -1,0 +1,107 @@
+{
+  "mode": "extend",
+  "generated_at": "2026-06-20T21:56:09.984413+00:00",
+  "stats": {
+    "mode": "extend",
+    "tag_count": 4,
+    "deep_divecandidates": 0,
+    "deep_cap": 14,
+    "deep_selected": 0,
+    "quick_candidates": 2,
+    "quick_skim_target": 19,
+    "quick_selected": 2
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.19842v1",
+      "source": "arxiv",
+      "title": "Mid-infrared photothermal imaging flow cytometry",
+      "abstract": "Imaging flow cytometry (IFC) enables high-throughput single-cell analysis but largely relies on fluorescence labeling to obtain molecular specificity. Label-free vibrational imaging can provide intrinsic chemical contrast, yet coherent Raman-based methods interrogate only a limited axial volume, which restricts quantitative whole-cell analysis under flow. Mid-infrared photothermal (MIP) microscopy offers a promising route to overcome this limitation by combining linear mid-infrared (MIR) absorption-based chemical contrast with visible-light detection, allowing chemical imaging of a broader axial volume of each cell in a wide-field configuration. However, applying MIP microscopy to rapidly flowing cells has been difficult because conventional frame-sequential acquisition of MIR-ON and MIR-OFF images is highly susceptible to motion-induced subtraction artifacts. Here we demonstrate MIP-IFC, a label-free imaging flow cytometry platform based on single-shot nanosecond-dual-pulse MIP (SNAP-MIP) microscopy. SNAP-MIP encodes the MIR-ON and MIR-OFF states into separate holographic channels within a single camera exposure, reducing their temporal separation to 20 ns. This single-shot acquisition suppresses motion artifacts and increases the allowable sample velocity for artifact-free MIP imaging by five orders of magnitude compared with conventional frame-sequential MIP imaging. Leveraging this capability, MIP-IFC acquired chemical images at 500 frames per second and achieved a cellular event rate up to ~70 events s^-1. We demonstrate quantitative chemical discrimination of flowing microbeads and apply MIP-IFC to single-cell profiling of oleic-acid-induced lipid accumulation, adipocyte differentiation, and confluence-dependent cellular heterogeneity. These results establish MIP-IFC as a high-throughput, quantitative, label-free chemical imaging platform for single-cell phenotyping under flow.",
+      "authors": [
+        "Yusei Sugawara",
+        "Keiichiro Toda",
+        "Genki Ishigane",
+        "Masato Fukushima",
+        "Takuro Ideguchi"
+      ],
+      "primary_category": "physics.optics",
+      "categories": [
+        "physics.optics"
+      ],
+      "published": "2026-06-18T06:43:26+00:00",
+      "link": "https://arxiv.org/pdf/2606.19842v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "high-throughput single-cell analysis via label-free mid-infrared photothermal imaging",
+      "llm_evidence_cn": "通过免标记中红外光热成像进行高通量单细胞分析",
+      "llm_evidence": "通过免标记中红外光热成像进行高通量单细胞分析",
+      "canonical_evidence": "通过免标记中红外光热成像进行高通量单细胞分析",
+      "llm_tldr_en": "Presents a mid-infrared photothermal imaging flow cytometry method for high-throughput label-free single-cell analysis, overcoming limitations of fluorescence labeling and enabling chemical imaging of flowing cells.",
+      "llm_tldr_cn": "提出的中红外光热成像流式细胞术解决了传统成像流式细胞术依赖荧光标记、化学对比度有限的问题。该方法结合中红外吸收与可见光检测，实现流动中单细胞的大轴体积化学成像，避免了荧光标记带来的干扰。实验展示了高速下单细胞化学成像的能力，为无标记单细胞分析提供了新工具。",
+      "llm_tldr": "提出的中红外光热成像流式细胞术解决了传统成像流式细胞术依赖荧光标记、化学对比度有限的问题。该方法结合中红外吸收与可见光检测，实现流动中单细胞的大轴体积化学成像，避免了荧光标记带来的干扰。实验展示了高速下单细胞化学成像的能力，为无标记单细胞分析提供了新工具。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.18523v1",
+      "source": "arxiv",
+      "title": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
+      "abstract": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
+      "authors": [
+        "Johannes Seiffarth",
+        "Matthias Pesch",
+        "Lukas Scholtes",
+        "Dietrich Kohlheyer",
+        "Hanno Scharr",
+        "Katharina Nöh"
+      ],
+      "primary_category": "q-bio.QM",
+      "categories": [
+        "q-bio.QM",
+        "cs.CV"
+      ],
+      "published": "2026-06-16T22:38:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.18523v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "microfluidic live-cell imaging generates single-cell data for real-time analysis",
+      "llm_evidence_cn": "微流控活细胞成像产生单细胞数据，支持实时分析",
+      "llm_evidence": "微流控活细胞成像产生单细胞数据，支持实时分析",
+      "canonical_evidence": "微流控活细胞成像产生单细胞数据，支持实时分析",
+      "llm_tldr_en": "DART paradigm aligns CAD blueprint with physical chip to enable throughput-independent ROI localization and automated image processing for high-throughput microfluidic live-cell imaging, overcoming semi-automated bottlenecks.",
+      "llm_tldr_cn": "高吞吐量微流控活细胞成像产生丰富的单细胞数据，但现有半自动方法在定位感兴趣区域（ROI）和去除微流控结构时需要与ROI数量成比例的手动操作，阻碍了实时分析。本文提出设计感知实时（DART）范式，通过嵌入标记将CAD蓝图与实际芯片对齐，实现与吞吐量无关的ROI自动定位和全自动图像处理。实验表明DART可处理多种ROI几何和芯片布局，显著加速从数据到洞察的流程。该范式为单细胞成像分析提供了高效的实时处理基础，可广泛应用于不同微流控平台。",
+      "llm_tldr": "高吞吐量微流控活细胞成像产生丰富的单细胞数据，但现有半自动方法在定位感兴趣区域（ROI）和去除微流控结构时需要与ROI数量成比例的手动操作，阻碍了实时分析。本文提出设计感知实时（DART）范式，通过嵌入标记将CAD蓝图与实际芯片对齐，实现与吞吐量无关的ROI自动定位和全自动图像处理。实验表明DART可处理多种ROI几何和芯片布局，显著加速从数据到洞察的流程。该范式为单细胞成像分析提供了高效的实时处理基础，可广泛应用于不同微流控平台。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

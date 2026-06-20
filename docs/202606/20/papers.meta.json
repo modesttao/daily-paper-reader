@@ -1,0 +1,39 @@
+{
+  "label": "2026-06-20",
+  "date": "2026-06-20",
+  "generated_at": "2026-06-20T21:57:03",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202606/20/2606.19842v1-mid-infrared-photothermal-imaging-flow-cytometry",
+      "section": "quick",
+      "title_en": "Mid-infrared photothermal imaging flow cytometry",
+      "authors": "Yusei Sugawara, Keiichiro Toda, Genki Ishigane, Masato Fukushima, Takuro Ideguchi",
+      "date": "2026-06-18",
+      "pdf": "https://arxiv.org/pdf/2606.19842v1",
+      "score": "7.0",
+      "evidence": "通过免标记中红外光热成像进行高通量单细胞分析",
+      "tldr": "传统成像流式细胞术依赖荧光标记，无标记振动成像仅能检测有限轴向体积。本文提出中红外光热成像流式细胞术（MIP-IFC），基于单次纳秒双脉冲（SNAP-MIP）显微术，将中红外开/关态编码至同一相机曝光的不同全息通道，时间间隔仅20纳秒，消除运动伪影。实现了500帧/秒成像和约70事件/秒通量，成功区分流动微珠并分析油酸诱导脂质积累、脂肪细胞分化等单细胞表型。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Imaging flow cytometry (IFC) enables high-throughput single-cell analysis but largely relies on fluorescence labeling to obtain molecular specificity. Label-free vibrational imaging can provide intrinsic chemical contrast, yet coherent Raman-based methods interrogate only a limited axial volume, which restricts quantitative whole-cell analysis under flow. Mid-infrared photothermal (MIP) microscopy offers a promising route to overcome this limitation by combining linear mid-infrared (MIR) absorption-based chemical contrast with visible-light detection, allowing chemical imaging of a broader axial volume of each cell in a wide-field configuration. However, applying MIP microscopy to rapidly flowing cells has been difficult because conventional frame-sequential acquisition of MIR-ON and MIR-OFF images is highly susceptible to motion-induced subtraction artifacts. Here we demonstrate MIP-IFC, a label-free imaging flow cytometry platform based on single-shot nanosecond-dual-pulse MIP (SNAP-MIP) microscopy. SNAP-MIP encodes the MIR-ON and MIR-OFF states into separate holographic channels within a single camera exposure, reducing their temporal separation to 20 ns. This single-shot acquisition suppresses motion artifacts and increases the allowable sample velocity for artifact-free MIP imaging by five orders of magnitude compared with conventional frame-sequential MIP imaging. Leveraging this capability, MIP-IFC acquired chemical images at 500 frames per second and achieved a cellular event rate up to ~70 events s^-1. We demonstrate quantitative chemical discrimination of flowing microbeads and apply MIP-IFC to single-cell profiling of oleic-acid-induced lipid accumulation, adipocyte differentiation, and confluence-dependent cellular heterogeneity. These results establish MIP-IFC as a high-throughput, quantitative, label-free chemical imaging platform for single-cell phenotyping under flow.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/20/2606.18523v1-dart-a-design-aware-microfluidic-chip-paradigm-for-real-time-live-cell-image-analysis",
+      "section": "quick",
+      "title_en": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
+      "authors": "Johannes Seiffarth, Matthias Pesch, Lukas Scholtes, Dietrich Kohlheyer, Hanno Scharr, Katharina Nöh",
+      "date": "2026-06-16",
+      "pdf": "https://arxiv.org/pdf/2606.18523v1",
+      "score": "6.0",
+      "evidence": "微流控活细胞成像产生单细胞数据，支持实时分析",
+      "tldr": "微流控活细胞成像中，半自动定位感兴趣区域（RoI）耗时长，阻碍实时分析。DART范式通过CAD蓝图与物理芯片对齐，利用嵌入式标记和深度学习检测实现全自动定位。在1164个RoI的芯片上，定位仅需5分钟，图像处理40毫秒，细胞分割1.1秒。DART实现了吞吐量无关的实时分析，为闭环智能显微镜奠定基础。",
+      "tags": "query:sc-methods",
+      "abstract_en": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
