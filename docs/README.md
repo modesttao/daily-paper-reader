@@ -6,29 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-20
-- 运行时间：2026-06-20 21:56:58 UTC
+- 最新运行日期：2026-06-21
+- 运行时间：2026-06-21 21:39:17 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：3
 - 精读区：0
-- 速读区：2
+- 速读区：3
 
 ### 今日简报（AI）
-今日速读2篇论文，关注活细胞成像分析新技术。
-其中7.0分的中红外光热成像流式细胞术是最大亮点，该方向值得优先了解。
-建议从这篇入手，快速把握无标记细胞分析的前沿进展。
-- 详情：[/202606/20/README](/202606/20/README)
+今日共速读3篇论文，涉及AI生物推理模型、微流控芯片与基因组压缩领域。  
+其中最值得关注的是《How Post-Training Shapes Biological Reasoning Models》与《DART》两篇（均为7.0分），分别涉及推理模型训练和活细胞实时成像分析。  
+建议优先阅读这两篇高分速读文章。
+- 详情：[/202606/21/README](/202606/21/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Mid-infrared photothermal imaging flow cytometry](/202606/20/2606.19842v1-mid-infrared-photothermal-imaging-flow-cytometry)  
+1. [How Post-Training Shapes Biological Reasoning Models](/202606/21/2606.16517v1-how-post-training-shapes-biological-reasoning-models)  
    标签：评分：7.0/10、query:sc-methods
-   evidence：通过免标记中红外光热成像进行高通量单细胞分析
-2. [DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis](/202606/20/2606.18523v1-dart-a-design-aware-microfluidic-chip-paradigm-for-real-time-live-cell-image-analysis)  
+   evidence：在转录组数据上研究生物推理模型的后训练
+2. [DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis](/202606/21/2606.18523v1-dart-a-design-aware-microfluidic-chip-paradigm-for-real-time-live-cell-image-analysis)  
+   标签：评分：7.0/10、query:sc-methods
+   evidence：微流控活细胞成像用于单细胞数据分析；实时图像处理
+3. [Compressed-Resident Genomics: Full-Pipeline Device-Resident GPU LZ77 Decode with Position-Invariant Random Access](/202606/21/2606.18900v1-compressed-resident-genomics-full-pipeline-device-resident-gpu-lz77-decode-with-position-invariant-random-access)  
    标签：评分：6.0/10、query:sc-methods
-   evidence：微流控活细胞成像产生单细胞数据，支持实时分析
+   evidence：GPU加速的FASTQ随机访问解压，适用于单细胞测序数据处理。
 
 
 <div class="dpr-home-promo-card">

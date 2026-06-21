@@ -1,0 +1,54 @@
+{
+  "label": "2026-06-21",
+  "date": "2026-06-21",
+  "generated_at": "2026-06-21T21:39:25",
+  "count": 3,
+  "papers": [
+    {
+      "paper_id": "202606/21/2606.16517v1-how-post-training-shapes-biological-reasoning-models",
+      "section": "quick",
+      "title_en": "How Post-Training Shapes Biological Reasoning Models",
+      "authors": "Lukas Fesser, Hanlin Zhang, Michelle M. Li, Eric Wang, Bryan Perozzi, Shekoofeh Azizi, Sham M. Kakade, Marinka Zitnik",
+      "date": "2026-06-15",
+      "pdf": "https://arxiv.org/pdf/2606.16517v1",
+      "score": "7.0",
+      "evidence": "在转录组数据上研究生物推理模型的后训练",
+      "tldr": "生物科学推理模型通过后训练（CPT、SFT、RL）构建，但各阶段如何影响推理与泛化尚不清晰。本研究在基因组学、转录组学和蛋白质组学上，基于不同骨干模型，系统评估了100多个模型在域内和域外性能。发现CPT通过对齐生物语言提升下游表现；SFT持续提升域内性能，但域外性能早期即达峰后下降；RL应用于强SFT检查点可恢复泛化。结果表明生物推理不随监督单调提升，最优trade-off来自短SFT、大RL分配和非对称适应能力。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Scientific reasoning models for biology combine language models with foundation models trained on multimodal biological data, including DNA, RNA, and proteins. These models are built through post-training, yet how each stage shapes reasoning and generalization remains poorly understood. We study when post-training improves performance and when it induces over-specialization. Across genomics, transcriptomics, and proteins, we train and evaluate more than 100 biological reasoning models under controlled variation in backbone, continued pre-training (CPT), supervised fine-tuning (SFT), and reinforcement learning (RL), measuring both in-domain (ID) and out-of-domain (OOD) performance. We find that each post-training stage reshapes generalization in a distinct way rather than contributing uniform gains. CPT improves downstream performance by aligning models with biological language. SFT consistently increases ID performance but causes OOD performance to peak early and decline as models fit the training distribution. RL, when applied to strong SFT checkpoints with aligned rewards, improves OOD performance and partially recovers generalization. These results show that biological reasoning does not improve monotonically with additional supervision or compute. Instead, performance depends on how training stages are composed. Under fixed post-training budgets, the strongest ID-OOD trade-off comes from brief SFT, larger RL allocations, and asymmetric adaptation capacity across stages.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/21/2606.18523v1-dart-a-design-aware-microfluidic-chip-paradigm-for-real-time-live-cell-image-analysis",
+      "section": "quick",
+      "title_en": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
+      "authors": "Johannes Seiffarth, Matthias Pesch, Lukas Scholtes, Dietrich Kohlheyer, Hanno Scharr, Katharina Nöh",
+      "date": "2026-06-16",
+      "pdf": "https://arxiv.org/pdf/2606.18523v1",
+      "score": "7.0",
+      "evidence": "微流控活细胞成像用于单细胞数据分析；实时图像处理",
+      "tldr": "高通量微流控活细胞成像产生丰富单细胞数据，但半自动RoI定位和去噪可扩展性差，阻碍实时分析。DART范式通过CAD蓝图与物理芯片对齐，利用嵌入式基准标记和深度学习检测，实现吞吐量无关的RoI定位和全自动图像处理。在Swiss Army Knife芯片验证，5分钟定位1164个RoI，40ms去噪，1.1秒内完成细胞分割。DART建立端到端硬件-软件范式，实现实时分析，为闭环智能显微镜奠定基础。",
+      "tags": "query:sc-methods",
+      "abstract_en": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/21/2606.18900v1-compressed-resident-genomics-full-pipeline-device-resident-gpu-lz77-decode-with-position-invariant-random-access",
+      "section": "quick",
+      "title_en": "Compressed-Resident Genomics: Full-Pipeline Device-Resident GPU LZ77 Decode with Position-Invariant Random Access",
+      "authors": "Yakiv Shavidze",
+      "date": "2026-06-17",
+      "pdf": "https://arxiv.org/pdf/2606.18900v1",
+      "score": "6.0",
+      "evidence": "GPU加速的FASTQ随机访问解压，适用于单细胞测序数据处理。",
+      "tldr": "基因组数据解压速度远落后于数据增长，现有方案无法兼顾高吞吐与随机访问。本文扩展ACEAPEX，实现全设备GPU LZ77解码流水线，熵与匹配均在GPU，FASTQ吞吐达260GB/s。提出位置不变随机访问，紧凑索引，任意读解码0.362ms，比samtools快6倍，索引小6.3倍。针对大基因组，范围解码策略将输出与VRAM解耦，50GB数据上维持165.7GB/s且不溢出内存。所有结果位精确，代码开源MIT。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Genomic archives grow faster than decompression keeps up: the European Nucleotide Archive holds tens of petabytes of fastq.gz, and gzip is fundamentally sequential. GPU decompressors (nvCOMP DEFLATE at ~50GB/s on A100) decode whole files with no random access; CPU genomic tools (CRAM, samtools) support region seeks but only at CPU speed. We extend ACEAPEX, an absolute-offset parallel LZ77 codec included in the official lzbench 2.3 release, with three contributions absent from our prior work. First, a full device-resident GPU decode pipeline (entropy and match resolution both on-device) reaching up to 260GB/s on FASTQ, closing the match-phase-only gap of the earlier paper. Second, position-invariant random access with a compact coordinate index: an arbitrary read decodes in 0.362ms, ~6x faster than warm samtools faidx, with a read-to-block index 6.3x smaller than a .fai. Third, a range-decode strategy that decouples output size from VRAM, sustaining 165.7GB/s on a 50GB genome where whole-file decode runs out of memory. All results are bit-perfect. We also measure Meta's open DietGPU ANS on H100 at 592GB/s decode, faster than the proprietary entropy stage we currently use, showing a fully open high-throughput stack is viable. Code is MIT-licensed.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

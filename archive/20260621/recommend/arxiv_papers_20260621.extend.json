@@ -1,0 +1,150 @@
+{
+  "mode": "extend",
+  "generated_at": "2026-06-21T21:37:53.075759+00:00",
+  "stats": {
+    "mode": "extend",
+    "tag_count": 4,
+    "deep_divecandidates": 0,
+    "deep_cap": 14,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 19,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.16517v1",
+      "source": "arxiv",
+      "title": "How Post-Training Shapes Biological Reasoning Models",
+      "abstract": "Scientific reasoning models for biology combine language models with foundation models trained on multimodal biological data, including DNA, RNA, and proteins. These models are built through post-training, yet how each stage shapes reasoning and generalization remains poorly understood. We study when post-training improves performance and when it induces over-specialization. Across genomics, transcriptomics, and proteins, we train and evaluate more than 100 biological reasoning models under controlled variation in backbone, continued pre-training (CPT), supervised fine-tuning (SFT), and reinforcement learning (RL), measuring both in-domain (ID) and out-of-domain (OOD) performance. We find that each post-training stage reshapes generalization in a distinct way rather than contributing uniform gains. CPT improves downstream performance by aligning models with biological language. SFT consistently increases ID performance but causes OOD performance to peak early and decline as models fit the training distribution. RL, when applied to strong SFT checkpoints with aligned rewards, improves OOD performance and partially recovers generalization. These results show that biological reasoning does not improve monotonically with additional supervision or compute. Instead, performance depends on how training stages are composed. Under fixed post-training budgets, the strongest ID-OOD trade-off comes from brief SFT, larger RL allocations, and asymmetric adaptation capacity across stages.",
+      "authors": [
+        "Lukas Fesser",
+        "Hanlin Zhang",
+        "Michelle M. Li",
+        "Eric Wang",
+        "Bryan Perozzi",
+        "Shekoofeh Azizi",
+        "Sham M. Kakade",
+        "Marinka Zitnik"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "q-bio.QM"
+      ],
+      "published": "2026-06-15T10:19:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.16517v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "post-training on transcriptomics for biological reasoning models",
+      "llm_evidence_cn": "在转录组数据上研究生物推理模型的后训练",
+      "llm_evidence": "在转录组数据上研究生物推理模型的后训练",
+      "canonical_evidence": "在转录组数据上研究生物推理模型的后训练",
+      "llm_tldr_en": "Investigates how continued pre-training, supervised fine-tuning, and reinforcement learning shape generalization in biological reasoning models trained on genomics, transcriptomics, and protein data, finding distinct effects per stage that can guide single-cell foundation model development.",
+      "llm_tldr_cn": "该论文系统研究了后训练各阶段（持续预训练、监督微调、强化学习）如何影响生物推理模型的泛化能力。在基因组、转录组和蛋白质数据上训练了超过100个模型，发现每个阶段对泛化有不同影响：持续预训练增强领域内性能但可能降低领域外泛化，而强化学习则提升领域外性能。这些发现为单细胞基础模型的训练策略提供了重要指导。",
+      "llm_tldr": "该论文系统研究了后训练各阶段（持续预训练、监督微调、强化学习）如何影响生物推理模型的泛化能力。在基因组、转录组和蛋白质数据上训练了超过100个模型，发现每个阶段对泛化有不同影响：持续预训练增强领域内性能但可能降低领域外泛化，而强化学习则提升领域外性能。这些发现为单细胞基础模型的训练策略提供了重要指导。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell foundation model",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.18900v1",
+      "source": "arxiv",
+      "title": "Compressed-Resident Genomics: Full-Pipeline Device-Resident GPU LZ77 Decode with Position-Invariant Random Access",
+      "abstract": "Genomic archives grow faster than decompression keeps up: the European Nucleotide Archive holds tens of petabytes of fastq.gz, and gzip is fundamentally sequential. GPU decompressors (nvCOMP DEFLATE at ~50GB/s on A100) decode whole files with no random access; CPU genomic tools (CRAM, samtools) support region seeks but only at CPU speed. We extend ACEAPEX, an absolute-offset parallel LZ77 codec included in the official lzbench 2.3 release, with three contributions absent from our prior work. First, a full device-resident GPU decode pipeline (entropy and match resolution both on-device) reaching up to 260GB/s on FASTQ, closing the match-phase-only gap of the earlier paper. Second, position-invariant random access with a compact coordinate index: an arbitrary read decodes in 0.362ms, ~6x faster than warm samtools faidx, with a read-to-block index 6.3x smaller than a .fai. Third, a range-decode strategy that decouples output size from VRAM, sustaining 165.7GB/s on a 50GB genome where whole-file decode runs out of memory. All results are bit-perfect. We also measure Meta's open DietGPU ANS on H100 at 592GB/s decode, faster than the proprietary entropy stage we currently use, showing a fully open high-throughput stack is viable. Code is MIT-licensed.",
+      "authors": [
+        "Yakiv Shavidze"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-06-17T10:21:31+00:00",
+      "link": "https://arxiv.org/pdf/2606.18900v1",
+      "tags": [
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:sc-methods",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GPU-accelerated random-access decompression for FASTQ files, applicable to single-cell sequencing data processing.",
+      "llm_evidence_cn": "GPU加速的FASTQ随机访问解压，适用于单细胞测序数据处理。",
+      "llm_evidence": "GPU加速的FASTQ随机访问解压，适用于单细胞测序数据处理。",
+      "canonical_evidence": "GPU加速的FASTQ随机访问解压，适用于单细胞测序数据处理。",
+      "llm_tldr_en": "This paper presents a full GPU-based LZ77 decode pipeline for FASTQ files with position-invariant random access, achieving up to 260GB/s throughput. It enables efficient region-specific queries in large genomic archives, benefiting single-cell and other sequencing data analysis workflows.",
+      "llm_tldr_cn": "该文提出一种全GPU设备驻留的LZ77解码流水线，支持对FASTQ文件的位置不变随机访问，解压吞吐量达260GB/s。现有基因组数据压缩工具要么只能全量解码无法随机访问（GPU方案），要么虽支持区域查询但速度受限（CPU工具）。本文通过将熵编码和匹配解析均在GPU上完成，并引入绝对偏移并行随机访问机制，解决了这一矛盾。实验表明该方法在FASTQ数据上性能优异，可直接加速单细胞等大规模测序数据的分析流程。",
+      "llm_tldr": "该文提出一种全GPU设备驻留的LZ77解码流水线，支持对FASTQ文件的位置不变随机访问，解压吞吐量达260GB/s。现有基因组数据压缩工具要么只能全量解码无法随机访问（GPU方案），要么虽支持区域查询但速度受限（CPU工具）。本文通过将熵编码和匹配解析均在GPU上完成，并引入绝对偏移并行随机访问机制，解决了这一矛盾。实验表明该方法在FASTQ数据上性能优异，可直接加速单细胞等大规模测序数据的分析流程。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.18523v1",
+      "source": "arxiv",
+      "title": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
+      "abstract": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
+      "authors": [
+        "Johannes Seiffarth",
+        "Matthias Pesch",
+        "Lukas Scholtes",
+        "Dietrich Kohlheyer",
+        "Hanno Scharr",
+        "Katharina Nöh"
+      ],
+      "primary_category": "q-bio.QM",
+      "categories": [
+        "q-bio.QM",
+        "cs.CV"
+      ],
+      "published": "2026-06-16T22:38:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.18523v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "microfluidic live-cell imaging for single-cell data analysis; real-time image processing",
+      "llm_evidence_cn": "微流控活细胞成像用于单细胞数据分析；实时图像处理",
+      "llm_evidence": "微流控活细胞成像用于单细胞数据分析；实时图像处理",
+      "canonical_evidence": "微流控活细胞成像用于单细胞数据分析；实时图像处理",
+      "llm_tldr_en": "DART aligns CAD blueprints with physical chips using embedded fiducial markers, enabling throughput-independent automated ROI localization and real-time image analysis for microfluidic live-cell imaging, accelerating single-cell data acquisition.",
+      "llm_tldr_cn": "高吞吐量微流控活细胞成像虽能产生丰富单细胞数据，但传统半自动方法定位感兴趣区域（ROI）耗时且随通道数增加而扩展。本文提出DART范式，通过在芯片内嵌基准标记对齐CAD设计与物理芯片，实现与吞吐量无关的全自动ROI定位和实时图像处理，消除了数小时至数天的分析延迟，为大规模单细胞动力学研究提供了关键技术支撑。",
+      "llm_tldr": "高吞吐量微流控活细胞成像虽能产生丰富单细胞数据，但传统半自动方法定位感兴趣区域（ROI）耗时且随通道数增加而扩展。本文提出DART范式，通过在芯片内嵌基准标记对齐CAD设计与物理芯片，实现与吞吐量无关的全自动ROI定位和实时图像处理，消除了数小时至数天的分析延迟，为大规模单细胞动力学研究提供了关键技术支撑。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
