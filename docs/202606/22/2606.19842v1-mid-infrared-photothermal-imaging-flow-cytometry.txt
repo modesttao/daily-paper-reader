@@ -1,0 +1,1120 @@
+Title: 2606.19842v1.pdf
+
+URL Source: https://arxiv.org/pdf/2606.19842v1
+
+Published Time: Fri, 19 Jun 2026 00:30:55 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# Mid -infrared photothermal imaging flow cytometry 
+
+Yusei Sugawara 1, Keiichiro Toda 2*, Genki Ishigane 1, Masato Fukushima 1, and Takuro Ideguchi 1,2 ,3 ,4 **  
+
+> 1
+
+Department of Physics, The University of Tokyo , Tokyo, Japan  
+
+> 2
+
+Institute for Photon Science and Technology, The University of Tokyo, Tokyo, Japan  
+
+> 3
+
+Department of Advanced Materials Science, The University of Tokyo, Chiba , Japan  
+
+> 4
+
+RIKEN Center for Advanced Photonics, RIKEN, Saitama, Japan  
+
+> *
+
+keiichiro --toda@g.ecc.u -tokyo.ac.jp  
+
+> **
+
+ideguchi@edu.k.u -tokyo.ac.jp 
+
+Abstract 
+
+Imaging flow cytometry (IFC) enables high -throughput single -cell analysis but largely relies on fluorescence labeling to 
+
+obtain molecular specificity. Label -free vibrational imaging can provide intrinsic chemical contrast, yet coherent Raman -
+
+based methods in terrogate only a limited axial volume, which restricts quantitative whole -cell analysis under flow. Mid -
+
+infrared photothermal (MIP) microscopy offers a promising route to overcome this limitation by combining linear mid -
+
+infrared ( MIR ) absorption -based chemical contrast with visible -light detection, allowing chemical imaging of a broader 
+
+axial volume of each cell in a wide -field configuration. However, applying MIP microscopy to rapidly flowing cells has 
+
+been difficult because conventional frame -sequential acquisition of MIR -ON and MIR -OFF images is highly susceptible 
+
+to motion -induced subtraction artifacts . Here we demonstrate MIP -IFC , a label -free imaging flow cytometry platform 
+
+based on single -shot nanosecond -dual -pulse MIP (SNAP -MIP) microscopy . SNAP -MIP encodes the MIR -ON and MIR -
+
+OFF states into separate holographic channels within a single camera exposure , reducing the ir temporal separation to 20 
+
+ns . This single -shot acquisition suppresses motion artifacts and increases the allowable sample velocity for artifact -free 
+
+MIP imaging by five orders of magnitude compared with conventional frame -sequential MIP imaging . Leveraging this 
+
+capability, MIP -IFC acquire d chemical images at 500 frames per second and achieve d a cellular event rate up to ~70
+
+events s⁻¹. We demonstrate quantitative chemical discrimination of flowing microbeads and apply MIP -IFC to single -
+
+cell profiling of oleic -acid -induced lipid accumulation, adipocyte differentiation, and confluence -dependent cellular 
+
+heterogeneity. These results establish MIP -IFC as a high -throughput, quantitative, label -free chemical imaging platform 
+
+for single -cell phenotyping under flow. 
+
+Introduction 
+
+Imaging flow cytometry (IFC) integrates continuous flow -based cell handling with high -speed optical imag ing to enable 
+
+morpholog ical and subcellular analysis across large cell populations 1-3. By extracting hundreds of quantitative image 
+
+features from each event, IFC supports high -dimensional phenotypic profiling of single cells 1,4 . Modern platforms 
+
+achieve throughput of thousands of cells per second at submicrometer spatial resolution. In parallel, advances in machine -
+
+learning -based analysis have enhanced the ability to resolve subtle phenotypic differences and cellular heterogenei ty 1,4 -
+
+> 7
+
+. Despite these advances , robust identification of cellular states and subpopulations still largely relies on fluorescence 
+
+labeling . Fluorescence imaging provides molecular specificity but can introduce cytotoxi c effects and perturb native 
+
+cellular physiology 8, 9 , limiting its applicability in contexts that require minimal sample disturbance or preservation for 
+
+downstream analysis . In addition, certain cell types, such as primary immune cells, often exhibit weak or heterogeneous 
+
+fluorescence signals, which further complicates reliable analysis 10,1 1. Thes e challenges motivate the development of 
+
+label -free IFC modalities that can provide intrinsic contrast without external probes .Quantitative phase imaging (QPI) -based IFC 12 -15 has emerged as a powerful approach for high -throughput label -free 
+
+characterization of cells under flow. By measuring optical path length contrast, QPI provides quantitative information on 
+
+cell morphology, dry mass, and intracellular structural organizatio n, enabling label -free analysis of cellular biophysical 
+
+properties and phenotypic heterogeneity at throughput approaching that of fluorescence -based IFC. QPI -based IFC has 
+
+de veloped along several technical directions, including off -axis digital holograph y (DH) 14 and time -stretch imaging 15.
+
+Among these approaches, DH is particularly useful for flow imaging because it records the complex optical field in a 
+
+single acquisition. The measured complex field can then be numerically propagated through free space, allow ing QPI 
+
+images to be computationally refocused without mechanical axial scanning . This capability reduc es sensitivity to axial 
+
+variations in cell position. Despite these advantages, phase imaging inherently lacks chemical specificity . QPI -based IFC 
+
+alone is therefore insufficient to resolve molecular composition and chemically distinct cellular states. 
+
+Vibrational microscopy offers a complementary label -free strategy by extracting chemical contrast from endogenous 
+
+molecular vibrations , prim arily via Raman scattering and mid -infrared (MIR) absorption 16,1 7. In the context of IFC ,
+
+coherent Raman technique s ha ve enabled high -throughput single -cell chemical analysis , including quanti fication of 
+
+metabolic heterogeneity and label -free identification of cancer cells at throughputs of ~100 cells per second 18,19. However ,
+
+these method s rel y on nonlinear optical processes that confine signal generation to a thin axial region near the focal plane, 
+
+typically on the order of one to a few micrometers. As a result , they probe only a limited subcellular volume rather than 
+
+the full axial extent of each cell. Although acoustic focusing and related microfluidic techniques improve cell alignment, 
+
+residual axial variations in cell position can still change which subcellular region overlaps with the thin excitation volume 
+
+near the focal plane. Even under ideal alignment, this axially confined volume samples only a local portion of each cell, 
+
+making quantitative readouts su sce ptible to cell -to -cell difference s in the spatial organization of organelles and chemical 
+
+content . These limitations highlight the need for alt ernative vibrational imaging strategies that can probe the full cellular 
+
+volume. 
+
+Mid -infrared photothermal (MIP) microscopy offers a promising route to address this need by combining MIR 
+
+absorption -based chemical contrast with visible -light detection 20 -32 . In this approach , MIR absorption induces a local 
+
+refractive index (RI) change that is detected using visible -light microscopy , enabl ing MIR absorption imaging with 
+
+visible diffraction -limited resolution. Because this contrast arises from linear MIR absorption rather than nonlinear focal -
+
+volume excitation, MIP imaging is not intrinsically confined to a thin signal -generation volume and can be implemented 
+
+in a wide -field (WF) co nfiguration . In this format, WF -MIP provides a projection -like readout of photothermal contrast 
+
+over the cell thickness, allowing chemical information to be collected from a broader axial volume than a restricted focal 
+
+slice. When DH is used for visible detection in this WF -MIP framework , MIP -DH additionally provides QPI -based 
+
+morpholo gical information and enables computational refocusing within a single setup. Despite these advantages, 
+
+applying WF -MIP imaging , including MIP -DH , to rapidly flowing samples remains challenging. In c onventional 
+
+implementation s, images acquired with and without MIR illumination are recorded in separate camera exposures ,
+
+typically separated by >1 ms , and MIP contrast is obtained from their differen ce 21 -32 . This sequential acquisition is 
+
+inherently sensitive to sample motion and therefore introduces artifacts in to reconstructed images. Consequently, 
+
+avoid ing motion artifacts is expected to limit the allowable flow velocity to only several tens of micrometers per second, 
+
+far below the range required for high -throughput IFC. 
+
+In this work, we demonstrate MIP -DH -based IFC by suppress ing motion artifacts during MIP imaging of rapidly flow ing 
+
+samples . This platform enables robust extraction of MIP contrast from flowing cell s and supports high -throughput, label -
+
+free chemical and morphological analysis at the single -cell level . To achieve this, we integrat e frequency -multiplexed 
+
+off -axis DH 33 with synchronized nanosecond MIR and visible pulses. In this configuration , MIR -ON and MIR -OFF states 
+
+are encoded as separate holographic channels within a single camera exposure , with an effective temporal separation of 
+
+only 20 ns. The differential MIP signal is therefore extracted from near -simultaneous measurements, suppressing motion -
+
+induced inconsistencies. This approach extends the allowable flow velocity to the meter -per -second range , reaching 
+
+values comparable to those of fluorescence -based IFC platforms. Using this platform, we acquired MIP images at 500 
+
+frames per second (fps) and achieved a cellular event rate of ~ 70 events s⁻¹ (eps) . We then demonstrated quantitative 
+
+chemical discrimination in flowing samples and applied MIP -IFC to single -cell profiling of oleic -acid -induced lipid 
+
+accumulation, adipocyte differentiation, and confluence -dependent cellular heterogeneity. Results 
+
+Single -shot nanosecond -dual -pulse MIP ( SNAP -MIP) microscopy for IFC. 
+
+We first describe th e operating principle of MIP -DH 24 and the conventional acquisition scheme used to extract the MIP 
+
+signal . In MIP -DH , wide -field MIR irradiation induces localized heating at MIR -absorbing regions within the field of 
+
+view , generating transient RI changes via the thermo -optic effect . Off -axis DH detects these RI changes as phase shifts. 
+
+In this configuration, inter ference between the object beam transmitted through the sample and a tilted reference beam 
+
+generate s a hologram on the image sensor (Fig. 1a) . Fourier transformation of this hologram separates the interferometric 
+
+terms into distinct spatial frequency bands , allowing the sideband that contain s the complex object -field information to
+
+be isolated. For MIP imaging, t he complex field s are reconstructed f rom MIR -ON and MIR -OFF hologra ms , acquired 
+
+with and without MIR excitation, respectively , and the MIP contrast is obtained as the difference between the 
+
+corresponding phase images. This acquisition scheme provides MIP contrast together with a quantitative phase image 
+
+from the MIR -OFF state, enabling dual -modal analysis of chemically specific contrast and cellular morphology. Because 
+
+off -axis DH preserves the complex optical field, both the quantitative phase image and the MIP image can be 
+
+computationally refoc used without mechanical adjustment of the sample position (see “Reconstruction procedure” in 
+
+Methods and in Supplementary Note 1 for details). 
+
+In conventional MIP -DH systems , MIR -ON and MIR -OFF image s are recorded in separate sensor frame s using 
+
+succe ssive probe pulses , which are typically separated by ~1 ms or longer (Fig. 1 b). This millisecond -scale separation 
+
+typical ly arises from the ~1 -kHz repetition rate used in common MIP -DH implementations to suppress thermal 
+
+accumulation from repeated MIR excitation. When the sensor frame interval exceeds the pulse -to -pulse interval, the 
+
+sensor frame interval instead determines the temporal separation between the two phase images . For static samples, this 
+
+temporal separation is not problematic becaus e subtracti ng the MIR -OFF phase image from the MIR -ON phase image 
+
+removes the background phase and isolates the MIP -induced phase change (Fig. 1 b, “ static ”). For moving samples, 
+
+however, sample displacement during th e interval between the two acquisitions causes a spatial mismatch between the 
+
+MIR -ON and MIR -OFF phase images. This mismatch generates subtraction artifacts in the reconstructed MIP image 
+
+(Fig. 1 b, “moving”). In IFC, such motion -induced artifacts severely restrict the allowable flow velocit y to only several 
+
+tens of μm per second , correspond ing to a typical throughput of ~0.1 eps 34(see Supplementary Note 2). Reducing the 
+
+temporal separation between the MIR -ON and MIR -OFF acquisitions is therefore essential. However, in frame -sequential 
+
+acquisition, this interval cannot be reduced below the limits imposed by the laser repetition period and the sensor frame 
+
+inte rval. 
+
+To overcome these limitations, we developed a method termed single -shot nanosecond -dual -pulse MIP (SNAP -MIP )
+
+microscopy . SNAP -MIP addresses the repetition -rate constraint by generating two temporally separated replicas from a 
+
+single ~10 -ns visible probe pulse. The first replica reaches the sample immediately before the ~10 -ns MIR excitation 
+
+pulse and prob es the MIR -OFF state , whereas the second replica reaches the sample imm ediately after MIR excitation 
+
+and probes the MIR -ON state . This dual -pulse design reduces the effective temporal separation between the two phase 
+
+measurements to ~20 ns (Fig. 1 c). SNAP -MIP also removes the frame -rate constraint of the image sensor by recording 
+
+the MIR -OFF and MIR -ON states within a single sensor exposure. The two states are separated computationally using 
+
+spatial -frequency -multiplexed off -axis DH 33,35. In this scheme , two reference beams with different incidence angles 
+
+encode the MIR -ON and MIR -OFF information into separate spatial -frequenc y bands with in a single hologram (Fig. 1 d). 
+
+Fourier transformation of the recorded hologram separates the two encoded sidebands , which are then isolated and filtered 
+
+independently . Inverse Fourier transform ation of e ach sideband reconstruct s the corresponding phase image , and the MIP 
+
+image is obtained by subtracting the MIR -OFF phase image from the MIR -ON phase image . By combining nanosecond -
+
+scale dual -pulse probing with single -exposure holographic multiplexing, SNAP -MIP theoretically increases the 
+
+permissible flow velocity for motion -artifact -free imaging to approximately 1 m s⁻¹ (see Supplementary Note 2). This 
+
+capability enabl es MIP imaging of rapidly flowing samples (Fig. 1 c, “moving ”). 
+
+A schematic of the SNAP -MIP -based IFC system is shown in Fig. 1 e. A Q-switched Nd:YAG laser (1,064 -nm 
+
+wavelength, 1 kHz repetition rate, ~10 -ns pulse duration) serves as the common pump source for MIR excitation and 
+
+visible probe generation. The MIR excitation pulses are generated using a tunable optical parametric oscillator (OPO) 
+
+operating at 2, 400 -3,600 cm -1 and delivered to the sample plane with a pulse energy of approximately 5.6 μJ. The visible 
+
+pro be pulses are generated by second harmonic generat ion (SHG) at 532 -nm . The visible output is then split into two 
+
+pulses separated by ~20 ns , which interrogate the MIR -ON and MIR -OFF states , respectively. The two probe pulses are introduced in to a spatial -frequency -multiplexed off -axis DH inter ferometer based on a Mach -Zehnder configuration . In 
+
+the sample arm, specimen s flow through a 40 μm -thick glass capillary without hydrodynamic focusing . The MIR 
+
+excitation and visible probe beams illuminate an approximately 40 μm × 40 μm field of view . After passing through the 
+
+sample , each probe pulse interferes with its corresponding reference beam , generating a spatial -frequency -multiplexed 
+
+hologram that encodes both MIR -OFF and MIR -ON information. The hologram is recorded by an image sensor operat ing 
+
+at 500 fps , which determines the MIP imaging frame rate. A detailed optical layout is provided in “Detailed schematic 
+
+of SNAP -MIP -based IFC system ” in Methods , and in Supplementary Note 3.
+
+Fig.1 Principle and schematic of SNA P-MIP microscopy for IFC. a, Operating principle of conventional MIP -DH. 
+
+FT, Fourier transform; IFT, inverse Fourier transform; b, Conventional frame -sequential MIP acquisition scheme (top) 
+
+and MIP images for static and moving samples (bottom) . c, SNAP -MIP acquisition scheme (top) and MIP images for 
+
+moving samples (bottom) . d, Spatial -frequency multiplex ing in SNAP -MIP for single -exposure recording of the MIR -
+
+OFF and MIR -ON states. e, Schematic of the SNAP -MIP -based IFC system. PPLN, periodically poled lithium niobate; 
+
+LBO, lithium triborate. 
+
+Validation of motion -artifact suppression by SNAP -MIP microscopy .
+
+To evaluate the ability of SNAP -MIP microscopy to suppress motion -induced artifacts, we compared MIP imag es of 
+
+moving polymethyl methacrylate ( PMMA ) beads acquired using conventional MIP -DH and SNAP -MIP. The MIR 
+
+excitation was tuned to 2 ,925 cm⁻¹ , corresponding to the CH 2 stretching vibration of PMMA . A MIP image of a static 
+
+PMMA bead was used as the motion -artifact -free reference (Fig. 2a) . When the sample stage was translated laterally at 
+
+200 μm s -1, conventional MIP -DH produced severely distorted MIP images (Fig. 2b, top) . The artifacts appeared as 
+
+alternating positive and negative features along the direction of motion , consistent with relative spatial mis match between 
+
+the MIR -ON and MIR -OFF acquisitions . Under the same conditions , SNAP -MIP preserved image quality comparable to 
+
+that of the static refe rence and accurately reproduced both the bead contrast and lateral displacement of the bead (Fig. 2b, bottom). SNAP -MIP also remained robust at substantially higher sample velocities. At approximately 8 cm s⁻¹, 
+
+comparable to the speed used in subsequent IFC experiments, SNAP -MIP still produce d clear MIP images without 
+
+apparent motion -induced distortion (see Supplementary Note 4). These results demonstrate that SNAP -MIP suppresses 
+
+motion artifacts and enables faithful MIP imaging of moving samples. 
+
+Fig. 2 Validation of motion -artifact suppression by SNAP -MIP microscopy. a, Motion -artifact -free reference images 
+
+of a static PMMA bead. Top, phase image. Bottom, MIP image at 2,925 cm⁻¹. b, Comparison of MIP imaging of a 
+
+laterally moving PMMA bead acquired by conventional MIP -DH (top) and SNAP -MIP (bottom). 
+
+Quantitative chemical di scrimination of flowing microbeads. 
+
+We next evaluated whether SNAP -MIP enables quantitative chemical discrimination under flow . A mixture of PMMA 
+
+and silica beads was flowed through a glass capillary and imaged by SNAP -MIP. The MIR excitation was tuned to 2 ,925 
+
+cm⁻¹, corresponding to the CH₂ stretching vibration of PMMA. The flow rate was set to 42 cm s-1, yielding a bead event 
+
+rate of 1 79 eps (see “Flow procedure ” and “E vent -rate calculation ” in Methods and Supplementary Note 5).
+
+Representative MIR -OFF phase images and the corresponding MIP images of the two bead types are shown in Fig. 3a. 
+
+A pro nounced MIP signal was detected only from the resonant PMMA bead s, whereas the off -resonant silica bead s
+
+showed no clear corresponding response . This bead -type -dependent response confirms chemically selective MIP imaging 
+
+under flow . Although silica beads did not produce a clear photothermal signal, weak residual edge -like features were 
+
+occasionally observed in their reconstructed MIP images. Control measurements indicated that these residual features 
+
+were not caused by MIR absorption or sample motion, but were artifacts originat ing from the spatial -frequency -
+
+multiplexed off -axis DH scheme (see Supplementary Note 6 for details). We therefore refer to these residual features 
+
+hereafter as multiplex artifact s.
+
+We then examined whether computational refocusing preserves accurate MIP reconstruction for beads flowing at 
+
+different axial positions. Figure 3b shows representative phase and MIP images of beads located at different axial 
+
+positions before and after computational refocus ing . Before refocusing, axial defocus degraded both the phase and MIP 
+
+images , particularly for beads displaced from the focal plane. Computational refocusing restored clear bead profiles and 
+
+yielded consistent QPI and MIP contrast across different axial positions. These results show that SNAP -MIP can recover 
+
+rel iable MIP contrast over an extended axial range from a single recorded hologram, without mechanical axial alignment. 
+
+This relaxes the requirement for precise axial confinement by acoustic focusing or related microfluidic techniques ,
+
+enabling robust chemical imaging of samples passing through different axial positions within the capillary. 
+
+Figure 3 c quantitative ly characteriz es the bead populations using histograms and scatter plots of phase values and MIP 
+
+signal intensities. The phase values were obtained from computational ly refocused QPI images , whereas MIP signal 
+
+intensities were obtained from the computational ly refocused MIP images after normalization by the measured MIR 
+
+fluence distribution , which allowed MIP contrast to be evaluated independently of spatial variations in MIR excitation fluence (see “Calibration and normalization of MIR fluence distribution” in Methods). The measured phase values were 
+
+5.9 1 ± 0.2 4 rad for PMMA beads and 3.61 ± 0.08 rad for silica beads . These values agree well with theoretical estimate s
+
+based on the refractive indices of the beads (1.49 for PMMA and 1.43 for silica ) and their nominal diameters (3.04 μm 
+
+for PMMA and 2. 86 μm for silica ). The variation in phase values wa s primarily attribut ed to the intrin sic size dispersion 
+
+of the commercial beads ( 3.04 ± 0.11 μm for PMMA and 2.86 ± 0.06 μm for silica) . These result s indicate that the two 
+
+bead populations can be reliably distinguished using phase information. Consistent with th is phase -based cla ssification ,
+
+the MIP signal intensities provide d clear chemical separation between PMMA and silica beads, with values of -0.52 ±
+
+0.06 rad /(J cm -2) and -0.01 ± 0.06 rad/(J cm -2), respectively . The varia nce in the MIP signal wa s dominated by phase 
+
+noise, which ar ose mainly from optical shot noise and multiplex artifact s (see Supplementary Note 7 for details) . These 
+
+results establish that SNAP -MIP enables quantitative chemical discrimination of flowing samples with distinct molecular 
+
+compositions. 
+
+Fig. 3 Quantitative chemical discrimination of flowing microbeads by SNAP -MIP. a, Representative phase images 
+
+and corresponding MIP images at 2,925 cm -1 of flowing PMMA and silica beads. b, Computational refocusing of phase 
+
+and MIP images for PMMA beads flowing at different axial positions. The y-direction corresponds to the flow direction, 
+
+whereas the z -direction corresponds to the propagation direction of the visible probe beam. c, Quantitative classification 
+
+of PMMA and silica beads based on phase values and MIR -fluence -normalized MIP signal intensities. Histograms show 
+
+the marginal distributions of each feature , calculated from 2,512 beads .
+
+MIP -IFC analysis of lipid accumulation under flow. 
+
+We next examined whether MIP -IFC can discriminate cell populations with distinct chemical compositions under flow. 
+
+To generate controlled compositional differences , we induced intracellular lipid accumulation in COS -7 cells by oleic 
+
+acid treatment under three conditions, 0, 50, and 100 μL (see “ Cell preparation of COS -7 cells and oleic acid treatment ”
+
+in Methods for details) 36. The MIR excitation wavenumber was set to 2 ,925 cm -1, corresponding to the CH 2 stretching 
+
+absorption band, a lipid -associated vibrational signature. The flow rate was set to 10 cm s-1, yielding a cellular event rate 
+
+of 70, 42 and 46 eps , with n = 12,627, 7,515 and 8,310 cells for the 0, 50 and 100 μL conditions , respectively (see 
+
+Supplementary Note 5 ). Representative phase and MIP images for each condition are shown in Fig. 4a. The phase images 
+
+mainly reflect the depth -integrated dry mass density , with contributions from proteins, lipids, and nucleic acids, whereas the MIP images preferentially highlight lipid -rich intracellular regions . Consistent with these different contrast origins, 
+
+the phase images showed no obvious differences across the three conditions, whereas the MIP images of oleic acid -
+
+treated cells exhibited contrast concentrated in discrete intracellular regions, in line with localized lipid accumulation 37.
+
+To quantify these trends, we extracted multiple features from the phase and MIP images and compared them across 
+
+conditions (see “ Calculation of cell feature values ” in Methods for detail s). From the phase images, we quantified the 
+
+cell diameter and dry mass density for each cell. By c ombining the MIP images with cell -size information , we further 
+
+calculated the MIP signal density, defined as the mean RI change per cell. W e also calculated the normalized Shannon 
+
+entropy of the pixel -wise MIP signal -distribution for each MIP image to assess whether the intracellular MIP signal 
+
+intensity was concentrated in a limited subset of pixels or distributed more uniformly across pixels (hereafter referred to 
+
+as entropy) . In Fig. 4b, t he left column shows violin plots of the feature distribution s under each treatment condition ,
+
+while the right column shows the corresponding mean standard deviation ( s.d. ) values . Cell diameter remained largely 
+
+un changed across the th ree oleic acid conditions, whereas dry mass density increased only modes tly in the 50 and 100 
+
+μL conditions, reaching 1.03 -fold and 1.16 -fold relative to the 0 μL condition , respectively . In contrast, MIP signal 
+
+density increased markedly, reaching 3.87 -fold and 6.80 -fold higher than the 0 μL condition in the 50 and 100 μL 
+
+conditions, respectively. This difference between phase -derived dry mass density and MIP signal den sity indicate s that 
+
+the MIP signal density more clearly captures lipid -associated compositional changes than dry mass density, which 
+
+integrates contributions from multiple biomolecular components. 
+
+Entropy analysis further showed that entropy was lower in both the 50 and 100 μL conditions than in the 0 μL condition ,
+
+indicating that the intracellular lipid -associated signal became more concentrated in a smaller subset of pixels after oleic 
+
+acid treatment . This trend is consistent with the accumulation of excess intracellular lipids in lipid droplet -like storage 
+
+structures. However , entropy did not differ substantially between the 50 and 100 μL conditions. Interpreted together with 
+
+the increase in MIP signal density, th is result suggests that higher oleic acid treatment increased the overall lipid 
+
+accumulation while the heterogeneity of the MIP signal intensity across pixels remained similar between the two treated 
+
+conditions . These results show that MIP -IFC can visualize and quantify difference s in cellular chemical composition 
+
+under flow, particularly differences in lipid content across the cell population. Fig. 4 MIP -IFC analysis of oleic -acid -induced lipid accumulation under flow. a, Representative phase and MIP 
+
+images of flowing COS -7 cells treated with 0, 50 or 100 μL oleic acid. MIP images were acquired at 2,925 cm⁻¹. b, 
+
+Quantitative feature analysis of COS -7 cells under each treatment condition. Left, violin plots showing the distributions 
+
+of cell diameter, dry mass density, MIP signal density and entropy. Right, corresponding mean ± s.d. values. 
+
+Single -cell analysis of adipocyte differentiation by MIP -IFC .
+
+We next examined whether MIP -IFC can visualize lipid accumulation associated with adipocyte differentiation at the 
+
+single -cell level. To generate cells with increased intracellular lipid content , we induced adipocyte differentiation in 3T3 -
+
+L1 cells, a well -established adipo genesis model that accumulates lipids after differentiation induction (see 
+
+“Differentiation of 3T3 -L1 cells ” in Methods for the detailed procedure) 38. Measurements were performed at a cellular 
+
+event rate of 6.3 eps, and 2,270 cells were analyzed. Using the phase images together with MIP images acquired at 2925 
+
+cm -1, we quantified the cell area and lipid -rich area for individual cells. Cell area was calculated from the phase images. 
+
+Lipid -rich area was defined as the total area of intracellular structures with MIP signals above a threshold determined 
+
+from the undifferentiated cell population . Because the post -induction population still contained undifferentiated cells, 
+
+cells without detectable lipid -rich areas were excluded from the subsequent differentiated -cell analysis (see “ Exclusion 
+
+of undifferentiated -like 3T3 -L1 cells ” in Methods for the details) .
+
+Figure 5a shows the relationship between cell area and lipid -rich area for individual cells. The reference lines indicate 
+
+lipid area fractions of 20%, 40%, and 70% relative to the cell area. The differentiated -cell population was broadly 
+
+distributed along both axes , indicat ing substantial cell -to -cell heterogeneity in both cell size and lipid accumulation. This 
+
+distribution shows that the differentiation state of 3T3 -L1 cells cannot be adequately described by cell size or lipid amount 
+
+alone, but requires jo int evaluation of cell area, lipid -rich area, and lipid area fraction. Figure 5b shows representative phase and MIP images of cells selected from the regions indicated in Fig. 5a, labeled S1 
+
+to S3 and L1 to L3. The representative MIP images provide a visual counterpart to the heterogeneity observed in Fig. 5a. 
+
+Among cells with similar cell areas, the MIP images revealed substantial differences in the size and extent of lipid -rich 
+
+structures, demonstrating that MIP -IFC can directly visualize heterogeneity in differentiation -associated lipid 
+
+accumulation within the population. Comparison across the selected regions further showed that, in both the smaller -cell 
+
+group (S1 to S3) and the larger -cell group (L1 to L3), t he increase in lipid -rich area from region 1 to region 3 was not 
+
+characterized by a uniform increase in the number of lipid structures of similar size. Instead, lipid accumulation was 
+
+associated with the emergence and growth of larger lipid droplet -like st ructures. These observations indicate that MIP -
+
+IFC captures not only increases in total lipid content but also changes in the spatial organization of lipid storage. 
+
+In Fig. 5c, the data are replotted with cell area on the x axis and lipid area fraction on the y axis. The upper boundary of 
+
+the lipid area fraction was not uniform across cell sizes , as indicated by the blue dashed line . It decreased with increasing 
+
+cell area , from approximately 90% at 200 μm 2 to approximately 60 % at 500 μm 2. This size -dependent decrease suggests 
+
+that, within the heterogeneous differentiated cell population, the upper limit of lipid accumulation does not simply scale 
+
+with cell area . This interpretation is discussed further in the Discussion section. Overall, these findings show that MIP -
+
+IFC enables single -cell quantification of lipid accumulation during adipocyte differentiation and reveals heterogeneity in 
+
+differentiation state that cannot be captured by cell size alone or lipid -rich area alone .
+
+Fig. 5 Single -cell analysis of adipocyte differentiation by MIP -IFC. a, Relationship between cell area and lipid -rich 
+
+area for differentiated 3T3 -L1 cells. Dashed lines indicate lipid area fractions of 20%, 40% and 70%. 
+
+b, Representative phase and MIP images of cells selected from the regions indicated in a. Cells are grouped by smaller -
+
+cell regions (S1 to S3) and larger -cell regions (L1 to L3). c, Relationship between cell area and lipid area fraction. The 
+
+blue dashed line indicates the apparent upper envelope of the lipid area fraction. 
+
+Culture confluence -dependent cellular profiling by MIP -IFC. 
+
+We next used MIP -IFC to characterize changes in cellular population state associated with increasing culture confluence .
+
+COS -7 cells were seeded in culture dishes and maintained for several days. As the cells proliferated, culture confluence gradually increased and reached nearly 100% between days 8 and 10 . Cells were measured at multiple time points during 
+
+this process , and changes in morphology, dry mass density , and lipid -related MIP contrast were analyzed . Representative 
+
+phase and MIP images at each time point are shown in Fig. 6a , and Fig. 6b summarizes the temporal evolution of the 
+
+extracted feature s using the same analysis as in Fig. 4. 
+
+The mean cell diameter and dry mass density remained largely unchanged throughout the experiment, indicating that the 
+
+overall cell size and bulk dry -mass content were relatively stable. In contrast, MIP signal density increased from day 8 
+
+onward, indicatin g an increase in lipid -associated molecular content. Entropy calculated from the MIP images decreased 
+
+over the same period, suggesting that the lipid -associated MIP signal became increasingly concentrated in a limited subset 
+
+of pixels. This trend is consis tent with the accumulation of intracellular lipids in lipid droplet -like storage structures. 
+
+The temporal changes in standard deviation further revealed an increase in population heterogeneity. After the culture 
+
+reached approximately 100% confluence, the distribution of MIP signal density became progressively broader. This 
+
+broadening indicates that, under high -density culture conditions, cells did not converge to a single common state but 
+
+instead became increasingly heterogeneous . The possible biological origins of the observed changes in both mean values 
+
+and population heterogeneity are discussed in the Discussion section. These findings show that MIP -IFC can capture 
+
+both shifts in population -averaged cellular composition and the emergence of population heterogeneity under high -
+
+density culture conditions through integrated single -cell analysis of morphology, dry mass -related properties, and 
+
+chemical contrast. 
+
+Fig. 6 Culture -confluence -dependent cellular profiling by MIP -IFC. a, Representative phase and MIP images of 
+
+flowing COS -7 cells measured at different culture times as confluence increased. MIP images were acquired at 2,925 
+
+cm⁻¹. b, Quantitative feature analysis across culture time. Left, violin plots showing the distributions of cell diameter, 
+
+dry mass density, MIP signal density and entropy. Right, corresponding mean ± s.d. values. 
+
+Discussion 
+
+The results in Figs. 5 and 6 provide insight into heterogeneous cellular responses in two biological contexts: adipocyte 
+
+differentiation and high -density culture . In Fig. 5c, the upper limit of lipid area fraction decreased with increasing cell 
+
+area. Because this fraction is normalized by cell area, larger cells must contain a greater absolute lipid -rich area to reach the same fractional value as smaller cells. The reduced upper bound observed in larger cells therefore suggests that, at 
+
+the time of measurement, even the most lipid -rich cells in this size range had not accumulated sufficient lipid -rich regions 
+
+to reach the fractional values observed in smaller cel ls. This relationship indicates heterogeneous progression of lipid 
+
+remodeling across cells of different sizes during adipocyte differentiation. 
+
+Fig ure 6 further suggests that cellular states changed during the transition to high -density culture. Near 100% confluence, 
+
+several factors that can alte r cellular physiology may arise simultaneously, including contact -dependent growth inhibition, 
+
+nutrient depletion, accumulation of metabolic by -products , and acidification of the medium . Under these high -density 
+
+culture conditions, the lipid -associated MIP signal increased, and its intensity became increasingly concentrated in a 
+
+limited subset of pixels. These features are consistent with the possibility that a subset of cells shifted from a proliferation -
+
+dominant state toward a metabolically altered state associated with adaptation to high -density culture. This interpretation 
+
+is consistent with reports that lipid accumulation can accompany stress responses or metabolic adaptation 39. It is also 
+
+notable that heterogeneity in lipid content increased around the time when the culture reached near ly 100% confluence. 
+
+One possible explanation is that local microenvironments , such as nutrient availability, waste accumulation, and cell -cell 
+
+contact, became spatially heterogeneous in dense cultures, leading to divergent cellular responses within the population. 
+
+We next discuss several technical extensions that could further enhance the performance and application scope of SNAP -
+
+MIP -based IFC. A key direction is increasing image -acquisition throughput. In the current implementation , the 
+
+throughput is primarily limited by the image sensor , which operates at 500 fps for a reconstructed field of view of 279 ×
+
+279 pixel s. This corresponds to a pixel throughput of 3.9×10⁷ pixel s s-1, already several times higher than that of reported 
+
+coherent Raman IFC systems , which typically operate at 2.0×10 7 pixels s-1 18. With faster sensors, the dominant constraint 
+
+would shift to the repetition rate of the MIR and visible pulse trains, currently 1 kHz. Importantly, th is repetition -rate 
+
+constraint is not fundamental. In conventional MIP -DH imaging of static samples, increasing the repetition rate leads to 
+
+cumulative heating , which can induce thermal damage and thereby limits the allowable excitation rate. In SNAP -MIP -
+
+based IFC , by contrast, the MIR -ON and MIR -OFF states are acquired within a single excitation event , and sample flow 
+
+ensures that each sample volume exper iences only a single MIR excitation . This prevents cumulative heating of the same 
+
+sample volume and relaxes the repetition -rate constraint. When c ombin ed with a high -speed image sensor, increasing the 
+
+repetition rate by an order of magnitude could enable imaging rates approaching 10 ,000 fps , provided that sufficient MIR 
+
+pulse energy is maintained . This strategy pr ovide s a scalable pathway toward throughput improvement s exceeding one 
+
+order of magnitude relative to coherent Raman IFC. 
+
+A second direction is expan ding the spectral dimensionality, which is important for biochemical characterization and 
+
+diagnostic applications . Within the SNAP -MIP framework , multispectral acquisition could be implemented by extending 
+
+the spatial -frequency multiplexing strategy. In the current implementation , only two states, MIR -ON and MIR -OFF, are 
+
+encoded into distinct spatial -frequency bands within a single hologram, leaving a substantial portion of the spatial -
+
+frequency domain unused. The unoccupied frequency bands c ould be used to encode additional MIR -ON states at 
+
+different excitation wavelengths , enabl ing simultaneous acquisition of multiple spectral channels within a s ingle exposure .
+
+This capability allows parallel analysis of multiple chemical targets under flow conditions. 
+
+Finally, we comment on the broader biological scope of MIP -IFC. The present results demonstrate that our MIP -IFC can 
+
+capture integrated changes in cellular state under flow, including lipid accumulation, lipid spatial organization, 
+
+morphology and dry mass -related properties. This capability supports applications in the analysis of differentiation 
+
+processes, culture -environment -induced state transitions and metabolically distinct subpopulations. Further 
+
+improvements in throughput and spectral dimensionality discussed above would extend this scope to more robust analysis 
+
+of rare or low -abundance subpopulations and more detailed biochemical profiling. With these advances, MIP -IFC could 
+
+become a platform for high -throughput, label -free chemical phenotyping in diagnostic screeni ng and functional cell -state 
+
+analysis. 
+
+Reference 
+
+1. Rees, P. et al. Imaging flow cytometry. Nat. Rev. Methods Primers 2, 86 (2022). 
+
+2. Basiji, D. A. et al. Cellular image analysis and imaging by flow cytometry. Clin. Lab. Med. 27 , 653 -670 (2007). 
+
+3. Han, Y. et al. Review: imaging technologies for flow cytometry. Lab Chip 16 , 4639 -4647 (2016). 4. Doan, M. et al. Diagnostic potential of imaging flow cytometry. Trends Biotechnol . 36 , 649 -652 (2018). 
+
+5. Blasi, T. et al. Label -free cell cycle analysis for high -throughput imaging flow cytometry. Nat. Commun. 7, 10256 
+
+(2016). 
+
+6. Ota, S. et al. Ghost cytometry. Science 360 , 1246 –1251 (2018). 
+
+7. Nitta, N. et al. Intelligent image -activated cell sorting. Cell 175 , 266 –276.e13 (2018). 
+
+8. Hoebe, R. A. et al. Controlled light -exposure microscopy reduces photobleaching and phototoxicity in fluorescence 
+
+live -cell imaging. Nat. Biotechnol. 25 , 249 –253 (2007). 
+
+9. Icha, J. et al. Phototoxicity in live fluorescence microscopy, and how to avoid it. BioEssays 39 , 1700003 (2017). 
+
+10. Andersen, M. N. et al. Elimination of erroneous results in flow cytometry caused by antibody binding to Fc 
+
+receptors on human monocytes and macrophages. Cytometry A 89 , 1001 –1009 (2016). 
+
+11. Fahlberg, M. D. et al. Overcoming fixation and permeabilization challenges in flow cytometry by optical 
+
+barcoding and multi -pass acquisition. Cytometry A 105 , 838 –848 (2024). 
+
+12. Merola, F. et al. Tomographic flow cytometry by digital holography. Light Sci. Appl. 6, e16241 (2017). 
+
+13. Wang, Z. et al. Holographic flow scanning cytometry overcomes depth of focus limits and smartly adapts to 
+
+microfluidic speed. Lab Chip 23 , 2316 –2326 (2023). 
+
+14. Min, J. et al. Quantitative phase imaging of cells in a flow cytometry arrangement utilizing Michelson 
+
+interferometer -based off -axis digital holographic microscopy. J. Biophotonics 12 , e201900085 (2019). 
+
+15. Lee, K. C. M. et al. Quantitative phase imaging flow cytometry for ultra -large -scale single -cell biophysical 
+
+phenotyping. Cytometry A 95 , 510 –520 (2019). 
+
+16. Cheng, J. -X. et al. Vibrational spectroscopic imaging of living systems: an emerging platform for biology and 
+
+medicine. Science 350 , aaa8870 (2015). 
+
+17. Shi, L. et al. Mid -infrared metabolic imaging with vibrational probes. Nat. Methods 17 , 844 –851 (2020). 
+
+18. Suzuki, Y. et al. Label -free chemical imaging flow cytometry by high -speed multicolor stimulated Raman scattering. 
+
+Proc. Natl Acad. Sci. USA 116 , 15842 –15848 (2019). 
+
+19. Nitta, N. et al. Raman image -activated cell sorting. Nat. Commun. 11 , 3452 (2020). 
+
+20. Zhang, D. et al. Depth -resolved mid -infrared photothermal imaging of living cells and organisms at submicrometer 
+
+spatial resolution. Sci. Adv. 2, 1600521 (2016). 
+
+21. Toda, K. et al. Molecular contrast on phase -contrast microscope. Sci. Rep. 9, 9957 (2019). 
+
+22. Bai, Y. et al. Ultrafast chemical imaging by widefield photothermal sensing of infrared absorption. Sci. Adv. 5, 1 –
+
+24 (2019). 
+
+23. Zhang, D. et al. Bond -selective transient phase imaging via sensing of the infrared photothermal effect. Light Sci. 
+
+Appl. 8, 116 (2019). 
+
+24. Tamamitsu, M. et al. Label -free biochemical quantitative phase imaging with mid -infrared photothermal effect. 
+
+Optica 7, 359 -366 (2020). 
+
+25. Toda, K. et al. Adaptive dynamic range shift (ADRIFT) quantitative phase imaging. Light Sci. Appl. 10 , 1 (2021). 
+
+26. Samolis, P. D . et al . Label -free imaging of fibroblast membrane interfaces and protein signatures with vibrational 
+
+infrared photothermal and phase signals. Biomedical Optics Express 12 , 303 –319 (2021). 
+
+27. Zhao, J. et al. Bond -selective intensity diffraction tomography. Nat. Commun. 13 , 7767 (2022). 
+
+28. Ishigane, G. et al. Label -free mid -infrared photothermal live -cell imaging beyond video rate. Light Sci. Appl. 12 ,
+
+174 (2023). 
+
+29. Yuan, T. et al. Phase -shifting optothermal microscopy enables live -cell mid -infrared hyperspectral imaging of large 
+
+cell populations at high confluency. Sci. Adv. 10 , adj7944 (2024). 
+
+30. Tamamitsu, M. et al. Mid -infrared wide -field nanoscopy . Nat. Photonics 18 , 738 -743 (2024). 
+
+31. Jia, D. et al. Mid -infrared photothermal relaxation intensity diffraction tomography for video -rate volumetric 
+
+chemical imaging. arXiv:2512.24375 (2025). 32. Fukushima, M. et al. Video -rate bond -selective volumetric imaging with mid -infrared photothermal optical 
+
+diffraction tomography . arXiv:2 603 .03812 (2026) .
+
+33. Shaked, N. T. et. al. Off -axis digital holographic multiplexing for rapid wavefront acquisition and processing. Adv. 
+
+Opt. Photonics 12 , 556 (2020). 
+
+34. Han, Y. et al. Imaging cells in flow cytometer using spatial -temporal transformation. Sci. Rep. 5, 13267 (2015). 
+
+35. Liebel, M. et al. Ultrafast transient holographic microscopy. Nano Lett. 21 , 1666 –1671 (2021). 
+
+36. Poppelreuther, M. et al. The N -terminal region of acyl -CoA synthetase 3 is essential for both the localization on 
+
+lipid droplets and the function in fatty acid uptake. J. Lipid Res. 53 , 888 –900 (2012). 
+
+37. Rohwedder, A. et al. Lipid droplet formation in response to oleic acid in Huh -7 cells is mediated by the fatty acid 
+
+receptor FFAR4. J. Cell Sci. 127 , 3104 –3115 (2014). 
+
+38. Green, H. et al. An established pre -adipose cell line and its differentiation in culture. Cell 3, 127 –133 (1974). 
+
+39. Jarc, E. et al. Lipid droplets and the management of cellular stress. Yale J. Biol. Med. 92 , 435 –452 (2019). 
+
+40. Memmolo, P. et al. Refocusing criterion via sparsity measurements in digital holography. Opt. Lett. 39 , 4719 –4722 
+
+(2014). 
+
+41. Popescu, G. et al. Optical imaging of cell mass and growth dynamics. Am. J. Physiol. Cell Physiol . 295 , C538 –
+
+C544 (2008). 
+
+Method s
+
+Detailed schematic of SNAP -MIP -based IFC system .
+
+Fig ure S2 shows a detailed schematic of the SNAP -MIP system . A Q-switched Nd: YAG laser ( NL202, Ekspla ) serve d
+
+as a common pump source for MIR generation and visible probe generation . Frequency doubling of the 1,064 -nm output 
+
+to 532 nm was performed using a 15 -mm -long lithium triborate (LBO) crystal, whereas tunable MIR light spanning 2,400 
+
+to 3,600 cm -1 was generated using a 50 -mm -long fan -out periodically poled lithium niobate (PPLN) crystal (HC 
+
+Photonics) 28. The 532 -nm output was split into two visible probe pulses with a temporal separation of 20 ns using a free -
+
+space delay line . The relative timing between the MIR excitation pulse and the two visible probe pulses wa s adjusted 
+
+with an additional delay stage to ensure sequential interrogation of the MIR -OFF and MIR -ON states. 
+
+The two probe pulses we re directed into a Mach -Zehnder interferometer configured for spatial -frequency -multiplexed 
+
+off -axis DH . In the sample arm, the probe pulses were recombined and coupled into a short single -mode fiber (150 mm; 
+
+460HP , Thorlabs) before illuminating the specimen . This configuration ensure d identical illumination wavefronts for 
+
+both probes and reduce d beam -pointing fluctuations associated with the long free -space delay path. The probe light 
+
+transmitted through the sample was imaged onto the image sensor (VLXT -17M.I, Baumer) using a water -immersion 
+
+objective ( UP LSAPO 60XW ) and relay lens es , resulting in a total magnif ication of 150 . The spatial resolution was 222 
+
+nm according to the Nyquist -Shannon sampling cri terion . In the reference arm , two reference beams corresponding to 
+
+the two probe pulses we re deliver ed through separate fibers and directed to the sensor with different incident angles. 
+
+These different incidence angles encoded the MIR -OFF and MIR -ON sample fields into separate spatial -frequency bands 
+
+within a single hologram. 
+
+Reconstruction procedure .
+
+The reconstruction workflow is illustrated in Fig. S1. A recorded spatial -frequency -multiplexed hologram contains two 
+
+separated sidebands in the Fourier domain, corresponding to the MIR -OFF and MIR -ON probe pulses. These sidebands 
+
+were isolated independent ly and transformed back to the image domain to reconstruct the complex optical fields for the 
+
+MIR -OFF and MIR -ON states. 
+
+The reconstructed fields include the sample -dependent optical phase together with sample -independent background phase 
+
+offset s. Because the MIR -OFF and MIR -ON probe pulses interfere with different reference fields, the two holographic 
+
+channels contain different static phase offsets. These offsets mainly originate from optical -path differences between the 
+
+two reference -beam paths and can vary spatially even in the absence of a specimen. To correct for these channel -
+
+dependent offsets, we acquired a sample -free reference measurement under the same optical conditions, with only the aqueous medium present. This reference measurement was used to remove the reference -beam -dependent phase offsets 
+
+from the reconstructed MIR -OFF and MIR -ON fields before computational refocusing. 
+
+The corrected complex fields were then computationally refocused using angular -spectrum propagation. The optimal 
+
+focal plane was determined for bead and cell samples using the Gini index (GI) criterion 40 . After computational 
+
+refocusing, phase images were obtained for the MIR -OFF and MIR -ON states. The final MIP contrast was calculated as 
+
+the difference between the MIR -ON and MIR -OFF phase image s.
+
+Flow procedure .
+
+Glass capillaries with thicknesses of 20 μm and 40 μm (VITROCOM) were used as flow channels for bead and cell 
+
+experiments , respectively. Each capillary was mechanically stabilized by clamping it between a glass coverslip and a
+
+CaF 2 coverslip (see Supplementary Note 8 for details ). To minimize the strong MIR absorption of H₂O in both the flow 
+
+medium and the immersion layer of the objective , D₂O was used as the solvent . Although prolonged exposure to D₂O 
+
+could perturb cellular physiology, the residence time of cells with in the channel during imaging wa s on the order o f
+
+seconds . Under these conditions, no measurable impact on cellular state wa s expected. 
+
+For bead measurements, an appropriate amount of bead suspension wa s added to D 2O. The resulting mixture was loaded 
+
+into a syringe , mounted on a syringe pump , and infused through the capillary at the desired flow rate. For cell 
+
+measurements, adherent cells we re detached from the culture dish by trypsinization and collected by centrifugation. After 
+
+removal of the supernatant, the cell pellet was resuspended in D₂O -based PBS. The cell concentration was then measured, 
+
+and the suspension was further diluted with D₂O -based PBS as needed to obtain the desired concentration. The prepared 
+
+cell suspension was loaded into a syringe, mounted on a syringe pump and infused through the cap illary at the desired 
+
+flow rate. 
+
+Event -rate calculation .
+
+The acquired data were first screened using the phase images to exclude frame s in which no sample was detected. The 
+
+remaining sample detections were then filtered based on phase and MIP signal to exclude invalid measurements, 
+
+including debris and measurements affected by autofocus failure. For each detected sample, the local MIR fluence at its 
+
+position was then estimated. Detections were excluded when this local fluence was below 50% of the maximum fluence 
+
+for bead measurements or 30% for cell measurements, because such locally low -fluence measurements had poor signal -
+
+to -noise ratio. The remaining valid detections were defined as events , and the e vent rate was calculated as the total number 
+
+of events divided by the total acquisition time for each measurement. 
+
+Calibration and normalization of MIR fluence distribution. 
+
+To correct for fluence -dependent variations in the MIP signal , calibration data were acquired before the main bead or cell 
+
+measurements to estimate the three -dimensional (3D) MIR fluence distribution. For this calibration, PMMA beads we re 
+
+measured under flow . From the acquired image set, we extracted the lateral and axial positions of each bead together 
+
+with its MIP signal intensity . These paired position -intensity data were used as training data for Gaussian process 
+
+regression , which estimate d a continuous 3D function describing the position -dependent MIP response .
+
+Because PMMA beads of the same material and nominal size produce MIP signals proportional to the local MIR fluence, 
+
+th is fitted function represents the relative 3D MIR fluence distribution. Using the independently measured MIR pulse 
+
+energy , this relative distribution was converted into absolute fluence maps. The MIP signals obtained in the main 
+
+measurements were then normalized using the corresponding fluence maps to correct for fluence -dependent signal 
+
+variations. This calibration procedure and the resulting fluence maps are summarized in Fig. S8 in Supplementary Note 
+
+9.
+
+Cell preparation of COS -7 cells and oleic acid treatment .
+
+COS -7 cells were cultured in a 90 -mm cell -culture dish . Cells were maintained in high -glucose Dulbecco’s modified 
+
+Eagle medium (DMEM; FUJIFILM Wako) containing L -glutamine, phenol red, and HEPES, supplemented with 10% 
+
+fetal bovine serum (FBS; Cosmo Bio) and 1% penicillin -streptomycin -L-glutamine solution (FUJIFILM Wako). Cell 
+
+cultures were maintained at 37 °C in a humidified incubator with 5% CO 2. For oleic acid treatment, 0, 50, or 100 μL of 4 m mol L-1 oleic acid solution was added to the culture medium one day before measurement , and the cells were incubated 
+
+overnight. 
+
+Calculation of cell feature values .
+
+For cell -size estimation, a cell mask wa s first generated from the phase image. The phase image was normalized using 
+
+percentile -based intensity scaling , followed by Gaussian blurring and Otsu thresholding to segment the cell region. The 
+
+largest connected component was selected as the cell mask and refined by morphological closing and opening. The cell 
+
+diameter wa s calculated by extracting the outer contour of the mask, measuring the enclosed area, and determining the 
+
+diameter of the area -equivalent circle. 
+
+For dry -mass -density analysis , the phase values within the masked cell region we re summed and converted to total dry 
+
+mass using the following equation 41 :
+
+𝑀 = λ
+
+2πα ' ϕ!" Δ𝑥 Δ𝑦 
+
+> (!,")∈'
+
+where 𝑀 is the total dry mass, 𝐴 denotes the masked cell region , ϕ!" is the phase value at pixel (𝑖 , 𝑗 ), Δ𝑥 and Δ𝑦 are the 
+
+lateral pixel sizes, λ = 532 nm is the probe wavelength, and 𝛼 = 0.18 mL g-1 is a specific refractive increment . The cell 
+
+volume was then estimated from the effective diameter calculated above , assuming a spherical cell geometry. Dry mass 
+
+density was calculated as the total dry mass divided by this estimated volume. 
+
+To calculate the MIP signal density, the MIP phase values within the masked cell region were area -integrated as 
+
+𝑆 ()* = ∑ Δϕ()+ ,!" Δ𝑥 Δ𝑦 (!,")∈' ,
+
+where Δϕ()+ ,!" is the MIP -induced phase change at pixel (𝑖 , 𝑗 ). Because each MIP phase value represents an axial 
+
+integral of the MIR -induced optical path -length change, th is area -integrated signal is proportional to the volume integral 
+
+of the RI change over the cell. This integrated signal was divided by the estimated cell volume to obtain the mean RI 
+
+change, which we define as the MIP signal density. 
+
+Normalized Shannon entropy of the pixel -wise MIP signal -distribution was calculated to assess whether the intracellular 
+
+MIP signal intensity was concentrated in a limited subset of pixels or distributed more uniformly across pixels . For each 
+
+pixel in the masked cell region, the absolute MIP signal was divided by the sum of absolute MIP signals over the entire 
+
+cell region to obtain a normalized non -negative weight ,
+
+𝑝 ! = ,-.!"# ,%& , 
+
+> ∑,-.!"# ,%& ,%∈(
+
+.
+
+Normalized e ntropy was defined as 
+
+𝐻 = 0 ∑ 1%%∈( 234 1%  
+
+> 567 9
+
+,
+
+where 𝐴 denotes the masked cell region and 𝑁 is the number of pixels in 𝐴 .
+
+Differentiation of 3T3 -L1 cells. 
+
+3T3 -L1 cells were seeded in culture dishes at a density of 3 × 10 5 cells per dish in 12 mL of growth medium. The growth 
+
+medium consisted of low -glucose DMEM (Wako 041 -29775) supplemented with calf serum (Sigma -Aldrich, C8056 -
+
+100ML) and antibiotics. Cells were cultured for approximately 4 days until they reached 100% confluence. 
+
+For adipocyte differentiation, the growth medium was then replaced with induction medium . This induction medium was 
+
+prepared from high -glucose basal medium (Wako 048 -30275) supplemented with FBS , antibiotics, 0.5 mM 3 -isobutyl -
+
+1-methylxanthine (I5879, Sigma -Aldrich), 0.25 μM dexamethasone (D4902, Sigma -Aldrich) and 10 μg mL⁻¹ insulin 
+
+(093 -06471, Wako). Cells were cultured in this induction medium for 2 days. Thereafter, the medium was replaced every 2 days with maintenance medium prepared from the same high -glucose basal medium supplemented with FBS, antibiotics, 
+
+and 1 μg mL⁻¹ insulin. Measurements were performed 9 days after the initiation of differentiation. 
+
+Exclusion of undifferentiated -like 3T3 -L1 cells. 
+
+To exclude undifferentiated -like cells from the post -induction 3T3 -L1 population , we used a two -step thresholding 
+
+procedure based on thresholds defined from the pre -induction data set . First , a pixel -level MIP -signal threshold was used 
+
+to generat e lipid -rich area masks . Pixels with MIP signal values above this threshold were cla ssified as lipid -rich regions ,
+
+where the threshold was set so that the lipid -rich area in most pre -induction cells was zero or nearly zero . However, some 
+
+pre -induction cells still contained small above -threshold regions, reflecting basal lipid -associated MIP signals . Therefore, 
+
+the pixel -level threshold alone was insufficient to distinguish post -induction cells with differentiation -associated lipid 
+
+accumulation from undifferentiated -like cells retaining only basal lipid signals. 
+
+We therefore defined a second threshold at the cell level based on lipid -rich area . Using the pixel -level MIP -signal 
+
+threshold defined above, we calculated the lipid -rich area for each cell in the pre -induction dataset. The resulting per -cell 
+
+lipid -rich area distribution was used to define a cell -level threshold that excludes cells whose lipid -rich area remains 
+
+within the range observed before differentiation induction . The same pixel -level and cell -level thresholds were then 
+
+applied to the post -induction dataset, and only cells with lipid -rich areas above the cell -level threshold were included in 
+
+the differentiated -cell analysis. 
+
+Data, Materials, and Software Availability 
+
+The data provided in the manuscript is available from the corresponding author upon reasonable request. 
+
+Acknowledgments 
+
+This work was financially supported by Japan Society for the Promotion of Science (23H00273, 25H01386, T.I.), JST 
+
+FOREST Program (JPMJFR236C, T.I.), RIKEN TRIP initiative (T.I.) . Y. S. was supported by the FoPM WINGS 
+
+Program of The University of Tokyo and JST SPRING (JPMJSP2108 ).
+
+Author contributions 
+
+T.I. conceived the project. K.T . designed the SNAP -MIP methodology . Y.S . performed the experiments and analyzed 
+
+the data. Y.S. established the cell -flow procedure. Y.S., K.T., G.I., M. F., and T.I. discussed the implementation of the 
+
+results. K.T. and T.I. supervised the work. Y.S., K.T., and T.I. wrote the manuscript with inputs from other authors. 
+
+Competing interests 
+
+Y.S. , K.T., M. F., and T.I. are inventors of a fi led patent application related to the SNAP -MIP methodology (optical 
+
+microscopy, JP 2025 -35847). This application covers the methodology reported here. G.I . declares no competing interests.

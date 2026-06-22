@@ -1,0 +1,197 @@
+{
+  "mode": "extend",
+  "generated_at": "2026-06-22T23:01:59.887482+00:00",
+  "stats": {
+    "mode": "extend",
+    "tag_count": 4,
+    "deep_divecandidates": 0,
+    "deep_cap": 14,
+    "deep_selected": 0,
+    "quick_candidates": 4,
+    "quick_skim_target": 19,
+    "quick_selected": 4
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2606.16460v1",
+      "source": "arxiv",
+      "title": "Module-Structured Mixture Factor Models to Identify Outcome-Specific Signatures in Gene Expression Data",
+      "abstract": "High-throughput gene expression data exhibit high dimensionality, complex intergene dependence, and pronounced biological heterogeneity across samples, presenting major challenges for unsupervised clustering and disease subtype discovery. We introduce a module-structured mixture factor model that combines finite mixture modelling with low-rank latent factor representations defined at the gene-module level. By explicitly modelling gene modules in both the mean and covariance structure, the proposed framework decomposes expression variability into global gene-specific effects, cluster-specific module-level shifts, latent dependence within modules, and gene-specific residual noise. An Expectation--Conditional Maximisation algorithm is developed for parameter estimation, allowing stable and scalable inference in high-dimensional transcriptomic settings. This framework enables interpretable unsupervised identification of disease-associated molecular subtypes and phenotypic heterogeneity across two autoimmune diseases using a large clinical transcriptomic dataset.",
+      "authors": [
+        "Jinran Wu",
+        "Geoffrey J. McLachlan",
+        "Saumyadipta Pyne"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP",
+        "stat.ME"
+      ],
+      "published": "2026-06-15T09:31:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.16460v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "mixture factor model for gene expression clustering",
+      "llm_evidence_cn": "用于基因表达聚类的混合因子模型",
+      "llm_evidence": "用于基因表达聚类的混合因子模型",
+      "canonical_evidence": "用于基因表达聚类的混合因子模型",
+      "llm_tldr_en": "Proposes a module-structured mixture factor model to identify outcome-specific signatures in gene expression data, relevant to single-cell clustering.",
+      "llm_tldr_cn": "该论文提出一种模块结构化混合因子模型，用于在基因表达数据中识别结果特异性特征，解决高维异质性聚类挑战。模型将有限混合与基因模块级低秩因子结合，分解表达变异为多个成分，有助于疾病亚型发现。",
+      "llm_tldr": "该论文提出一种模块结构化混合因子模型，用于在基因表达数据中识别结果特异性特征，解决高维异质性聚类挑战。模型将有限混合与基因模块级低秩因子结合，分解表达变异为多个成分，有助于疾病亚型发现。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell clustering",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.19842v1",
+      "source": "arxiv",
+      "title": "Mid-infrared photothermal imaging flow cytometry",
+      "abstract": "Imaging flow cytometry (IFC) enables high-throughput single-cell analysis but largely relies on fluorescence labeling to obtain molecular specificity. Label-free vibrational imaging can provide intrinsic chemical contrast, yet coherent Raman-based methods interrogate only a limited axial volume, which restricts quantitative whole-cell analysis under flow. Mid-infrared photothermal (MIP) microscopy offers a promising route to overcome this limitation by combining linear mid-infrared (MIR) absorption-based chemical contrast with visible-light detection, allowing chemical imaging of a broader axial volume of each cell in a wide-field configuration. However, applying MIP microscopy to rapidly flowing cells has been difficult because conventional frame-sequential acquisition of MIR-ON and MIR-OFF images is highly susceptible to motion-induced subtraction artifacts. Here we demonstrate MIP-IFC, a label-free imaging flow cytometry platform based on single-shot nanosecond-dual-pulse MIP (SNAP-MIP) microscopy. SNAP-MIP encodes the MIR-ON and MIR-OFF states into separate holographic channels within a single camera exposure, reducing their temporal separation to 20 ns. This single-shot acquisition suppresses motion artifacts and increases the allowable sample velocity for artifact-free MIP imaging by five orders of magnitude compared with conventional frame-sequential MIP imaging. Leveraging this capability, MIP-IFC acquired chemical images at 500 frames per second and achieved a cellular event rate up to ~70 events s^-1. We demonstrate quantitative chemical discrimination of flowing microbeads and apply MIP-IFC to single-cell profiling of oleic-acid-induced lipid accumulation, adipocyte differentiation, and confluence-dependent cellular heterogeneity. These results establish MIP-IFC as a high-throughput, quantitative, label-free chemical imaging platform for single-cell phenotyping under flow.",
+      "authors": [
+        "Yusei Sugawara",
+        "Keiichiro Toda",
+        "Genki Ishigane",
+        "Masato Fukushima",
+        "Takuro Ideguchi"
+      ],
+      "primary_category": "physics.optics",
+      "categories": [
+        "physics.optics"
+      ],
+      "published": "2026-06-18T06:43:26+00:00",
+      "link": "https://arxiv.org/pdf/2606.19842v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "novel tool for high-throughput single-cell analysis",
+      "llm_evidence_cn": "高通量单细胞分析新工具",
+      "llm_evidence": "高通量单细胞分析新工具",
+      "canonical_evidence": "高通量单细胞分析新工具",
+      "llm_tldr_en": "Mid-infrared photothermal imaging flow cytometry achieves label-free chemical imaging of single cells under flow, overcoming depth limitations of Raman methods.",
+      "llm_tldr_cn": "针对传统成像流式细胞术依赖荧光标记且深度受限的问题，本文提出中红外光热成像流式细胞术，利用线性中红外吸收化学对比与可见光检测结合，实现了对高速流动单细胞的宽轴向范围无标记化学成像。该方法克服了相干拉曼方法仅能探测有限轴向体积的局限，有望推动高通量单细胞化学分析。",
+      "llm_tldr": "针对传统成像流式细胞术依赖荧光标记且深度受限的问题，本文提出中红外光热成像流式细胞术，利用线性中红外吸收化学对比与可见光检测结合，实现了对高速流动单细胞的宽轴向范围无标记化学成像。该方法克服了相干拉曼方法仅能探测有限轴向体积的局限，有望推动高通量单细胞化学分析。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.18523v1",
+      "source": "arxiv",
+      "title": "DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis",
+      "abstract": "High-throughput microfluidic live-cell imaging generates rich single-cell data. Yet semi-automated procedures for locating regions of interest (RoIs), each containing one cell population, and removing surrounding microfluidic structures from recorded images, scale with the number of RoIs. This prevents real-time image analysis and delays time-to-insight by hours to days. We introduce the Design-Aware and Real-Time capable (DART) paradigm for microfluidic cultivation chips, which aligns the CAD blueprint with the physical chip and thereby enables throughput-independent localization of all RoIs and fully automated image processing across diverse RoI geometries and chip layouts. DART establishes this alignment through embedded fiducial markers and deep-learning-based marker detection. We validate DART using the Swiss Army Knife chip, which combines eight structurally distinct RoI designs across 1164 RoI locations. DART localizes all RoIs in five minutes, removes microfluidic structures from raw microscopy images in 40 ms, and performs fully automated image analysis, including cell segmentation, in under 1.1 s per image. Together, these capabilities establish DART as an end-to-end hardware-software paradigm with real-time-capable analysis that paves the way toward closed-loop and outcome-driven smart microscopy.",
+      "authors": [
+        "Johannes Seiffarth",
+        "Matthias Pesch",
+        "Lukas Scholtes",
+        "Dietrich Kohlheyer",
+        "Hanno Scharr",
+        "Katharina Nöh"
+      ],
+      "primary_category": "q-bio.QM",
+      "categories": [
+        "q-bio.QM",
+        "cs.CV"
+      ],
+      "published": "2026-06-16T22:38:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.18523v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "microfluidic live-cell imaging for single-cell data analysis",
+      "llm_evidence_cn": "微流控活细胞成像用于单细胞数据分析",
+      "llm_evidence": "微流控活细胞成像用于单细胞数据分析",
+      "canonical_evidence": "微流控活细胞成像用于单细胞数据分析",
+      "llm_tldr_en": "DART enables real-time automated analysis of microfluidic live-cell imaging by aligning CAD blueprint with physical chip, removing the bottleneck of region-of-interest localization for single-cell data.",
+      "llm_tldr_cn": "DART提出了一种设计感知微流控芯片范式，通过将芯片的CAD蓝图与物理芯片对齐，实现了与感兴趣区域数量无关的自动图像处理。该方法解决了传统半自动流程无法实时分析单细胞数据的瓶颈，显著缩短了从成像到获得洞察的时间。实验表明，DART能够支持多种芯片布局和几何形状的自动化分析，为高通量单细胞成像提供了一种可扩展的解决方案。",
+      "llm_tldr": "DART提出了一种设计感知微流控芯片范式，通过将芯片的CAD蓝图与物理芯片对齐，实现了与感兴趣区域数量无关的自动图像处理。该方法解决了传统半自动流程无法实时分析单细胞数据的瓶颈，显著缩短了从成像到获得洞察的时间。实验表明，DART能够支持多种芯片布局和几何形状的自动化分析，为高通量单细胞成像提供了一种可扩展的解决方案。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.18703v1",
+      "source": "arxiv",
+      "title": "Contextualizing Biological Language Models across Modalities via Logit-Space Contrastive Alignment",
+      "abstract": "Pretrained biological language models expose per-token probability distributions through masked-token prediction, providing the likelihood interface central to sequence design, variant scoring, and mechanistic interpretation. Yet these distributions are learned from broad unlabeled corpora and are not naturally conditioned on task-specific biological contexts such as interaction partners, cellular environments, or therapeutic interventions. Existing contextual matching methods often distort this interface through pooled embeddings, contrastive latent spaces, or task-specific prediction heads. We introduce LOGICA (Logit-space Contrastive Alignment), a framework for context-conditioned prediction that performs contrastive learning directly in output-logit space. Using gated cross-modal adapters compatible with each model's native token head, LOGICA preserves the pretrained likelihood interface and converts contextualized token log-likelihoods into matching scores. Alignment is defined through context-sensitive token probabilities rather than proximity in a shared embedding space, enabling learning from sparse paired data across models with distinct vocabularies, without a shared tokenizer or decoder. LOGICA is particularly effective for mutation-local variant ranking, where comparisons reduce to context-conditioned likelihoods of mutant tokens at perturbed sites. Across protein--ligand binding, TCR--peptide activity, and drug-conditioned resistance prediction, LOGICA improves over prior state-of-the-art methods, including matched latent-contrastive and conditional MLM baselines, while retaining a token-level interface for interpretation and generation. On held-out-gene single-mutation drug-resistance prediction, LOGICA improves AUC from near-random latent-space baselines of $\\sim$0.55 to $\\sim$0.65.",
+      "authors": [
+        "Yanjun Shao",
+        "Yundi Chen",
+        "Yashvi Patel",
+        "Aurelien Pelissier",
+        "María Rodríguez Martínez"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "q-bio.QM"
+      ],
+      "published": "2026-06-17T05:30:47+00:00",
+      "link": "https://arxiv.org/pdf/2606.18703v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "contextual conditioning of biological language models for cellular environments",
+      "llm_evidence_cn": "生物语言模型的细胞环境情境化条件化",
+      "llm_evidence": "生物语言模型的细胞环境情境化条件化",
+      "canonical_evidence": "生物语言模型的细胞环境情境化条件化",
+      "llm_tldr_en": "LOGICA uses logit-space contrastive alignment to condition pretrained biological language models on cellular contexts without distorting output distributions, enabling context-aware predictions for sequence design and variant scoring.",
+      "llm_tldr_cn": "大规模生物学语言模型在无标注语料上预训练，但其概率输出无法自然地适应特定的细胞环境或治疗干预等任务情境。本文提出LOGICA（对数空间对比对齐），通过在对数概率空间进行对比学习，将情境信息注入模型，同时保持原始概率分布接口的完整性。实验表明，该方法在序列设计、变异评分等任务上优于现有条件化方法，且不损失模型的可解释性。该框架为单细胞基础模型等需要情境感知的生物学应用提供了可迁移的解决方案。",
+      "llm_tldr": "大规模生物学语言模型在无标注语料上预训练，但其概率输出无法自然地适应特定的细胞环境或治疗干预等任务情境。本文提出LOGICA（对数空间对比对齐），通过在对数概率空间进行对比学习，将情境信息注入模型，同时保持原始概率分布接口的完整性。实验表明，该方法在序列设计、变异评分等任务上优于现有条件化方法，且不损失模型的可解释性。该框架为单细胞基础模型等需要情境感知的生物学应用提供了可迁移的解决方案。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell foundation model",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
