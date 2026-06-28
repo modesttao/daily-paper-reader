@@ -6,35 +6,44 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-22
-- 运行时间：2026-06-22 23:03:02 UTC
+- 最新运行日期：2026-06-28
+- 运行时间：2026-06-28 21:51:06 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：0
-- 速读区：4
+- 本次总论文数：8
+- 精读区：6
+- 速读区：2
 
 ### 今日简报（AI）
-今日速读4篇论文，均分7.0，涉及基因表达签名识别、活细胞实时成像芯片及生物语言模型跨模态对齐。  
-最值得关注的是生物语言模型跨模态对齐（《Contextualizing Biological Language Models...》）与实时活细胞分析微流控芯片（《DART...》）两项前沿技术。  
-建议关注如何将跨模态生物模型与实时成像芯片结合，以提升单细胞动态分析能力。
-- 详情：[/202606/22/README](/202606/22/README)
+今日重点推荐两篇高分精读：空间蛋白质组学智能推理体SP-Mind与基因扰动转录预测模型Stable-Shift，均获9.0/10高分，为生物信息学提供新范式。速读可关注C.elegans发育连接组时间图网络DevoTG及心理压力数字化基准RSPC。建议优先精读SP-Mind与Stable-Shift，把握空间组学和基因调控预测前沿。
+- 详情：[/202606/28/README](/202606/28/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [SP-Mind: An Autonomous Reasoning Agent for Spatial Proteomics Analysis](/202606/28/2606.24235v1-sp-mind-an-autonomous-reasoning-agent-for-spatial-proteomics-analysis)  
+   标签：评分：9.0/10、query:single-cell-omics
+   evidence：单细胞分辨率空间蛋白质组学分析智能体
+2. [Stable-Shift: Biologically Structured Prediction of Transcriptional Responses to Unseen Gene Perturbations](/202606/28/2606.24940v1-stable-shift-biologically-structured-prediction-of-transcriptional-responses-to-unseen-gene-perturbations)  
+   标签：评分：9.0/10、query:sc-methods
+   evidence：利用单细胞测量预测转录响应
+3. [scBench-Long: Verifiable Benchmarking of Long-Horizon Single-Cell Biology](/202606/28/2606.26563v1-scbench-long-verifiable-benchmarking-of-long-horizon-single-cell-biology)  
+   标签：评分：9.0/10、query:sc-methods
+   evidence：用于长周期单细胞生物学任务的基准测试
+4. [3D Masked Autoencoders are Robust Learners of Volumetric and Multimodal Cellular Representations for Microscopy](/202606/28/2606.23964v1-3d-masked-autoencoders-are-robust-learners-of-volumetric-and-multimodal-cellular-representations-for-microscopy)  
+   标签：评分：8.0/10、query:sc-methods
+   evidence：3D掩码自编码器用于显微镜单细胞任务
+5. [Privacy-preserving federated tensor decomposition of single-cell immune data: recovering multicellular programs across institutions](/202606/28/2606.24938v1-privacy-preserving-federated-tensor-decomposition-of-single-cell-immune-data-recovering-multicellular-programs-across-institutions)  
+   标签：评分：8.0/10、query:sc-methods
+   evidence：单细胞免疫数据的联邦张量分解
+6. [Deviance-style normalization for jointly overdispersed counts](/202606/28/2606.26061v1-deviance-style-normalization-for-jointly-overdispersed-counts)  
+   标签：评分：8.0/10、query:sc-methods
+   evidence：适用于单细胞RNA-seq的测序计数矩阵标准化方法
 
 ### 速读区论文标签
-1. [Module-Structured Mixture Factor Models to Identify Outcome-Specific Signatures in Gene Expression Data](/202606/22/2606.16460v1-module-structured-mixture-factor-models-to-identify-outcome-specific-signatures-in-gene-expression-data)  
-   标签：评分：7.0/10、query:sc-methods
-   evidence：用于基因表达聚类的混合因子模型
-2. [DART: A design-aware microfluidic chip paradigm for real-time live-cell image analysis](/202606/22/2606.18523v1-dart-a-design-aware-microfluidic-chip-paradigm-for-real-time-live-cell-image-analysis)  
-   标签：评分：7.0/10、query:sc-methods
-   evidence：微流控活细胞成像用于单细胞数据分析
-3. [Contextualizing Biological Language Models across Modalities via Logit-Space Contrastive Alignment](/202606/22/2606.18703v1-contextualizing-biological-language-models-across-modalities-via-logit-space-contrastive-alignment)  
-   标签：评分：7.0/10、query:sc-methods
-   evidence：生物语言模型的细胞环境情境化条件化
-4. [Mid-infrared photothermal imaging flow cytometry](/202606/22/2606.19842v1-mid-infrared-photothermal-imaging-flow-cytometry)  
+1. [DevoTG: Temporal Graph Neural Networks for Modeling C. elegans Developmental Connectomics](/202606/28/2606.21940v1-devotg-temporal-graph-neural-networks-for-modeling-c-elegans-developmental-connectomics)  
    标签：评分：6.0/10、query:sc-methods
-   evidence：高通量单细胞分析新工具
+   evidence：基于细胞分裂事件的谱系预测
+2. [RSPC: A Benchmark for Modeling Stress and Psychiatric Conditions in Digitally Mediated Relationships using Psychiatrist Annotations](/202606/28/2606.27247v1-rspc-a-benchmark-for-modeling-stress-and-psychiatric-conditions-in-digitally-mediated-relationships-using-psychiatrist-annotations)  
+   标签：评分：6.0/10、query:scz-model
+   evidence：精神疾病基准，含精神科医生注释
 
 
 <div class="dpr-home-promo-card">

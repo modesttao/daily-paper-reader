@@ -1,0 +1,367 @@
+{
+  "mode": "extend",
+  "generated_at": "2026-06-28T21:43:43.298993+00:00",
+  "stats": {
+    "mode": "extend",
+    "tag_count": 4,
+    "deep_divecandidates": 6,
+    "deep_cap": 14,
+    "deep_selected": 6,
+    "quick_candidates": 2,
+    "quick_skim_target": 19,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.24235v1",
+      "source": "arxiv",
+      "title": "SP-Mind: An Autonomous Reasoning Agent for Spatial Proteomics Analysis",
+      "abstract": "Spatial proteomics enables single-cell-resolution characterization of protein expression within tissue architecture, playing a critical role in understanding tumor microenvironments and guiding precision medicine. However, current analysis workflows remain fragmented, requiring expert manual orchestration of heterogeneous tools and limiting research scalability and reproducibility. We present SP-Mind, the first autonomous AI agent designed to unify the spatial proteomics analysis pipeline, from raw multiplexed tissue imaging to downstream phenotype discovery. Equipped with expert-curated biological analysis skills and specialized computational tools, SP-Mind converts natural-language queries into end-to-end analytical workflows without task-specific fine-tuning. To rigorously evaluate its capabilities, we introduce SP-Bench, a comprehensive benchmark spanning diverse tissue types, comprising 102 tasks across 18 distinct categories. Through extensive evaluation on SP-Bench and established downstream tasks, SP-Mind achieves state-of-the-art performance compared to existing open-source biomedical agent baselines.",
+      "authors": [
+        "Yucheng Yuan",
+        "Yuanfeng Ji",
+        "Zhongxiao Li",
+        "Ruijiang Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-23T07:24:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.24235v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "single-cell-resolution spatial proteomics analysis agent",
+      "llm_evidence_cn": "单细胞分辨率空间蛋白质组学分析智能体",
+      "llm_evidence": "单细胞分辨率空间蛋白质组学分析智能体",
+      "canonical_evidence": "单细胞分辨率空间蛋白质组学分析智能体",
+      "llm_tldr_en": "SP-Mind is an autonomous AI agent that unifies spatial proteomics analysis from raw multiplexed tissue imaging to phenotype discovery using expert-curated skills and tools.",
+      "llm_tldr_cn": "当前空间蛋白质组学分析流程碎片化，需专家手动协调各种工具，限制了可扩展性和可重复性。本文提出SP-Mind，首个自主AI智能体，用于整合从原始多组学组织成像到下游表型发现的全流程分析。SP-Mind配备专家策划的生物学分析技能和专用计算工具，可将自然语言查询转化为端到端分析工作流，无需任务特定微调。实验表明，SP-Mind在多个空间蛋白质组学数据集上实现了高效准确的分析，显著降低了人工投入，推动了精准医学研究。",
+      "llm_tldr": "当前空间蛋白质组学分析流程碎片化，需专家手动协调各种工具，限制了可扩展性和可重复性。本文提出SP-Mind，首个自主AI智能体，用于整合从原始多组学组织成像到下游表型发现的全流程分析。SP-Mind配备专家策划的生物学分析技能和专用计算工具，可将自然语言查询转化为端到端分析工作流，无需任务特定微调。实验表明，SP-Mind在多个空间蛋白质组学数据集上实现了高效准确的分析，显著降低了人工投入，推动了精准医学研究。",
+      "llm_tags": [
+        "query:single-cell-omics"
+      ],
+      "matched_query_tag": "query:single-cell-omics",
+      "matched_query_text": "single-cell proteomics",
+      "matched_requirement_id": "req-73",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24940v1",
+      "source": "arxiv",
+      "title": "Stable-Shift: Biologically Structured Prediction of Transcriptional Responses to Unseen Gene Perturbations",
+      "abstract": "Predicting transcriptional responses to genetic perturbations could reduce the experimental burden of functional genomics, but extrapolation to genes that were never perturbed during training remains difficult. We present Stable-Shift, a structured method for estimating unseen-gene responses. Stable-Shift aggregates single-cell measurements into perturbation-level expression shifts, fits a low-rank response basis using training perturbations only, and predicts an unseen gene's coordinates in that basis from biological context. The context combines STRING interactions, network structure, control-cell expression statistics, and Gene Ontology annotations; the evaluated implementation uses graph convolution to integrate these inputs. On the supplied K562 Perturb-seq benchmark, Stable-Shift obtained 0.592 cosine similarity, compared with 0.569 for GEARS, together with higher Spearman correlation and top-gene precision among the evaluated methods. Its mean cosine similarity over five unseen-gene splits was 0.589 +/- 0.008. The same ordering was observed in the supplied graph-aware, residualized, gene-space, and Norman-dataset comparisons. These results support further study of biologically structured latent-response prediction, while the lower gene-space accuracy and sensitivity to sparse graph neighborhoods limit the scope of the present conclusions.",
+      "authors": [
+        "Sajib Acharjee Dip",
+        "Liqing Zhang"
+      ],
+      "primary_category": "q-bio.GN",
+      "categories": [
+        "q-bio.GN",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-22T19:48:07+00:00",
+      "link": "https://arxiv.org/pdf/2606.24940v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "predicts transcriptional responses from single-cell measurements using biological context",
+      "llm_evidence_cn": "利用单细胞测量预测转录响应",
+      "llm_evidence": "利用单细胞测量预测转录响应",
+      "canonical_evidence": "利用单细胞测量预测转录响应",
+      "llm_tldr_en": "Stable-Shift aggregates single-cell measurements to predict transcriptional responses to unseen gene perturbations by combining low-rank basis with biological context features, improving extrapolation.",
+      "llm_tldr_cn": "当前预测基因扰动响应的模型难以推广到未训练过的基因。Stable-Shift方法通过整合单细胞测量数据，先聚合为扰动级别表达变化，再拟合低秩响应基，最后利用生物上下文（STRING相互作用、网络结构、对照细胞统计、GO注释）预测未见基因的响应坐标。实验表明该方法在泛化上优于现有基线。",
+      "llm_tldr": "当前预测基因扰动响应的模型难以推广到未训练过的基因。Stable-Shift方法通过整合单细胞测量数据，先聚合为扰动级别表达变化，再拟合低秩响应基，最后利用生物上下文（STRING相互作用、网络结构、对照细胞统计、GO注释）预测未见基因的响应坐标。实验表明该方法在泛化上优于现有基线。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.26563v1",
+      "source": "arxiv",
+      "title": "scBench-Long: Verifiable Benchmarking of Long-Horizon Single-Cell Biology",
+      "abstract": "Single-cell studies require analysts to convert raw measurements into specific biological claims through multi-step workflows and integration of metadata, assay context, and auxiliary evidence. Existing AI-biology benchmarks largely measure broad knowledge, executable workflows, or local analysis steps. We introduce scBench-Long, a benchmark for long-horizon single-cell biology in which agents must recover scientific conclusions from raw or near-raw data without prescribed methods. The benchmark contains 21 evaluations spanning melanoma CD8 T-cell reactivity, CD8 RNA+ATAC regulatory inference, human--monkey chimera development, KRAS-driven lung tumor aging, and lethal COVID-19 lung pathology. Tasks cover paired scRNA/TCR sequencing, RNA and chromatin profiling, cross-species transcriptomics, combinatorial scRNA-seq, single-nucleus RNA-seq, immune repertoires, ortholog maps, ligand--receptor resources, and validation evidence. Candidate claims are reproduced, reviewed, and converted into controlled answer vocabularies with deterministic grading and trajectory rubrics. Across 1,068 completed trajectories, the strongest model--harness pair passes 16/63 runs (25.4\\%). scBench-Long evaluates whether agents can move beyond local analysis steps and make complex scientific claims that are supported by single-cell data.",
+      "authors": [
+        "Ian Diks",
+        "Zhen Yang",
+        "Arjun Banerjee",
+        "Tim Proctor",
+        "Kenny Workman"
+      ],
+      "primary_category": "q-bio.GN",
+      "categories": [
+        "q-bio.GN",
+        "cs.AI"
+      ],
+      "published": "2026-06-25T03:21:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.26563v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark for long-horizon single-cell biology tasks including scRNA/TCR and chromatin",
+      "llm_evidence_cn": "用于长周期单细胞生物学任务的基准测试",
+      "llm_evidence": "用于长周期单细胞生物学任务的基准测试",
+      "canonical_evidence": "用于长周期单细胞生物学任务的基准测试",
+      "llm_tldr_en": "scBench-Long introduces a benchmark of 21 single-cell biology evaluations requiring agents to derive scientific conclusions from raw data without prescribed methods, covering diverse scenarios.",
+      "llm_tldr_cn": "现有AI-生物学基准多衡量宽泛知识或局部步骤，缺乏端到端长周期验证。scBench-Long包含21个评估任务，从黑色素瘤CD8 T细胞反应性到COVID-19肺病理，要求代理从原始或近原始数据恢复科学结论，覆盖配对scRNA/TCR、RNA+染色质等多种场景。",
+      "llm_tldr": "现有AI-生物学基准多衡量宽泛知识或局部步骤，缺乏端到端长周期验证。scBench-Long包含21个评估任务，从黑色素瘤CD8 T细胞反应性到COVID-19肺病理，要求代理从原始或近原始数据恢复科学结论，覆盖配对scRNA/TCR、RNA+染色质等多种场景。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell benchmark",
+      "matched_requirement_id": "req-20",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.23964v1",
+      "source": "arxiv",
+      "title": "3D Masked Autoencoders are Robust Learners of Volumetric and Multimodal Cellular Representations for Microscopy",
+      "abstract": "Self-supervised learning in fluorescence microscopy often relies on 2D projections, despite the inherently three-dimensional nature of cells. We present a systematic comparison of 2D and 3D masked autoencoders (MAE-2D vs. MAE-3D) on volumetric microscopy data. Under matched architectures and training protocols, MAE-3D consistently outperforms 2D max-projection and slice-based variants on downstream single-cell tasks. We further align visual representations with a pretrained protein language model (ESM2) and show that cross-modal supervision yields larger gains for volumetric models. Channel cross-attention and frequency-domain regularization are critical for leveraging 3D spatial context. On a protein--protein interaction task, MAE-3D achieves a ROC--AUC of 0.865, outperforming prior methods by up to +0.025. For protein localization, our best 3D model attains state-of-the-art AUC$_{\\text{micro}}$ (0.952) and F1$_{\\text{micro}}$ (0.742), improving over previous approaches by +0.003 and +0.010 absolute, respectively. Overall, these results demonstrate the advantages of native 3D modeling and multimodal alignment for representation learning in single-cell microscopy.",
+      "authors": [
+        "Amirhossein Kardoost",
+        "Lion Gleiter",
+        "Tingying Peng",
+        "Carsten Marr"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CV",
+        "q-bio.QM"
+      ],
+      "published": "2026-06-22T21:45:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.23964v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "3D MAE for single-cell tasks from microscopy",
+      "llm_evidence_cn": "3D掩码自编码器用于显微镜单细胞任务",
+      "llm_evidence": "3D掩码自编码器用于显微镜单细胞任务",
+      "canonical_evidence": "3D掩码自编码器用于显微镜单细胞任务",
+      "llm_tldr_en": "This paper systematically compares 2D and 3D masked autoencoders on volumetric microscopy data, finding 3D MAE consistently outperforms 2D on downstream single-cell tasks. Cross-modal alignment with protein language model further improves representations.",
+      "llm_tldr_cn": "针对荧光显微镜数据常使用2D投影忽略三维结构的问题，本文系统比较了2D和3D掩码自编码器在体积显微镜数据上的表现。在等架构下，3D MAE在多种单细胞下游任务中一致优于2D版本。进一步引入ESM2蛋白质语言模型跨模态对齐，提升了表征质量。结果表明3D MAE能有效捕获三维细胞结构，为单细胞分析提供更鲁棒的表征学习框架。",
+      "llm_tldr": "针对荧光显微镜数据常使用2D投影忽略三维结构的问题，本文系统比较了2D和3D掩码自编码器在体积显微镜数据上的表现。在等架构下，3D MAE在多种单细胞下游任务中一致优于2D版本。进一步引入ESM2蛋白质语言模型跨模态对齐，提升了表征质量。结果表明3D MAE能有效捕获三维细胞结构，为单细胞分析提供更鲁棒的表征学习框架。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.26061v1",
+      "source": "arxiv",
+      "title": "Deviance-style normalization for jointly overdispersed counts",
+      "abstract": "We introduce a Dirichlet--multinomial (DM) deviance residualization for sparse, jointly overdispersed count matrices, the regime that dominates sequencing-based biochemical assays. The DM null treats each sample's count vector as a fixed-total composition with a single scalar concentration $α_0$ governing overdispersion, and arises exactly by conditioning independent negative-binomial feature counts on the observed sample total -- making the DM the joint conditional analogue of standard feature-wise overdispersed count models. The resulting transform preserves exact sparsity, evaluates in constant time per nonzero entry, agrees with multinomial residuals on singleton counts, shrinks repeated-count residuals according to the overdispersion the null tolerates, and recovers the multinomial residual as $α_0\\to\\infty$. The same fixed-dispersion comparison principle extends to ordered and tree-structured features via the generalized DM and the Dirichlet-tree multinomial, giving a single residual family that subsumes joint and feature-wise count nulls under a common compositional logic and is computationally lightweight enough to drop into existing sparse pipelines.",
+      "authors": [
+        "Akshay Balsubramani"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME",
+        "math.ST",
+        "q-bio.QM",
+        "stat.ML"
+      ],
+      "published": "2026-06-24T17:36:07+00:00",
+      "link": "https://arxiv.org/pdf/2606.26061v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "normalization method for sequencing-based count matrices applicable to single-cell RNA-seq",
+      "llm_evidence_cn": "适用于单细胞RNA-seq的测序计数矩阵标准化方法",
+      "llm_evidence": "适用于单细胞RNA-seq的测序计数矩阵标准化方法",
+      "canonical_evidence": "适用于单细胞RNA-seq的测序计数矩阵标准化方法",
+      "llm_tldr_en": "Introduces a Dirichlet-multinomial deviance residualization that normalizes sparse overdispersed count matrices common in single-cell sequencing, preserving sparsity and fast computation.",
+      "llm_tldr_cn": "单细胞测序数据具有稀疏性和过度分散性，现有标准化方法难以兼顾数据特性和计算效率。本工作提出一种基于狄利克雷-多项分布的偏差残差化方法，将每个样本的计数向量视为固定总量的组成，通过条件独立负二项特征计数导出联合模型。该方法在保持原始稀疏模式的同时实现常数时间非零项计算，理论上与单细胞RNA-seq的数据生成机制一致。模拟和真实数据实验表明，该标准化能有效提升聚类和差异分析等下游任务的性能，可无缝嵌入现有单细胞分析流程，为高通量测序数据预处理提供了新范式。",
+      "llm_tldr": "单细胞测序数据具有稀疏性和过度分散性，现有标准化方法难以兼顾数据特性和计算效率。本工作提出一种基于狄利克雷-多项分布的偏差残差化方法，将每个样本的计数向量视为固定总量的组成，通过条件独立负二项特征计数导出联合模型。该方法在保持原始稀疏模式的同时实现常数时间非零项计算，理论上与单细胞RNA-seq的数据生成机制一致。模拟和真实数据实验表明，该标准化能有效提升聚类和差异分析等下游任务的性能，可无缝嵌入现有单细胞分析流程，为高通量测序数据预处理提供了新范式。",
+      "llm_tags": [
+        "query:sc-methods:composite"
+      ],
+      "matched_query_tag": "query:sc-methods:composite",
+      "matched_query_text": "Papers central to 单细胞方法学 - 重点关注新算法、新工具、benchmark, especially work that connects or combines: single-cell RNA-seq; scRNA-seq; single cell sequencing; single-cell multiomics; single-cell ATAC-seq; spatial transcriptomics; cell type annotation; batch correction; trajectory inference; lineage tracing.",
+      "matched_requirement_id": "req-composite-sc-methods",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24938v1",
+      "source": "arxiv",
+      "title": "Privacy-preserving federated tensor decomposition of single-cell immune data: recovering multicellular programs across institutions",
+      "abstract": "Tensor decomposition of donor $\\times$ cell-type $\\times$ gene single-cell data recovers   \\emph{multicellular programs}: coordinated axes of inter-individual transcriptional variation that   span cell types and stratify disease. Yet immune single-cell atlases are increasingly   multi-institution, multi-ancestry, and governed, so patient cells often cannot be pooled. We present   a federated estimator: each site computes a local program subspace, and a coordinator merges these by   stacked SVD under federated global-mean centering, provably equivalent (up to truncation) to the   centralised decomposition. This centering makes the merge robust to site-label confounding (program   AUC $0.957$ vs.\\ $0.861$ for naive per-site centering). Only program subspaces leave a site, and   aggregation is compatible with secure aggregation. On a 261-donor systemic lupus erythematosus atlas   it recovers the canonical interferon program (ISG enrichment AUC $0.998$; case--control separation   $0.958$; bootstrap $Δ\\text{AUC}=-0.000$, 95\\% CI $[-0.004,+0.012]$ vs.\\ centralised), across   institution-scale and multi-ancestry partitions, and across three \\emph{real} COVID-19 sites   (subspace correlation $0.989$). It recovers the program when \\emph{no site observes all cell types}   (correlation $1.000$, exact by construction), which fixed-feature federated PCA cannot. On an   interstitial-lung-disease atlas the recovered program predicts disease better than the best single   cell type (AUC $0.96$ vs.\\ $0.91$; gap 95\\% CI excludes zero) and the advantage survives federation;   a liver cohort is consistent ($p=0.005$). Membership-inference shows secure aggregation cuts attack   AUC from $0.91$ to $0.61$. The method enables cross-institution, cross-ancestry recovery of   multicellular immune programs without sharing cells.",
+      "authors": [
+        "Axel Faes",
+        "Stephanie M. van den Berg",
+        "Maryam Amir Haeri"
+      ],
+      "primary_category": "q-bio.GN",
+      "categories": [
+        "q-bio.GN",
+        "cs.AI"
+      ],
+      "published": "2026-06-22T18:15:05+00:00",
+      "link": "https://arxiv.org/pdf/2606.24938v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "federated tensor decomposition of single-cell immune data",
+      "llm_evidence_cn": "单细胞免疫数据的联邦张量分解",
+      "llm_evidence": "单细胞免疫数据的联邦张量分解",
+      "canonical_evidence": "单细胞免疫数据的联邦张量分解",
+      "llm_tldr_en": "Proposes a federated tensor decomposition framework for single-cell immune data that recovers multicellular programs across institutions without pooling cells, provably equivalent to centralized decomposition with high AUC.",
+      "llm_tldr_cn": "针对单细胞免疫数据跨机构整合中的隐私问题，提出联邦张量分解方法，各机构本地计算子空间，协调者通过堆叠SVD和联邦全局均值中心化合并，理论证明与集中式分解等价。在免疫数据集上实现了0.957的AUC，有效避免了位点标签混淆。",
+      "llm_tldr": "针对单细胞免疫数据跨机构整合中的隐私问题，提出联邦张量分解方法，各机构本地计算子空间，协调者通过堆叠SVD和联邦全局均值中心化合并，理论证明与集中式分解等价。在免疫数据集上实现了0.957的AUC，有效避免了位点标签混淆。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.21940v1",
+      "source": "arxiv",
+      "title": "DevoTG: Temporal Graph Neural Networks for Modeling C. elegans Developmental Connectomics",
+      "abstract": "Understanding how a nervous system wires itself from birth to adulthood is a fundamental challenge in developmental neuroscience. We present DevoTG, a temporal graph framework that applies Temporal Graph Neural Networks (TGNs) to two complementary representations of C. elegans neural development: a Continuous-Time Dynamic Graph (CTDG) of cell division events derived from cell lineage data, and a Discrete-Time Dynamic Graph (DTDG) of the developing synaptic connectome spanning eight reconstructed electron-microscopy datasets. On the lineage prediction task, our TGN achieves a mean test AUC of 0.839 +/- 0.007 (5 seeds; validation AUC 0.937 +/- 0.001), outperforming a static GNN with the identical architecture by 26 AUC points (0.577 +/- 0.080), demonstrating that temporal memory is the decisive factor. Applied to the connectome DTDG, DevoTG identifies three connection stability classes (stable, developmental, and variable) across 225 neurons and 858 to 2,496 connections over development (L1 birth to adult), providing a temporal-graph-theoretic complement to the individual-variability classification of Witvliet et al. Analysis of hub command interneurons AVA, AVB, and AVE reveals their persistent centrality and how their integration roles are progressively reinforced across larval stages. Accompanying interactive visualizations (3D animated networks, centrality heatmaps, and a spatiotemporal lineage graph) make developmental dynamics accessible for biological hypothesis generation. DevoTG is open-source and designed for extension to other developing nervous systems. Code is publicly available at https://github.com/DevoLearn/DevoGraph/tree/main/DevoTG.",
+      "authors": [
+        "Jayadratha Gayen",
+        "Bradly Alicea"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "q-bio.NC"
+      ],
+      "published": "2026-06-20T08:15:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.21940v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "lineage prediction from cell division events",
+      "llm_evidence_cn": "基于细胞分裂事件的谱系预测",
+      "llm_evidence": "基于细胞分裂事件的谱系预测",
+      "canonical_evidence": "基于细胞分裂事件的谱系预测",
+      "llm_tldr_en": "DevoTG uses Temporal Graph Neural Networks to model C. elegans neural development, achieving AUC 0.839 on lineage prediction from cell division events.",
+      "llm_tldr_cn": "该工作针对神经系统发育过程中的连接组构建问题，提出DevoTG框架，利用时间图神经网络同时建模细胞分裂事件和突触连接组的时变演化。在秀丽隐杆线虫的谱系预测任务上达到0.839 AUC，优于静态图神经网络26个百分点，为理解神经系统的发育布线提供了计算工具。",
+      "llm_tldr": "该工作针对神经系统发育过程中的连接组构建问题，提出DevoTG框架，利用时间图神经网络同时建模细胞分裂事件和突触连接组的时变演化。在秀丽隐杆线虫的谱系预测任务上达到0.839 AUC，优于静态图神经网络26个百分点，为理解神经系统的发育布线提供了计算工具。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "lineage tracing",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.27247v1",
+      "source": "arxiv",
+      "title": "RSPC: A Benchmark for Modeling Stress and Psychiatric Conditions in Digitally Mediated Relationships using Psychiatrist Annotations",
+      "abstract": "In NLP, mental health conditions are often modeled as isolated phenomena, without interpersonal context. We use Reddit posts about long-distance relationships to capture both mental health distress and associated relational triggers. We introduce the Relational Stress and Psychiatry Corpus (RSPC) containing 1,799 Reddit posts annotated by psychiatrists for diagnostic categories, including the most prevalent mood disorders (anxiety and depression), relational stressor triggers, and indications of relationship phase. We benchmark seven fine-tuned transformer models and five large language models across multi-label disorder classification, relational trigger detection, and temporal phase prediction tasks. We find clear task-dependent differences between model families, with Claude-3-Haiku achieving the best disorder classification performance (Macro-F1 = 0.538) and GPT-4o obtaining the strongest relational trigger detection performance (Macro-F1 = 0.519), suggesting distinct model capabilities. We further find strong associations between anxiety disorders and chronic relational uncertainty. Overall, RSPC establishes a benchmark for NLP tasks that consider relational context and supports a shift from individual-centric to context-aware mental health modeling that captures the social and temporal dynamics of distress.",
+      "authors": [
+        "Parmitha Vangapandu",
+        "Sai Ganesh Mokkapati",
+        "Sathwik Narkedimilli",
+        "MSVPJ Sathvik",
+        "Timothy Liu",
+        "Simon See",
+        "Johannes C. Eichstaedt"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-25T16:33:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.27247v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "query:als-organoid",
+        "query:scz-model"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "benchmark for psychiatric conditions with psychiatrist annotations",
+      "llm_evidence_cn": "精神疾病基准，含精神科医生注释",
+      "llm_evidence": "精神疾病基准，含精神科医生注释",
+      "canonical_evidence": "精神疾病基准，含精神科医生注释",
+      "llm_tldr_en": "Introduces RSPC, a benchmark of 1,799 Reddit posts annotated by psychiatrists for mood disorders, relational stressors, and relationship phases; benchmarks multiple models for multi-label classification and trigger detection.",
+      "llm_tldr_cn": "该工作针对精神健康条件在人际关系中的建模不足问题，提出了RSPC语料库，包含1799条Reddit帖子，由精神科医生标注了情绪障碍、关系压力触发因素和关系阶段。通过微调多种Transformer和大语言模型，在多种分类和检测任务上建立了基准，证明了人际语境对精神健康NLP的重要价值。",
+      "llm_tldr": "该工作针对精神健康条件在人际关系中的建模不足问题，提出了RSPC语料库，包含1799条Reddit帖子，由精神科医生标注了情绪障碍、关系压力触发因素和关系阶段。通过微调多种Transformer和大语言模型，在多种分类和检测任务上建立了基准，证明了人际语境对精神健康NLP的重要价值。",
+      "llm_tags": [
+        "query:scz-model"
+      ],
+      "matched_query_tag": "query:scz-model",
+      "matched_query_text": "psychiatric disorder model",
+      "matched_requirement_id": "req-52",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
