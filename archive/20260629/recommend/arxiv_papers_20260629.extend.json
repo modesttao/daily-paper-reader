@@ -1,0 +1,189 @@
+{
+  "mode": "extend",
+  "generated_at": "2026-06-29T22:16:51.008483+00:00",
+  "stats": {
+    "mode": "extend",
+    "tag_count": 4,
+    "deep_divecandidates": 2,
+    "deep_cap": 14,
+    "deep_selected": 2,
+    "quick_candidates": 2,
+    "quick_skim_target": 19,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.27657v1",
+      "source": "arxiv",
+      "title": "Reconstructing the Developmental Trajectory of Adipocytes in Human Adipose Tissue Using Single-Cell RNA Sequencing",
+      "abstract": "Obesity is a global health crisis associated with metabolic disorders such as type 2 diabetes and cardiovascular disease. This study employed single-cell RNA sequencing to reconstruct the developmental trajectory of human adipocytes from adipose tissue samples. Our analysis identified 15 transcriptionally distinct cell clusters, including 7 transitional states, revealing the dynamic process of adipocyte differentiation. We detected 16 functionally active signaling pathways mediating cellular communication between adipocytes and their progenitors. Among these, insulin-like growth factor (IGF) and fibroblast growth factor (FGF) pathways emerged as the most prominent networks, showing consistent activity across differentiation stages (p<0.05). The study revealed depot-specific differences, with visceral adipocytes undergoing additional extracellular matrix remodeling absent in subcutaneous differentiation. Spatial analysis further showed that IGF signaling was particularly active in perivascular niches, while FGF activity dominated in mature adipocyte zones. These results provide the first comprehensive map of human adipocyte development, highlighting IGF and FGF pathways as potential therapeutic targets. The identified signaling networks offer new insights for developing interventions to promote healthy adipose expansion or inhibit pathological fat accumulation. This work advances our fundamental understanding of adipose tissue biology while providing clinically relevant data for metabolic disorder treatments.",
+      "authors": [
+        "Weny S. M Sitinjak",
+        "Humasak Tommy Argo Simanjuntak"
+      ],
+      "primary_category": "q-bio.GN",
+      "categories": [
+        "q-bio.GN",
+        "cs.AI"
+      ],
+      "published": "2026-06-26T02:27:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.27657v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "uses single-cell RNA-seq for trajectory reconstruction",
+      "llm_evidence_cn": "使用单细胞RNA测序重建发育轨迹",
+      "llm_evidence": "使用单细胞RNA测序重建发育轨迹",
+      "canonical_evidence": "使用单细胞RNA测序重建发育轨迹",
+      "llm_tldr_en": "This study uses single-cell RNA sequencing to reconstruct the developmental trajectory of human adipocytes, identifying 15 clusters and 7 transitional states, with IGF and FGF pathways as key mediators.",
+      "llm_tldr_cn": "针对肥胖相关代谢疾病，该研究利用单细胞RNA测序技术从人脂肪组织中重建了脂肪细胞的发育轨迹。通过分析鉴定出15个转录不同的细胞簇，包括7个过渡状态，并揭示胰岛素样生长因子和成纤维细胞生长因子等信号通路在细胞间通讯中的关键作用。该工作为理解脂肪细胞分化机制提供了单细胞分辨率的动态图谱。",
+      "llm_tldr": "针对肥胖相关代谢疾病，该研究利用单细胞RNA测序技术从人脂肪组织中重建了脂肪细胞的发育轨迹。通过分析鉴定出15个转录不同的细胞簇，包括7个过渡状态，并揭示胰岛素样生长因子和成纤维细胞生长因子等信号通路在细胞间通讯中的关键作用。该工作为理解脂肪细胞分化机制提供了单细胞分辨率的动态图谱。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.27752v1",
+      "source": "arxiv",
+      "title": "PerturbCellRL: Verifier-Guided Reinforcement Learning for Single-Cell Perturbation Prediction",
+      "abstract": "Single-cell perturbation models can reduce costly wet-lab screening by predicting how cells respond transcriptionally to interventions. While recent generative models improve population-level prediction, individual generated cells are not explicitly checked for biological consistency. We introduce PerturbCellRL, a reinforcement learning (RL) framework that post-trains a pretrained single-cell transcriptomic generator using a suite of cell-level verifiers as rewards. These verifiers define four rewards: Pearson top-k similarity, RMSE top-k proximity, DE Spearman, and Pathway activity. The Pathway activity verifier rewards cells whose pathway responses match known perturbation biology. We evaluate PerturbCellRL on multiple genetic and chemical perturbation benchmarks. Across these benchmarks, PerturbCellRL improves over the pretrained flow-matching generator on reward-aligned evaluation metrics and a held-out evaluation metric. Moreover, PerturbCellRL remains competitive with state-of-the-art methods on population-level metrics. Together, these results frame trustworthy single-cell prediction as verifier-guided generative alignment, moving beyond matching expression distributions toward predictions whose single-cell perturbation effects are explicitly checked for biological consistency.",
+      "authors": [
+        "Dongxia Wu",
+        "Mingyu Li",
+        "Yuhui Zhang",
+        "Anurendra Kumar",
+        "Emma Lundberg",
+        "Serena Yeung-Levy",
+        "Emily B. Fox"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-26T06:15:04+00:00",
+      "link": "https://arxiv.org/pdf/2606.27752v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "uses RL to predict single-cell perturbation responses, directly relevant to Perturb-seq analysis",
+      "llm_evidence_cn": "使用强化学习预测单细胞扰动响应，直接与Perturb-seq分析相关",
+      "llm_evidence": "使用强化学习预测单细胞扰动响应，直接与Perturb-seq分析相关",
+      "canonical_evidence": "使用强化学习预测单细胞扰动响应，直接与Perturb-seq分析相关",
+      "llm_tldr_en": "PerturbCellRL introduces a reinforcement learning framework that post-trains a single-cell transcriptomic generator using cell-level verifiers as rewards to improve biological consistency of predicted perturbation responses.",
+      "llm_tldr_cn": "单细胞扰动预测模型虽能减少湿实验筛选成本，但生成细胞缺乏生物学一致性检查。本文提出PerturbCellRL，一种基于强化学习的框架，利用细胞级验证器（如通路活性）作为奖励，对预训练的单细胞转录组生成器进行后训练。实验表明该方法在多个基因扰动数据集上提升了预测精度。该工作为单细胞扰动建模提供了新的训练范式。",
+      "llm_tldr": "单细胞扰动预测模型虽能减少湿实验筛选成本，但生成细胞缺乏生物学一致性检查。本文提出PerturbCellRL，一种基于强化学习的框架，利用细胞级验证器（如通路活性）作为奖励，对预训练的单细胞转录组生成器进行后训练。实验表明该方法在多个基因扰动数据集上提升了预测精度。该工作为单细胞扰动建模提供了新的训练范式。",
+      "llm_tags": [
+        "query:single-cell-omics"
+      ],
+      "matched_query_tag": "query:single-cell-omics",
+      "matched_query_text": "Perturb-seq",
+      "matched_requirement_id": "req-81",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.26061v1",
+      "source": "arxiv",
+      "title": "Deviance-style normalization for jointly overdispersed counts",
+      "abstract": "We introduce a Dirichlet--multinomial (DM) deviance residualization for sparse, jointly overdispersed count matrices, the regime that dominates sequencing-based biochemical assays. The DM null treats each sample's count vector as a fixed-total composition with a single scalar concentration $α_0$ governing overdispersion, and arises exactly by conditioning independent negative-binomial feature counts on the observed sample total -- making the DM the joint conditional analogue of standard feature-wise overdispersed count models. The resulting transform preserves exact sparsity, evaluates in constant time per nonzero entry, agrees with multinomial residuals on singleton counts, shrinks repeated-count residuals according to the overdispersion the null tolerates, and recovers the multinomial residual as $α_0\\to\\infty$. The same fixed-dispersion comparison principle extends to ordered and tree-structured features via the generalized DM and the Dirichlet-tree multinomial, giving a single residual family that subsumes joint and feature-wise count nulls under a common compositional logic and is computationally lightweight enough to drop into existing sparse pipelines.",
+      "authors": [
+        "Akshay Balsubramani"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME",
+        "math.ST",
+        "q-bio.QM",
+        "stat.ML"
+      ],
+      "published": "2026-06-24T17:36:07+00:00",
+      "link": "https://arxiv.org/pdf/2606.26061v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:sc-methods",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:sc-methods",
+        "query:scz-model",
+        "query:single-cell-omics"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "normalization method for overdispersed count data common in single-cell RNA-seq",
+      "llm_evidence_cn": "针对单细胞RNA-seq中常见的过度分散计数数据的归一化方法",
+      "llm_evidence": "针对单细胞RNA-seq中常见的过度分散计数数据的归一化方法",
+      "canonical_evidence": "针对单细胞RNA-seq中常见的过度分散计数数据的归一化方法",
+      "llm_tldr_en": "This paper introduces a Dirichlet-multinomial deviance residualization for normalizing sparse overdispersed count matrices, applicable to single-cell RNA-seq preprocessing.",
+      "llm_tldr_cn": "测序数据的计数矩阵常呈现稀疏性和过度分散性，现有归一化方法存在局限。本文基于Dirichlet-多项分布提出一种偏差残差化变换，该变换保持稀疏性、计算高效，且与多项残差在单计数上一致。该方法为单细胞RNA-seq等测序数据的预处理提供了新工具。",
+      "llm_tldr": "测序数据的计数矩阵常呈现稀疏性和过度分散性，现有归一化方法存在局限。本文基于Dirichlet-多项分布提出一种偏差残差化变换，该变换保持稀疏性、计算高效，且与多项残差在单计数上一致。该方法为单细胞RNA-seq等测序数据的预处理提供了新工具。",
+      "llm_tags": [
+        "query:sc-methods"
+      ],
+      "matched_query_tag": "query:sc-methods",
+      "matched_query_text": "single-cell RNA-seq",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.27529v1",
+      "source": "arxiv",
+      "title": "Modelling chronic stress as an excitatory-inhibitory perturbation in recurrent working-memory networks",
+      "abstract": "Stress is an adaptive response coordinated by neural and physiological systems. While acute stress can enhance survival, chronic stress drives structural brain changes, cognitive dysfunction, and increased psychiatric risk. At the cellular level, chronic stress shifts the excitatory-inhibitory (E/I) balance of prefrontal pyramidal neurons toward inhibitory dominance, yet the mechanisms underlying these alterations are still unknown. We here investigate possible mechanisms causing inhibitory dominance using recurrent neuronal networks trained on a working memory task. Chronic stress is modelled as a modulation in synaptic strength or neuronal activity, systematically comparing eight candidate operators against three experimentally motivated signatures of stress-induced prefrontal dysfunction: inhibitory dominance, excitatory hypofunction, and impaired task performance. These signatures are all recovered by a single stress mechanism, stronger inhibitory-to-excitatory synapses. Contrasting naive networks with resilient networks trained under the stress mechanism, we find that resilience training not only preserves task performance under stress, but also confines the network to the same dynamical subspace and energetic regime with and without stress. This resilience comes at a cost: resilient networks generalise less well when the task requires longer memory than seen during training, indicating that resilient networks find a specialised solution tuned to the trained regime. This trade-off between resilience and generalization performance persists across stress magnitude and network size, offering a computational analogue of the shift toward rigid, habit-like behaviour reported in animal following chronic stress.",
+      "authors": [
+        "Mauricio A Diaz",
+        "Manuela A. Beyer",
+        "Janina Hesse"
+      ],
+      "primary_category": "q-bio.NC",
+      "categories": [
+        "q-bio.NC"
+      ],
+      "published": "2026-06-25T20:21:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.27529v1",
+      "tags": [
+        "keyword:als-organoid",
+        "keyword:scz-model",
+        "keyword:single-cell-omics",
+        "query:als-organoid",
+        "query:scz-model"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "models chronic stress as E/I imbalance in neural networks, relevant to schizophrenia excitatory-inhibitory imbalance",
+      "llm_evidence_cn": "将慢性压力建模为神经网络中的兴奋-抑制失衡，与精神分裂症的兴奋-抑制失衡相关",
+      "llm_evidence": "将慢性压力建模为神经网络中的兴奋-抑制失衡，与精神分裂症的兴奋-抑制失衡相关",
+      "canonical_evidence": "将慢性压力建模为神经网络中的兴奋-抑制失衡，与精神分裂症的兴奋-抑制失衡相关",
+      "llm_tldr_en": "This paper models chronic stress as an excitatory-inhibitory perturbation in recurrent neural networks trained on working memory tasks, investigating mechanisms that lead to inhibitory dominance, which is relevant to understanding psychiatric disorders like schizophrenia.",
+      "llm_tldr_cn": "该论文将慢性压力建模为工作记忆任务训练的递归神经网络中的兴奋-抑制扰动，系统比较了八种候选算子，研究导致抑制主导的机制。发现慢性压力通过调整突触强度或神经元活动水平改变网络动态，为理解精神分裂症等精神疾病中的E/I失衡提供了计算框架。",
+      "llm_tldr": "该论文将慢性压力建模为工作记忆任务训练的递归神经网络中的兴奋-抑制扰动，系统比较了八种候选算子，研究导致抑制主导的机制。发现慢性压力通过调整突触强度或神经元活动水平改变网络动态，为理解精神分裂症等精神疾病中的E/I失衡提供了计算框架。",
+      "llm_tags": [
+        "query:scz-model"
+      ],
+      "matched_query_tag": "query:scz-model",
+      "matched_query_text": "excitation-inhibition imbalance",
+      "matched_requirement_id": "req-59",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

@@ -1,0 +1,732 @@
+Title: PerturbCellRL: Verifier-Guided Reinforcement Learning for Single-Cell Perturbation Prediction
+
+URL Source: https://arxiv.org/pdf/2606.27752v1
+
+Published Time: Mon, 29 Jun 2026 00:31:03 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# PerturbCellRL : V ERIFIER -G UIDED REINFORCEMENT LEARNING FOR SINGLE -C ELL PERTURBATION PREDICTION 
+
+A P REPRINT 
+
+Dongxia Wu ∗
+
+Stanford University Stanford, CA dowu@stanford.edu 
+
+Mingyu Li ∗
+
+Peking University Beijing, China mingyulics@stu.pku.edu.cn 
+
+Yuhui Zhang 
+
+Stanford University Stanford, CA yuhuiz@stanford.edu 
+
+Anurendra Kumar 
+
+Stanford University Stanford, CA anurendk@stanford.edu 
+
+Emma Lundberg 
+
+Stanford University Stanford, CA emmalu@stanford.edu 
+
+Serena Yeung-Levy 
+
+Stanford University Stanford, CA syyeung@stanford.edu 
+
+Emily B. Fox 
+
+Stanford University Stanford, CA ebfox@stanford.edu 
+
+# ABSTRACT 
+
+Single-cell perturbation models can reduce costly wet-lab screening by predicting how cells respond transcriptionally to interventions. While recent generative models improve population-level predic-tion, individual generated cells are not explicitly checked for biological consistency. We introduce 
+
+PerturbCellRL , a reinforcement learning (RL) framework that post-trains a pretrained single-cell transcriptomic generator using a suite of cell-level verifiers as rewards. These verifiers define four rewards: Pearson top-k similarity, RMSE top-k proximity, DE Spearman, and Pathway activity. The Pathway activity verifier rewards cells whose pathway responses match known perturbation biology. We evaluate PerturbCellRL on multiple genetic and chemical perturbation benchmarks. Across these benchmarks, PerturbCellRL improves over the pretrained flow-matching generator on reward-aligned evaluation metrics and a held-out evaluation metric. Moreover, PerturbCellRL re-mains competitive with state-of-the-art methods on population-level metrics. Together, these results frame trustworthy single-cell prediction as verifier-guided generative alignment, moving beyond matching expression distributions toward predictions whose single-cell perturbation effects are ex-plicitly checked for biological consistency. 
+
+# 1 Introduction 
+
+Single-cell transcriptomic technologies make it possible to measure how genetic perturbations reshape cellular states [20, 23]. These data support an increasingly important goal in computational biology: building in silico perturbation models that predict transcriptional responses before running expensive wet-lab experiments. Such models could ac-celerate target discovery, drug screening, combinatorial perturbation design, and therapeutic prioritization. The recent virtual-cell vision emphasizes that useful biological simulators should not only generate realistic measurements, but also support reliable scientific reasoning under interventions [4, 8]. Perturbation prediction in single-cell RNA-seq is difficult because observations are sparse, noisy, high dimensional, and typically unpaired. For a perturbation c, we observe populations of control cells and perturbed cells, but not the before-and-after response of the same physical cell. This makes the task fundamentally distributional: the model can only learn how to generate target expression distributions under a control state and perturbation condition. Flow matching is well suited to this setting because it learns continuous generative dynamics from simple base distributions. We utilize a single-cell flow matching generator that predicts perturbed expression distributions conditioned on control states and perturbations. scDFM [31] and related models provide strong distributional baselines [5, 9], but their training objectives primarily reward population-level agreement.  
+
+> ∗
+
+Equal contribution. 
+
+> arXiv:2606.27752v1 [cs.LG] 26 Jun 2026
+
+PerturbCellRL A P REPRINT 
+
+Figure 1: Overview. Current single-cell perturbation generators can produce implausible individual responses. For example, a generated cell may show perturbation effects inconsistent with the known pathway direction. We design a suite of biologically meaningful verifiers serving in three roles: (1) as evaluators to assess single-cell biological consistency, (2) as reward signals to align generation via RL, and (3) as verification modules to improve samples through test-time scaling. However, distributional realism does not by itself imply trustworthy generated cell profiles [28]. A generated pop-ulation can match aggregate target statistics while individual samples remain poorly aligned with plausible treat-ment responses, differentially expressed gene rankings, discriminative perturbation signatures, or pathway-level re-sponses [26]. These failures matter because downstream analyses often inspect individual generated cells or selected subpopulations when prioritizing perturbations, interpreting mechanisms, or choosing candidates for follow-up exper-iments. We propose single-cell verifiers as biological guardrails: they check whether each generated profile remains compatible with plausible target responses, rather than only matching population-level statistics. We further propose PerturbCellRL : reinforcement learning (RL) for trustworthy single-cell transcriptomic prediction. The key idea is to turn biological verifiers into reward functions for post-training a pretrained generative model. Our verifier suite scores each generated cell using four rewards: Pearson top-k similarity, RMSE top-k proximity, DE Spearman, and Pathway activity. These rewards measure target alignment, population placement, transcriptional ranking, and pathway-level biological consistency. Because these verifiers can be non-differentiable and computed outside the generator, RL provides a natural mechanism for using them as direct optimization signals [33, 14]. 
+
+PerturbCellRL uses a pretrained flow-matching generator as the base model and post-trains its generative dynamics with a weighted sum of reward objectives. At training time, the model generates several possible perturbed states conditioned on a control state and perturbation condition, scores them with the verifier suite, and updates the generator to increase the probability of high-reward cells while regularizing against the pretrained policy. At inference time, we use the pathway activity verifier for best-of-N selection because it can be labeled from gene perturbation types without knowing the ground-truth treatment response: multiple candidate responses are generated, scored, and filtered to select the most biologically plausible prediction [27]. This unifies evaluation, training, and inference-time selection around the same transparent biological checks. We evaluate PerturbCellRL on multiple genetic and chemical perturbation benchmarks. Across these benchmarks, 
+
+PerturbCellRL improves over the pretrained flow-matching generator on reward-aligned evaluation metrics and a held-out evaluation metric. Best-of-N selection further improves biological consistency, indicating that verifier-guided test-time scaling can extract better predictions from sampled candidate responses. Importantly, these reward gains do not come at the cost of abandoning distributional quality: PerturbCellRL is competitive with state-of-the-art perturbation models on existing population-level evaluation metrics. In summary, our work identifies a key limitation of existing single-cell perturbation modeling: the lack of explicit enforcement of biological consistency at the single cell level. We address this limitation by incorporating biologically meaningful evaluators through RL, which substantially improves the plausibility of generated cell expressions. We further show that these gains can be amplified via test-time scaling. Finally, our rewards serve as new metrics for the community to benchmark against. Overall, our results move gene expression generation from “distributionally good” to being biologically consistent , supporting the downstream goal of drug discovery and personalized medicine with reduced reliance on costly wet-lab experiments. 2PerturbCellRL A P REPRINT 
+
+# 2 Related Work 
+
+Single-cell perturbation prediction with large-scale generative modeling. Single-cell perturbation prediction aims to infer how cellular transcriptomes change under genetic or chemical interventions. This problem has received substantial attention, driven by the increasing availability of large-scale perturbation datasets and advances in genera-tive modeling. On the data side, the Norman [20], ComboSciPlex [19] and Virtual Cell Challenge [25] provide challenging genetic and chemical perturbation benchmarks. scPerturb [21] highlights the broader availability of harmonized single-cell perturbation data. On the modeling side, early deep generative approaches such as scVI established probabilistic representation learning for single-cell transcriptomics [16]. Subsequent perturbation prediction methods have used conditional autoencoders, graph neural networks, transformer architectures, and distributional generative models to predict responses under unseen perturbations or cellular contexts [17, 24, 1, 2, 22]. More recently, state-of-the-art methods have begun to adopt flow matching [12, 13, 15], which provides a natural framework for conditional generation. This is particularly well suited to perturbation prediction, where models generate perturbed cells conditioned on control states and perturbation labels [31, 9, 32]. In this work, we build on this line of flow-matching models, using scDFM [31] in particular as our base generator, and further improve it through verifier-guided post-training on top of a strong flow-matching backbone. 
+
+Reinforcement learning and test-time scaling for biological alignment. Although generative models can produce expression-like cell profiles, incorporating biological priors into their predictions remains challenging. This issue is especially important in single-cell perturbation prediction, where a generated cell may look expression-like while its perturbation effect is biologically inconsistent. A trustworthy prediction should match observed population-level ex-pression patterns, correctly rank differentially expressed genes, and avoid unnecessary drift in stable genes. However, these objectives are often non-differentiable, making them difficult to optimize directly. One promising solution is RL, which has recently been used to align diffusion and flow models with human preferences or task-specific rewards [3, 7, 14, 30, 10, 29]. Flow and diffusion models introduce additional challenges because exact sample likelihoods are often intractable. Prior work such as FlowGRPO and MixGRPO formulates this problem as a Markov decision process, while recent methods such as DiffusionNFT [33] introduce forward-process objectives for online RL, improving both training efficiency and stability. In this work, we adapt this alignment perspective to transcriptomic perturbation prediction, where rewards are derived from biological verifiers rather than visual or human-preference scores. Furthermore, when a verifier is available, inference can be improved by sampling multiple candidates and selecting the highest-scoring output, an emerging direction known as test-time scaling. This best-of-N strategy is widely used in verifier-guided reasoning systems [6, 11, 27] and has also been explored as test-time scaling in diffusion models [18]. In PerturbCellRL , best-of-N selection uses the same normalized reward as RL post-training. 
+
+# 3 Problem Formulation 
+
+We consider single-cell perturbation prediction in transcriptomic space. Let ui ∈ RG denote a normalized control-cell expression vector over G genes, and let ci ∈ C denote a perturbation, such as gene overexpression, CRISPR activation, or chemical treatment. The goal is to learn a conditional generator that produces a perturbed expression profile 
+
+yi ∼ πθ (· | ui, c i), (1) where yi ∈ RG is a generated perturbed transcriptome for control cell ui under condition ci.In most single-cell perturbation screens, control and perturbed cells are observed as unpaired populations. For a perturbation condition c, let {yobs  
+
+> c,j
+
+}nc 
+
+> j=1
+
+denote the real perturbed cells observed under that condition. Because the same physical cell is not measured before and after perturbation, the model learns population-level conditional generation rather than paired cell-level responses. 
+
+Base generative model. We use scDFM [31] as the base generative model, as it achieves strong performance in learning population-level perturbation prediction. Following conditional flow matching, scDFM learns a velocity field 
+
+vθ (xt, t, u i, c i) that maps Gaussian base samples to perturbed expression states, conditioned on the control expression and perturbation. Given a control cell ui, perturbation ci, Gaussian base sample x0 ∼ N (0 , I ), and an observed 3PerturbCellRL A P REPRINT 
+
+perturbed cell yobs  
+
+> ci,j
+
+, a standard flow-matching objective can be written as 
+
+LFM (θ) = Eui,c i,x 0,yobs  
+
+> ci,j ,t
+
+vθ (xt, t, u i, c i) − (yobs  
+
+> ci,j
+
+− x0) 22 ,xt = (1 − t)x0 + ty obs  
+
+> ci,j
+
+, t ∼ U [0 , 1] .
+
+(2) In this work, we treat scDFM as a pretrained policy πθ (yi | ui, c i) that can generate candidate perturbed transcriptomes from Gaussian base samples. 
+
+Verifier objective. We are not only interested in average expression error or strong distributional matching. We want generated cells to satisfy biological checks that matter for scientific use. Let {rk}Kk=1 be transcriptomic reward functions, where 
+
+rk : RG × RG × C → R (3) scores a generated perturbed expression yi, its control expression ui, and condition ci along one axis of biological consistency. The concrete rewards used in PerturbCellRL are defined in §4.1. The combined reward can be written abstractly as 
+
+R(yi, u i, c i) = 
+
+> K
+
+X
+
+> k=1
+
+wkrk(yi, u i, c i), (4) where wk are reward weights. The PerturbCellRL objective is to obtain a post-trained generator πθ′ that improves verifier scores while staying close to the pretrained scDFM generator: 
+
+max  
+
+> θ′
+
+Eui,c i, y i∼πθ′ (·| ui,c i) [R(yi, u i, c i)] s.t. Eui,c i DKL (πθ′ (· | ui, c i) ∥ πθ (· | ui, c i)) ≤ ϵ.  (5) The KL constraint is important because biological verifiers are necessarily incomplete. Regularizing toward scDFM helps preserve the model’s learned expression manifold and reduces reward hacking. 
+
+# 4 Method 
+
+PerturbCellRL post-trains a pretrained single-cell flow matching generator with biologically informed rewards. The method has three components: a verifier suite, an RL update for flow matching models, and verifier-guided inference. 
+
+4.1 Reward Functions 
+
+We use the notation from §3. All rewards are computed within the current split, and we omit the split index for notation simplicity. Let G = {1, . . . , G } denote the reward gene set. When computing rewards, expressions are restricted to genes in G. Let μ ∈ RG be the mean expression of all real target cells in the split. Details are in Appendix B. 
+
+Pearson top-k similarity reward. This reward measures whether a generated cell is directionally similar to real target cells from the same perturbation. After centering by μ, we find the top-k real target cells with largest Pearson correlation to yi and average those correlations to obtain rpearson  
+
+> i
+
+∈ [−1, 1] :
+
+rpearson  
+
+> i
+
+= 1
+
+|P i|
+
+X
+
+> j∈P i
+
+ρ(yi − μ, y obs  
+
+> ci,j
+
+− μ). (6) 
+
+RMSE top-k proximity reward. This reward measures local proximity to the target-cell manifold. We compute the average RMSE from yi to its top-k nearest real target cells under condition ci, then map this distance to rrmse -topk  
+
+> i
+
+∈
+
+[0 , 1] using a condition-specific leave-one-out normalization. 
+
+rrmse -topk  
+
+> i
+
+= 1 −
+
+> 1
+> |N i|
+
+P 
+
+> j∈N i
+
+RMSE( yi, y obs  
+
+> ci,j
+
+)
+
+U rmse -topk 
+
+> ci
+
+. (7) 
+
+DE Spearman reward. This reward evaluates whether generated cells reproduce the rank ordering of perturbation effects on significant DE genes. For each condition, we compute generated and real fold changes on the selected DE genes, rank-transform both vectors, and use their Pearson correlation as rspearman  
+
+> i
+
+∈ [−1, 1] :
+
+rspearman  
+
+> i
+
+= ρ(rank( bFi, Dci ), rank( Fci,Dci )) . (8) 4PerturbCellRL A P REPRINT 
+
+Figure 2: PerturbCellRL Rewards. Pearson top-k and RMSE top-k compare each generated cell with nearby real target cells from the same perturbation condition. The top-k design encourages predictions to lie near the target-cell manifold while preserving cell-level diversity, instead of collapsing all samples to a condition centroid. Pathway activity and DE Spearman evaluate pathway directionality and differential-expression ranking. 
+
+Pathway activity reward. The Pathway activity reward encodes prior biological knowledge about how a perturba-tion should impact genetic pathways. Unlike other verifiers, it requires no ground-truth target cells, making it applica-ble at test time without real perturbed data. This reference-free property enables verifier-guided test-time scaling; see §4.3. PROGENy provides 14 curated signaling pathway signatures, each defined by weighted gene sets from perturbation experiments [26]. These signatures map gene expression to interpretable pathway activity scores. We use a fold-specific trained MLP fϕ : RK → R14 to predict these PROGENy pathway activities, where K is the predictor gene set stored in the checkpoint. The model projects the generated and control expressions onto this gene set and predicts pathway activities. We use the change in pathway activity relative to the control cell rather than absolute activity. This isolates the perturbation effect from baseline expression: 
+
+ˆsi = fϕ(yi), s0 
+
+> i
+
+= fϕ(ui), ∆si = ˆ si − s0 
+
+> i
+
+. (9) Here fϕ is a small trained MLP ( ∼680K parameters) used to predict PROGENy pathway scores. Details of the predictor architecture and validation are in Appendix C. For a single-gene perturbation with target gene h, the annotation table maps h to pathway p(h), direction d(h) ∈{+1 , −1}, and confidence weight w(h) ≥ 0. Confidence weights are fixed by annotation tier: High/Medium = 1 .0,Data-derived = 0 .8, Low = 0 .5, and Ultra-low = 0 .2. The annotation table is constructed from literature curation and empirical PROGENy validation on the Norman dataset; details are in Appendix D. The Pathway activity reward directly maps the annotated signed pathway change to [0 , 1] :
+
+rpathway  
+
+> i
+
+= σ
+
+ w(h) d(h) ∆ si,p (h)
+
+τpath 
+
+
+
+, rpathway  
+
+> i
+
+∈ [0 , 1] . (10) Thus, annotated up-regulators are rewarded when the corresponding pathway delta is positive, while annotated down-regulators are rewarded when it is negative. Annotating pathway effects for combinatorial perturbations is difficult and left to future work. 
+
+Reward normalization and combination. We map each reward to [0 , 1] using its known range: [−1, 1] for Pearson top-k and DE Spearman, and [0 , 1] for RMSE top-k and Pathway activity. Let ermi denote the normalized reward. Given reward set M and weights λm, the combined scalar reward is 
+
+¯ri = X
+
+> m∈M
+
+λm
+
+P 
+
+> m′∈M
+
+λm′
+
+ermi , ¯ri ∈ [0 , 1] . (11) We use equal weights for the four rewards by default. 5PerturbCellRL A P REPRINT 
+
+Figure 3: PerturbCellRL algorithm. RL post-training seeks to increase the likelihood of high-reward samples and decrease the likelihood of low-reward samples. Therefore, the core training loop of PerturbCellRL consists of inter-leaved phases of sampling and training. (a) Sampling: we generate multiple rollouts from a fixed control expression and perturbation condition, scoring each with the reward models. (b) Training: because exact likelihoods in flow matching are intractable, we construct positive and negative velocities from the batch of rollouts and optimize them contrastively to achieve this goal, following DiffusionNFT [33]. 
+
+4.2 RL Post-Training 
+
+We describe how we optimize the pretrained base model vθ with respect to the reward functions introduced in §4.1. 
+
+Objective. Our objective is to maximize the combined reward defined in Eq. (11). Since these biological reward functions are non-differentiable, standard backpropagation is inapplicable, necessitating an RL approach. The core principle is to increase the generation likelihood of high-reward samples while penalizing low-reward ones. We pro-vide an overview of the algorithm in Figure 3. 
+
+Algorithm overview. We adopt DiffusionNFT [33], a state-of-the-art online RL algorithm for flow matching. It operates on the flow’s forward process, avoiding intractable log likelihoods, and is built from distribution-agnostic 
+
+components, hence extending naturally to our conditional Gaussian-to-expression flow matching setting without mod-ification. At each iteration, DiffusionNFT collects a batch of generated cell profiles, evaluates them with respect to the reward functions, and uses the rewards to define an improvement direction over the current policy. The key idea is to split generated samples into positive (high-reward ) and negative (low-reward ) subsets and learn a contrastive update that moves the model towards the positive distribution. Concretely, given a Gaussian start x0, generated cell profile yi,and optimality reward r ∈ [0 , 1] , the training objective is (detailed explanations in Appendix A): 
+
+L(θ) = E ui,c i,x 0,t yi∼πold (·| x0,u i,c i)
+
+h
+
+r ∥v+ 
+
+> θ
+
+(xt, u i, c i, t ) − v∥22
+
++ (1 − r) ∥v− 
+
+> θ
+
+(xt, u i, c i, t ) − v∥22
+
+i
+
++ β D KL 
+
+ vθ ∥ vold  .
+
+(12) 
+
+Rollout and advantage estimation. During sampling, we fix a perturbation condition ci and a source control cell ui,draw Gaussian starts {x(j)0 }mj=1 , and generate a group of m candidate profiles {y(j) 
+
+> i
+
+}mj=1 . Within each group, diversity comes from these Gaussian starts, while ui and ci remain fixed conditions. We find this yields sufficient variation for DiffusionNFT to distinguish positive from negative generations. Each candidate is scored by the reward functions, and the raw rewards are normalized within the group to obtain optimality probabilities r(j) ∈ [0 , 1] , following the advantage normalization scheme [33]. The forward process is then applied between each x(j)0 and generated profile, and the loss in Eq. (12) is computed over the group. 
+
+4.3 Verifier-Guided Inference 
+
+Explicit reward functions uniquely enable general test-time scaling. Among our proposed rewards, the Pathway ac-tivity reward operates without ground-truth target gene expressions. This allows it to directly evaluate biological feasibility at inference time. In principle, any reference-free verifier could guide test-time scaling. For example, a 6PerturbCellRL A P REPRINT 
+
+trained cell-type classifier could score whether generated profiles preserve the expected identity, and housekeeping-gene checks could penalize unnecessary drift. We leverage this property to select among candidate generations at inference time. This adapts the success of best-of-N selection from reasoning models [6, 11, 27] to single-cell pertur-bation prediction. Given a perturbation condition ci and a source control cell ui, we generate N candidate profiles {y(ℓ) 
+
+> i
+
+}Nℓ=1 and select the one with the highest Pathway activity reward: 
+
+y∗ 
+
+> i
+
+= y(ℓ∗) 
+
+> i
+
+, ℓ∗ = arg max   
+
+> ℓ∈{ 1,...,N }
+
+rpathway (y(ℓ) 
+
+> i
+
+). (13) This provides a simple, training-free mechanism to improve prediction quality given additional inference compute. Moreover, best-of-N selection is complementary to RL post-training: RL improves the base distribution from which candidates are drawn, so that even modest values of N yield high-quality outputs, while Pathway activity selection contributes additional gains. 
+
+# 5 Experiments 
+
+5.1 Experimental Setup 
+
+Figure 4: Norman additive and holdout split proto-cols. 
+
+Datasets. Our experiments use Norman [20] and ComboSci-Plex [19] datasets to test genetic and chemical perturbation predictions. Following scDFM [31], we evaluate two Norman train-test split protocols, illustrated in Figure 4. In the addi-tive split, all single-gene perturbations and a subset of double-gene perturbations are used for training, and the model predicts held-out double-gene perturbations. In the holdout split, se-lected double-gene perturbations and their constituent single-gene perturbations are held out for testing, while the remain-ing perturbations are used for training. We report holdout sin-gle and holdout double by averaging over the single-gene and double-gene perturbations in the holdout test set, respectively. For the Norman additive and holdout results, we use four ran-dom train-test folds and report averages across folds. 
+
+Baselines. We compare against Control (unperturbed cells), Additive (a task-specific baseline for Norman additive that linearly superposes single-gene effects), GEARS [24], CPA [17], STATE [1], CellFlow [9], and scDFM [31]. The primary comparison is against scDFM, which serves as the pretrained base model and the strongest flow-matching baseline. 
+
+Evaluation Metrics. We report both population-level and single-cell-level metrics. At the population level, we measure mean absolute error ( MAE ) between predicted and real pseudobulk means, Pearson ∆ and Pearson ˆ∆
+
+(Pearson correlation of perturbation effects centered by control and training centroid, respectively), DE-Spearman LFC Sig (Spearman correlation of log fold changes on statistically significant DE genes), and DS (Discrimination Score), which ranks the predicted perturbation effect against all test perturbations by L1 distance to the real effect. We also report distribution-level distances between predicted and real cell populations: MMD , using an RBF kernel where s = 0 .5 sets σ2 = s times the target-cell median pairwise squared distance, and Energy Distance . DS , MMD ,and Energy Distance are fully held-out population-level evaluation metrics. They are not optimized as rewards, and therefore help test whether reward improvement comes from genuine biological alignment rather than reward hacking. At the single-cell level, we evaluate using the four verifier rewards defined in §4.1. The Pearson top-k similarity re-ward measures average Pearson similarity between each generated cell’s perturbation effect and the top-k most similar real target cells. The DE Spearman reward measures Pearson correlation between rank-transformed generated and real log fold changes on significant DE genes. The RMSE top-k proximity reward measures the normalized top-k
+
+root mean squared distance from each generated expression to real target cells from the same condition. The Pathway activity reward is the annotation-weighted PROGENy pathway score from a fold-specific MLP. For reporting, we subtract the neutral value 0.5 from this reward, so zero indicates no annotated pathway-direction evidence. Note this verifier is only evaluated for single-gene perturbations. This is not a methodological limitation; we currently lack pathway annotations for the other settings. We also report DS as a held-out single-cell evaluation metric in addition to the four rewards. 7PerturbCellRL A P REPRINT 
+
+Figure 5: PerturbCellRL post-training performance on Norman additive and holdout settings. We report the four proposed single-cell rewards and held-out single-cell Discrimination Score (DS) over 1600 training steps. Step 0
+
+corresponds to the pretrained scDFM model. 
+
+Implementation details. The base generator is the public scDFM checkpoint [31], used as the reference model for RL fine-tuning without retraining from scratch. Each normalized reward is assigned weight 1. We use 32 rollouts per group, sample batches of 64 , and learning rate 2 × 10 −6. The KL weight is 2.0 for Norman and 1.2 for ComboSciPlex. Each RL run is trained for 1600 steps on one H100 GPU. 
+
+5.2 Main Results Single-cell-level performance. Figure 5 compares pretrained scDFM with PerturbCellRL across Norman additive and holdout settings. We track the four optimized single-cell rewards together with single-cell Discrimination Score (DS), which is held out from RL optimization. Across both settings, PerturbCellRL improves the optimized rewards and also increases held-out DS. These results suggest that verifier-guided post-training improves single-cell biological consistency without merely overfitting to the training rewards. 
+
+Population-level performance. We next ask whether single-cell reward gains preserve population-level prediction quality across all benchmark settings. Table 1 reports Norman holdout single-gene, Norman holdout double-gene, Norman additive, and ComboSciPlex results, respectively. All metrics in these tables are measured at the population level, unlike the per-cell verifier rewards used for RL. They aggregate cells within each perturbation or compare full predicted and real cell populations. Thus, they evaluate distributional prediction quality rather than the single-cell reward signals. This separation partially addresses reward-hacking concerns: a model could improve per-cell reward signals while distorting the generated population distribution. Moreover, Pearson ∆, DS, MMD, and Energy Distance were not used by RL during training, and as such serve as fully held-out evaluation metrics. PerturbCellRL remains competitive with the state-of-the-art scDFM across these population-level metrics, and in many cases improves upon scDFM. This indicates that improved verifier rewards do not sacrifice distributional quality. 
+
+Figure 6: Test-time scaling with the PROGENy pathway verifier. 
+
+Best-of-N selection improves pathway reward at both the single-cell and population levels. 
+
+Test-Time Scaling. Figure 6 shows that verifier-guided best-of-N selection produces a clear test-time scaling trend. As the num-ber of candidate samples increases from 
+
+N = 1 to N = 8, the PROGENy path-way reward increases monotonically at both evaluation levels. At the single-cell level, the reward rises from 0.071 to 0.403 . At the population level, it rises from 0.160 to 
+
+0.456 . The largest gain appears with only a small amount of extra inference compute, while larger N values continue to improve the selected samples. These results indicate that the pathway verifier can select generated responses whose predicted pathway changes better match the annotated perturbation di-rection, without retraining the generator. 8PerturbCellRL A P REPRINT 
+
+Figure 7: Target-fitted UMAP case studies on Norman holdout perturbations. The left, middle, and right panels show cells from the same single-gene perturbation, the same double-gene perturbation, and single-gene perturbations from the same pathway, respectively. Blue, green, and orange densities denote real target cells, scDFM predictions, and PerturbCellRL predictions, respectively. Table 1: Population-level performance across Norman and ComboSciPlex settings. Bold indicates best; underline indicates second best within each setting. “–” indicates that the metric is not available for that setting. 
+
+Setting Model MAE ↓ DE-Sp. LFC Sig ↑ Pearson ˆ∆ ↑ Pathway ↑ Pearson ∆ ↑ DS ↑ MMD ↓ Energy ↓
+
+Holdout Single 
+
+Control 0.0247 – 0.2657 0.0000 – 0.5217 0.2611 4.6794 GEARS 0.0466 0.7356 0.6356 0.1002 0.6646 0.8271 0.0979 4.2827 CPA 0.0377 0.4082 0.3154 0.0488 0.3336 0.5616 0.2673 4.0323 STATE 0.0340 0.2969 -0.0116 0.1025 0.3640 0.5194 0.0892 1.1569 CellFlow 0.0219 0.7547 0.4589 0.0664 0.5425 0.5647 0.0528 1.4355 scDFM 0.0203 0.8365 0.6849 0.1564 0.7183 0.8919 0.0581 0.5641 
+
+PerturbCellRL 0.0197 0.8435 0.7047 0.1602 0.7323 0.8995 0.0507 0.5189 Holdout Double 
+
+Control 0.0414 – -0.1412 – – 0.5333 0.3224 6.2272 GEARS 0.0708 0.8082 0.6407 – 0.7552 0.8766 0.1170 5.3965 CPA 0.0517 0.3533 0.2728 – 0.4881 0.6100 0.2941 5.1256 STATE 0.0426 0.2495 0.0806 – 0.4868 0.5333 0.1049 1.6567 CellFlow 0.0333 0.8304 0.3311 – 0.7136 0.5633 0.0665 2.2825 scDFM 0.0251 0.8847 0.7433 – 0.8279 0.9122 0.0455 0.6396 
+
+PerturbCellRL 0.0253 0.8837 0.7618 – 0.8362 0.9233 0.0414 0.6284 Additive 
+
+Control 0.0384 – -0.1285 – – 0.5135 0.3237 5.9914 Additive 0.0228 0.6966 0.8584 – 0.9024 0.9686 0.2083 4.5242 GEARS 0.0400 0.7824 0.5755 – 0.7081 0.8482 0.2582 5.1080 CPA 0.0437 0.3844 0.4000 – 0.5825 0.6339 0.2770 4.7087 STATE 0.0408 0.1806 0.0926 – 0.4668 0.5267 0.1026 1.5350 CellFlow 0.0303 0.8125 0.4618 – 0.7168 0.5674 0.1304 2.0537 scDFM 0.0232 0.9016 0.8333 – 0.8820 0.9741 0.0459 0.5561 
+
+PerturbCellRL 0.0238 0.9019 0.8512 – 0.8942 0.9682 0.0407 0.5507 ComboSciPlex 
+
+Control 0.0697 – -0.3696 – – 0.5714 0.2040 3.1414 GEARS 0.0389 0.7349 0.6383 – 0.7221 0.8367 0.2643 4.7818 CPA 0.0441 0.6094 0.7415 – 0.7372 0.8776 0.2464 3.8947 STATE 0.0671 0.4112 -0.3191 – 0.3554 0.5714 0.1815 2.7685 CellFlow 0.0270 0.8558 0.7968 – 0.8405 0.8163 0.1375 1.4699 scDFM 0.0242 0.8358 0.8419 – 0.8681 0.8776 0.0461 0.5170 
+
+PerturbCellRL 0.0230 0.8406 0.8597 – 0.8824 0.8776 0.0370 0.4539 
+
+Visualization and case studies. To complement the scalar metrics, we visualize representative held-out perturba-tions with target-fitted UMAP projections. This view directly compares whether predicted single-cell populations occupy the same local manifold as the real target cells. As shown in Figure 7, PerturbCellRL better matches the geometry of the target cell distributions than scDFM. Across representative single- and double-gene perturbations, 
+
+PerturbCellRL predictions show tighter overlap with the target high-density regions, whereas scDFM often spreads into displaced or peripheral areas of the UMAP space. This suggests that verifier-guided post-training improves cell-level perturbation consistency while preserving distributional alignment with the observed target populations. 
+
+# 6 Conclusion 
+
+We introduced PerturbCellRL , a verifier-guided RL framework for aligning single-cell perturbation generators with cell-level biological checks. Starting from a public scDFM checkpoint, PerturbCellRL optimizes four rewards: Pear-9PerturbCellRL A P REPRINT 
+
+son top-k similarity, RMSE top-k proximity, DE Spearman, and Pathway activity. Across Norman additive, Norman holdout, and ComboSciPlex settings, PerturbCellRL improves reward-aligned metrics while remaining competitive on population-level evaluation metrics. The gains on held-out DS, MMD, and Energy Distance suggest that post-training does not simply exploit the optimized rewards. At the same time, the framework depends on the quality and coverage of its verifiers. Pathway activity is currently evaluated only where single-gene pathway annotations are available, and broader annotations are needed for other settings. Future work should expand reference-free verifiers and validate high-scoring predictions prospectively. An exciting direction is therefore to collaborate with domain biologists to cu-rate broader annotations, yielding more valuable rewards and extending verifier-guided alignment to more biological settings. 
+
+# Acknowledgement 
+
+This work was supported in part by ONR Grant N00014-22-1-2110 and the Stanford Institute for Human-Centered Artificial Intelligence (HAI). EBF, SY, EL are Biohub, San Francisco, Investigator. E.L. and S.Y. were supported by the Stanford Institute for Human-Centered AI. 
+
+# References 
+
+[1] Abhinav K Adduri, Dhruv Gautam, Beatrice Bevilacqua, Alishba Imran, Rohan Shah, Mohsen Naghipourfar, Noam Teyssier, Rajesh Ilango, Sanjay Nagaraj, Mingze Dong, et al. Predicting cellular responses to perturbation across diverse contexts with state. BioRxiv , pages 2025–06, 2025. 3, 7 [2] Michael Bereket and Theofanis Karaletsos. Modelling cellular perturbations with the sparse additive mechanism shift variational autoencoder. In A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine, editors, 
+
+Advances in Neural Information Processing Systems , volume 36, pages 1–12, 2023. 3 [3] Kevin Black, Michael Janner, Yilun Du, Ilya Kostrikov, and Sergey Levine. Training diffusion models with reinforcement learning. arXiv preprint arXiv:2305.13301 , 2023. 3 [4] Charlotte Bunne, Yusuf Roohani, Yanay Rosen, Ankit Gupta, Xikun Zhang, Marcel Roed, Theo Alexandrov, Mohammed AlQuraishi, Patricia Brennan, Daniel B Burkhardt, et al. How to build the virtual cell with artificial intelligence: Priorities and opportunities. Cell , 2024. 1 [5] Charlotte Bunne, Stefan G Stark, Gabriele Gut, Jacobo Sarabia Del Castillo, Mitch Levesque, Kjong-Van Lehmann, Lucas Pelkmans, Andreas Krause, and Gunnar R¨ atsch. Learning single-cell perturbation responses using neural optimal transport. Nature methods , 20(11):1759–1768, 2023. 1 [6] Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano, et al. Training verifiers to solve math word problems. arXiv preprint arXiv:2110.14168 , 2021. 3, 7 [7] Ying Fan, Olivia Watkins, Yuqing Du, Hao Liu, Moonkyung Ryu, Craig Boutilier, Pieter Abbeel, Mohammad Ghavamzadeh, Kangwook Lee, and Kimin Lee. Dpok: Reinforcement learning for fine-tuning text-to-image diffusion models. Advances in Neural Information Processing Systems , 36:79858–79885, 2023. 3 [8] Graham T Johnson, Eran Agmon, Matthew Akamatsu, Emma Lundberg, Blair Lyons, Wei Ouyang, Omar A Quintero-Carmona, Megan Riel-Mehan, Susanne Rafelski, and Rick Horwitz. Building the next generation of virtual cells to understand cellular biology. Biophysical Journal , 2023. 1 [9] Dominik Klein, Jonas Simon Fleck, Daniil Bobrovskiy, Lea Zimmermann, S¨ oren Becker, Alessandro Palma, Le-ander Dony, Alejandro Tejada-Lapuerta, Guillaume Huguet, Hsiu-Chuan Lin, et al. Cellflow enables generative single-cell phenotype modeling with flow matching. bioRxiv , pages 2025–04, 2025. 1, 3, 7 [10] Junzhe Li, Yutao Cui, Tao Huang, Yinping Ma, Chun Fan, Miles Yang, and Zhao Zhong. Mixgrpo: Unlocking flow-based grpo efficiency with mixed ode-sde. arXiv preprint arXiv:2507.21802 , 2025. 3 [11] Hunter Lightman, Vineet Kosaraju, Yuri Burda, Harrison Edwards, Bowen Baker, Teddy Lee, Jan Leike, John Schulman, Ilya Sutskever, and Karl Cobbe. Let’s verify step by step. In The twelfth international conference on learning representations , 2023. 3, 7 [12] Yaron Lipman, Ricky TQ Chen, Heli Ben-Hamu, Maximilian Nickel, and Matthew Le. Flow matching for generative modeling. In The Eleventh International Conference on Learning Representations , 2023. 3 [13] Yaron Lipman, Marton Havasi, Peter Holderrieth, Neta Shaul, Matt Le, Brian Karrer, Ricky TQ Chen, David Lopez-Paz, Heli Ben-Hamu, and Itai Gat. Flow matching guide and code. arXiv preprint arXiv:2412.06264 ,2024. 3 10 PerturbCellRL A P REPRINT 
+
+[14] Jie Liu, Gongye Liu, Jiajun Liang, Yangguang Li, Jiaheng Liu, Xintao Wang, Pengfei Wan, Di Zhang, and Wanli Ouyang. Flow-grpo: Training flow matching models via online rl. arXiv preprint arXiv:2505.05470 , 2025. 2, 3 [15] Xingchao Liu, Chengyue Gong, and Qiang Liu. Flow straight and fast: Learning to generate and transfer data with rectified flow. In ICLR , 2023. 3 [16] Romain Lopez, Jeffrey Regier, Michael B Cole, Michael I Jordan, and Nir Yosef. Deep generative modeling for single-cell transcriptomics. Nature methods , 15(12):1053–1058, 2018. 3 [17] Mohammad Lotfollahi, Anna Klimovskaia Susmelj, Carlo De Donno, Leon Hetzel, Yuge Ji, Ignacio L Ibarra, Sanjay R Srivatsan, Mohsen Naghipourfar, Riza M Daza, Beth Martin, et al. Predicting cellular responses to complex perturbations in high-throughput screens. Molecular systems biology , 19(6):MSB202211517, 2023. 3, 7[18] Nanye Ma, Shangyuan Tong, Haolin Jia, Hexiang Hu, Yu-Chuan Su, Mingda Zhang, Xuan Yang, Yandong Li, Tommi Jaakkola, Xuhui Jia, et al. Inference-time scaling for diffusion models beyond scaling denoising steps. 
+
+arXiv preprint arXiv:2501.09732 , 2025. 3 [19] Lukas Mathur, B Szalai, NH Du, Ramesh Utharala, Martine Ballinger, JJM Landry, M Ryckelynck, Vladimir Benes, Julio Saez-Rodriguez, and Christoph A Merten. Combi-seq for multiplexed transcriptome-based profiling of drug combinations using deterministic barcoding in single-cell droplets. Nature communications , 13(1):4450, 2022. 3, 7 [20] Thomas M Norman, Max A Horlbeck, Joseph M Replogle, Alex Y Ge, Albert Xu, Marco Jost, Luke A Gilbert, and Jonathan S Weissman. Exploring genetic interaction manifolds constructed from rich single-cell phenotypes. 
+
+Science , 365(6455):786–793, 2019. 1, 3, 7 [21] Stefan Peidli, Tessa D Green, Ciyue Shen, Torsten Gross, Joseph Min, Samuele Garda, Bo Yuan, Linus J Schu-macher, Jake P Taylor-King, Debora S Marks, et al. scperturb: harmonized single-cell perturbation data. Nature Methods , 21(3):531–540, 2024. 3, 14 [22] Ladislav Ramp´ aˇ sek, Daniel Hidru, Petr Smirnov, Benjamin Haibe-Kains, and Anna Goldenberg. Dr.vae: im-proving drug response prediction via modeling of drug perturbation effects. Bioinformatics , 35(19):3743–3751, 03 2019. 3 [23] Joseph M Replogle, Reuben A Saunders, Angela N Pogson, Jeffrey A Hussmann, Alexander Lenail, Alina Guna, Lauren Mascibroda, Eric J Wagner, Karen Adelman, Gila Lithwick-Yanai, et al. Mapping information-rich genotype-phenotype landscapes with genome-scale perturb-seq. Cell , 185(14):2559–2575, 2022. 1 [24] Yusuf Roohani, Kexin Huang, and Jure Leskovec. Predicting transcriptional outcomes of novel multigene per-turbations with gears. Nature Biotechnology , 42(6):927–935, 2024. 3, 7 [25] Yusuf H Roohani, Tony J Hua, Po-Yuan Tung, Lexi R Bounds, Feiqiao B Yu, Alexander Dobin, Noam Teyssier, Abhinav Adduri, Alden Woodrow, Brian S Plosky, et al. Virtual cell challenge: Toward a turing test for the virtual cell. Cell , 188(13):3370–3374, 2025. 3 [26] Michael Schubert, Bertram Klinger, Martina Kl¨ unemann, Anja Sieber, Florian Uhlitz, Sascha Sauer, Mathew J Garnett, Nils Bl¨ uthgen, and Julio Saez-Rodriguez. Perturbation-response genes reveal signaling footprints in cancer gene expression. Nature communications , 9(1):20, 2018. 2, 5 [27] Charlie Snell, Jaehoon Lee, Kelvin Xu, and Aviral Kumar. Scaling llm test-time compute optimally can be more effective than scaling model parameters. arXiv preprint arXiv:2408.03314 , 2024. 2, 3, 7 [28] Ramon Vi˜ nas Torn´ e, Maciej Wiatrak, Zoe Piran, Shuyang Fan, Liangze Jiang, Sarah A Teichmann, Mor Nitzan, and Maria Brbi´ c. Systema: a framework for evaluating genetic perturbation response prediction beyond system-atic variation. Nature Biotechnology , pages 1–10, 2025. 2 [29] Dongxia Wu, Shiye Su, Yuhui Zhang, Elaine Sui, Emma Lundberg, Emily B Fox, and Serena Yeung-Levy. Cellfluxrl: Biologically-constrained virtual cell modeling via reinforcement learning. arXiv preprint arXiv:2603.21743 , 2026. 3 [30] Zeyue Xue, Jie Wu, Yu Gao, Fangyuan Kong, Lingting Zhu, Mengzhao Chen, Zhiheng Liu, Wei Liu, Qiushan Guo, Weilin Huang, et al. Dancegrpo: Unleashing grpo on visual generation. arXiv preprint arXiv:2505.07818 ,2025. 3 [31] Chenglei Yu, Chuanrui Wang, Bangyan Liao, and Tailin Wu. scdfm: Distributional flow matching model for robust single-cell perturbation prediction. arXiv preprint arXiv:2602.07103 , 2026. 1, 3, 7, 8 [32] Yuhui Zhang, Yuchang Su, Chenyu Wang, Tianhong Li, Zoe Wefers, Jeffrey Nirschl, James Burgess, Daisy Ding, Alejandro Lozano, Emma Lundberg, et al. Cellflux: Simulating cellular morphology changes via flow matching. 
+
+arXiv preprint arXiv:2502.09775 , 2025. 3 11 PerturbCellRL A P REPRINT 
+
+[33] Kaiwen Zheng, Huayu Chen, Haotian Ye, Haoxiang Wang, Qinsheng Zhang, Kai Jiang, Hang Su, Stefano Ermon, Jun Zhu, and Ming-Yu Liu. Diffusionnft: Online diffusion reinforcement with forward process. arXiv preprint arXiv:2509.16117 , 2025. 2, 3, 6 12 PerturbCellRL A P REPRINT 
+
+Algorithm 1 PerturbCellRL : Verifier-Guided RL for scDFM 
+
+Require: Pretrained scDFM velocity vref  
+
+> θ
+
+; reward weights {λm}; perturbation dataset D; group size m; guidance γ;KL weight β
+
+1: Initialize vθ ← vref  
+
+> θ
+
+and data-collection policy vold ← vref 
+
+> θ
+
+2: for each RL iteration do 
+
+3: for each sampled (ui, c i) ∼ D do 
+
+4: Draw Gaussian starts {x(j)0 }mj=1 
+
+5: For each j, sample y(j) 
+
+> i
+
+from vold (· | x(j)0 , u i, c i)
+
+6: Score each candidate with the four reward functions and compute ¯r(j) via Eq. (11) 
+
+7: Normalize ¯r(j) within the group to obtain optimality probabilities r(j) ∈ [0 , 1] 
+
+8: Compute forward interpolation x(j) 
+
+> t
+
+= (1 − t)x(j)0 + ty (j) 
+
+> i
+
+with velocity v(j) = y(j) 
+
+> i
+
+− x(j)0
+
+9: Compute implicit policies v+ 
+
+> θ
+
+, v− 
+
+> θ
+
+via Eqs. (14)–(15) 
+
+10: end for 
+
+11: Update vθ with the NFT loss in Eq. (12) 
+
+12: Update vold via exponential moving average of vθ
+
+13: end for 
+
+14: return Post-trained generator vθ
+
+# A Algorithm Details 
+
+For Eq. (12), β is the KL divergence weight, x0 ∼ N (0 , I ) is the Gaussian start, xt = (1 − t)x0 + ty i is the forward-interpolated intermediate state, v = yi − x0 is the corresponding velocity target, and v+ 
+
+> θ
+
+, v− 
+
+> θ
+
+are implicit positive and negative policies defined as: 
+
+v+ 
+
+> θ
+
+(xt, u i, c i, t ) := (1 − γ) vold (xt, u i, c i, t ) + γ v θ (xt, u i, c i, t ), (14) 
+
+v− 
+
+> θ
+
+(xt, u i, c i, t ) := (1 + γ) vold (xt, u i, c i, t ) − γ v θ (xt, u i, c i, t ). (15) Here vold is the data-collection policy, a lagging copy of vθ , and γ > 0 controls guidance strength. The implicit parameterization is central to the algorithm: rather than training separate positive and negative models, a single policy 
+
+vθ is optimized such that its mixture with vold simultaneously fits high-reward cells (via v+ 
+
+> θ
+
+) and avoids low-reward ones (via v− 
+
+> θ
+
+). The optimal solution satisfies vθ∗ = vold + 2 
+
+> γ
+
+∆, where ∆ is the reinforcement guidance direction pointing from the negative towards the positive distribution. This formulation naturally regularizes the post-trained model towards the pretrained policy: when γ is large, the guidance strength 2 
+
+> γ
+
+is small and the model stays close to 
+
+vold ; when γ is small, the model may deviate more aggressively. The data-collection policy vold is updated via an exponential moving average of vθ .
+
+# B Verifier Implementations 
+
+This appendix gives the expanded mathematical definitions for the verifier rewards used in the main text. For top-k
+
+rewards, we use k = 10 .
+
+Pearson top-k similarity reward. For generated sample i, define the centered generated expression and centered real target expression: 
+
+b∆i = yi − μ, ∆ci,j = yobs  
+
+> ci,j
+
+− μ.  (16) Let Pi be the top-k real target cells from condition ci ranked by decreasing ρ( b∆i, ∆ci,j ). The reward averages these nearest target similarities: 
+
+rpearson  
+
+> i
+
+= 1
+
+|P i|
+
+X
+
+> j∈P i
+
+ρ( b∆i, ∆ci,j ), rpearson  
+
+> i
+
+∈ [−1, 1] . (17) 
+
+RMSE top-k proximity reward. For expressions a, b ∈ RG, define 
+
+RMSE( a, b ) = 
+
+s 1
+
+G
+
+X
+
+> g∈G
+
+(ag − bg )2. (18) 13 PerturbCellRL A P REPRINT 
+
+Let Ni be the top-k real target cells from condition ci ranked by increasing RMSE( yi, y obs  
+
+> ci,j
+
+). The generated top-k
+
+distance is 
+
+drmse -topk  
+
+> i
+
+= 1
+
+|N i|
+
+X
+
+> j∈N i
+
+RMSE( yi, y obs  
+
+> ci,j
+
+). (19) For each real target cell yobs  
+
+> c,j
+
+, let N −jc,j be its top-k nearest neighbors among other real target cells from the same condition. The condition-specific upper bound is 
+
+U rmse -topk  
+
+> c
+
+= max 
+
+> j
+
+1
+
+|N −jc,j |
+
+X 
+
+> ℓ∈N −jc,j
+
+RMSE( yobs  
+
+> c,j
+
+, y obs  
+
+> c,ℓ
+
+). (20) The reward maps distance to proximity: 
+
+rrmse -topk  
+
+> i
+
+= 1 − drmse -topk 
+
+> i
+
+U rmse -topk 
+
+> ci
+
+, rrmse -topk  
+
+> i
+
+∈ [0 , 1] . (21) 
+
+DE Spearman reward. For condition ci, let Dci be the significant DE gene set: 
+
+Dci = {g ∈ G : FDR ci,g ≤ α}. (22) The generated fold change is computed in linear space: 
+
+bFi,g = expm1( yi,g ) + ϵ
+
+expm1( ui,g ) + ϵ , g ∈ D ci . (23) The real fold change uses target and reference means: 
+
+Fci,g = Tci,g + ϵRci,g + ϵ , g ∈ D ci . (24) The reward is Pearson correlation after rank transformation: 
+
+rspearman  
+
+> i
+
+= ρ(rank( bFi, Dci ), rank( Fci,Dci )) , rspearman  
+
+> i
+
+∈ [−1, 1] . (25) 
+
+Pathway activity reward. Pathway annotations, confidence weights, PROGENy scoring, and unannotated pertur-bations are described in Appendix C and Appendix D. 
+
+# C PROGENy Predictor MLP 
+
+We train a small fold/split-specific MLP to directly predict 14 PROGENy pathway scores from K=1000 observed genes. Training data is the scPerturb NormanWeissman2019 dataset [21] (111,445 cells, 33,694 genes), normalized to 10 4 counts per cell and log1p-transformed. Ground-truth targets are PROGENy scores computed on the full 33K expression using L2-normalized PROGENy weights. Each MLP maps R1000 → R14 with hidden layers [512 , 256 , 128] , LayerNorm, ReLU, and Dropout( p=0 .1) ( ∼680K parameters). Models are trained with MSE loss, Adam (lr =10 −3), cosine annealing, and early stopping (patience 5). Eight models are trained in total, one per fold/split combination: folds {0, 1, 2, 3} × { train, test }, each using its specific 1K gene set as input. Mean Pearson correlation between predicted and ground-truth pathway scores across held-out cells is 0.51 ± 0.01 
+
+across all 8 configurations. In a representative fold, strongest performance is on pathways annotated to target genes: TGFb ( r=0 .90 ), JAK-STAT ( r=0 .74 ), and MAPK ( r=0 .68 ). 
+
+# D Pathway Annotation Table 
+
+We construct a tiered annotation table mapping each Norman perturbation gene to a PROGENy pathway, direction 
+
+d(h) ∈ { +1 , −1}, and confidence weight w(h), covering 62/101 Norman genes. Annotations are assigned through literature curation (High/Medium confidence) and empirical validation using PROGENy delta scores on the full-transcriptome Norman data. Data-derived annotations are accepted where |δ|>0.05 
+
+and the top pathway is > 1.5× the second-ranked. Confidence weights follow: High/Medium = 1 .0, Data-derived 
+
+= 0 .8, Low = 0 .5, Ultra-low = 0 .2.14 PerturbCellRL A P REPRINT 
+
+Rank-1 agreement between literature annotations and data-derived top pathway was 37% on held-out canonical genes, reflecting genuine biological complexity in K562 CRISPRa rather than annotation error. The complete tiered annotation is reported in Table 2. Rows with no pathway annotation are excluded from pathway-specific analyses. 
+
+Table 2: Norman tiered pathway annotation table. Gene Tier Pathway Dir. Confidence Source IRF1 1 JAK-STAT Up High Literature + Data FOXA1 2 Androgen Up High Literature only HK2 2 Hypoxia Up High Literature only DUSP9 2 MAPK Down High Literature only EGR1 2 MAPK Up High Literature only ETS2 2 MAPK Up High Literature only FOSB 2 MAPK Up High Literature only JUN 2 MAPK Up High Literature only MAP2K3 2 MAPK Up High Literature only MAP2K6 2 MAPK Up High Literature only MAPK1 2 MAPK Up High Literature only PTPN12 2 MAPK Down High Literature only SPI1 2 NFkB Up High Literature only CBL 2 PI3K Down High Literature only FOXO4 2 PI3K Down High Literature only SGK1 2 PI3K Up High Literature only CEBPB 2 TGFb Up High Literature + Data COL1A1 2 TGFb Up High Literature only SNAI1 2 TGFb Up High Literature only TGFBR2 2 TGFb Up High Literature only BAK1 2 Trail Up High Literature only BCL2L11 2 Trail Up High Literature only CDKN1A 2 p53 Up High Literature only TP73 2 p53 Up High Literature only AHR 2 JAK-STAT Up Medium Literature + Data MAP4K3 2 MAPK Up Medium Literature only MAP4K5 2 MAPK Up Medium Literature only CEBPA 2 NFkB Up Medium Literature only CEBPE 2 NFkB Up Medium Literature only LYL1 2 NFkB Up Medium Literature only PTPN1 2 PI3K Up Medium Literature only PTPN13 2 PI3K Down Medium Literature only PTPN9 2 PI3K Down Medium Literature only COL2A1 2 TGFb Up Medium Literature only FOXA3 2 TGFb Up Medium Literature only FOXF1 2 TGFb Up Medium Literature only KLF1 2 TGFb Up Medium Literature only RUNX1T1 2 TGFb Up Medium Literature only TBX2 2 TGFb Up Medium Literature only TBX3 2 TGFb Up Medium Literature only HES7 2 WNT Up Medium Literature only MAML2 2 WNT Up Medium Literature only CDKN1B 2 p53 Up Medium Literature only CDKN1C 2 p53 Up Medium Literature only CKS1B 2 p53 Down Medium Literature + Data KMT2A 2 p53 Up Medium Literature only SET 3 Hypoxia Down Data-derived Data only SLC4A1 3 Hypoxia Down Data-derived Data only IER5L 3 MAPK Down Data-derived Data only MEIS1 3 MAPK Down Data-derived Data only S1PR2 3 TGFb Up Data-derived Data only BPGM 3 Hypoxia Down Low Data only (Low confidence) HOXB9 3 Hypoxia Down Low Data only (Low confidence) IGDCC3 3 Hypoxia Down Low Data only (Low confidence) ZC3HAV1 3 JAK-STAT Up Low Data only (Low confidence) 
+
+15 PerturbCellRL A P REPRINT 
+
+Gene Tier Pathway Dir. Confidence Source HOXC13 3 MAPK Down Low Data only (Low confidence) SAMD1 3 MAPK Down Low Data only (Low confidence) UBASH3A 4 Hypoxia Down Ultra-low Data only (Ultra-low confidence) UBASH3B 4 Hypoxia Down Ultra-low Data only (Ultra-low confidence) CNN1 4 MAPK Down Ultra-low Data only (Ultra-low confidence) ISL2 4 MAPK Down Ultra-low Data only (Ultra-low confidence) ZBTB25 4 MAPK Down Ultra-low Data only (Ultra-low confidence) ARID1A 4 – – – Unannotatable ARRDC3 4 – – – Unannotatable ATL1 4 – – – Unannotatable BCORL1 4 – – – Unannotatable CBFA2T3 4 – – – Unannotatable CELF2 4 – – – Unannotatable CITED1 4 – – – Unannotatable CLDN6 4 – – – Unannotatable CNNM4 4 – – – Unannotatable CSRNP1 4 – – – Unannotatable DLX2 4 – – – Unannotatable FEV 4 – – – Unannotatable FOXL2 4 – – – Unannotatable GLB1L2 4 – – – Unannotatable HNF4A 4 – – – Unannotatable HOXA13 4 – – – Unannotatable IKZF3 4 – – – Unannotatable KIF18B 4 – – – Unannotatable KIF2C 4 – – – Unannotatable LHX1 4 – – – Unannotatable MAP7D1 4 – – – Unannotatable MIDN 4 – – – Unannotatable NCL 4 – – – Unannotatable NIT1 4 – – – Unannotatable OSR2 4 – – – Unannotatable PLK4 4 – – – Unannotatable POU3F2 4 – – – Unannotatable PRDM1 4 – – – Unannotatable PRTG 4 – – – Unannotatable RHOXF2 4 – – – Unannotatable RREB1 4 – – – Unannotatable SLC38A2 4 – – – Unannotatable SLC6A9 4 – – – Unannotatable STIL 4 – – – Unannotatable TMSB4X 4 – – – Unannotatable TSC22D1 4 – – – Unannotatable ZBTB1 4 – – – Unannotatable ZBTB10 4 – – – Unannotatable ZNF318 4 – – – Unannotatable 
+
+# E Dataset Details 
+
+We use the Norman and ComboSciPlex splits from scDFM. For each split, training conditions are all benchmark conditions not listed as test conditions. 
+
+Norman additive split. Each additive fold holds out 37 double-gene perturbations. All corresponding single-gene perturbations remain in training. Each fold therefore has 189 train conditions. Table 3 lists test conditions. 16 PerturbCellRL A P REPRINT 
+
+Table 3: Norman additive held-out double-gene conditions. Fold Test conditions 0 AHR+FEV, BPGM+SAMD1, CBL+UBASH3A, CBL+UBASH3B, CDKN1B+CDKN1A, CEBPB+CEBPA, CEBPB+PTPN12, CEBPE+CEBPA, CEBPE+KLF1, CEBPE+RUNX1T1, CNN1+MAPK1, CNN1+UBASH3A, DUSP9+MAPK1, ETS2+IGDCC3, ETS2+PRTG, FEV+ISL2, FOSB+CEBPB, FOSB+CEBPE, FOSB+OSR2, FOXA3+FOXA1, FOXA3+HOXB9, IRF1+SET, KIF18B+KIF2C, KLF1+MAP2K6, LYL1+IER5L, MAP2K3+IKZF3, MAP2K3+MAP2K6, PTPN12+OSR2, PTPN12+SNAI1, PTPN12+ZBTB25, SAMD1+PTPN12, SET+KLF1, TGFBR2+ETS2, UBASH3B+CNN1, UBASH3B+PTPN12, UBASH3B+UBASH3A, ZC3HAV1+HOXC13 1 AHR+FEV, AHR+KLF1, BCL2L11+BAK1, BPGM+ZBTB1, CBL+PTPN9, CBL+TGFBR2, CBL+UBASH3A, CBL+UBASH3B, CDKN1B+CDKN1A, CDKN1C+CDKN1A, CEBPB+CEBPA, CEBPE+CEBPB, CEBPE+KLF1, DUSP9+SNAI1, ETS2+IKZF3, ETS2+MAP7D1, FOSB+CEBPE, FOXA3+FOXF1, FOXA3+FOXL2, FOXA3+HOXB9, IGDCC3+PRTG, KIF18B+KIF2C, KLF1+CEBPA, KLF1+CLDN6, MAP2K3+IKZF3, MAP2K3+MAP2K6, MAP2K6+SPI1, MAPK1+PRTG, PTPN12+PTPN9, SAMD1+UBASH3B, SET+CEBPE, SGK1+S1PR2, SGK1+TBX2, TGFBR2+IGDCC3, UBASH3B+CNN1, UBASH3B+OSR2, ZC3HAV1+CEBPE 2 BPGM+ZBTB1, CBL+CNN1, CBL+PTPN12, CBL+TGFBR2, CBL+UBASH3B, CEBPE+CEBPA, CEBPE+RUNX1T1, CNN1+MAPK1, CNN1+UBASH3A, DUSP9+KLF1, DUSP9+SNAI1, ETS2+MAP7D1, ETS2+MAPK1, FEV+CBFA2T3, FOSB+IKZF3, FOSB+OSR2, FOSB+PTPN12, FOXA1+HOXB9, FOXL2+MEIS1, IGDCC3+PRTG, JUN+CEBPA, KLF1+CEBPA, LYL1+IER5L, MAP2K3+IKZF3, MAP2K3+MAP2K6, MAP2K6+IKZF3, MAP2K6+SPI1, MAPK1+IKZF3, PTPN12+PTPN9, SAMD1+UBASH3B, TGFBR2+ETS2, UBASH3B+CNN1, UBASH3B+PTPN9, UBASH3B+UBASH3A, UBASH3B+ZBTB25, ZC3HAV1+CEBPE, ZNF318+FOXL2 3 AHR+FEV, AHR+KLF1, CBL+UBASH3A, CDKN1C+CDKN1A, CEBPE+CNN1, CEBPE+SPI1, CNN1+MAPK1, DUSP9+ETS2, DUSP9+SNAI1, ETS2+MAP7D1, ETS2+PRTG, FEV+CBFA2T3, FEV+MAP7D1, FOSB+CEBPB, FOSB+CEBPE, FOSB+OSR2, FOSB+PTPN12, FOXA1+FOXL2, IGDCC3+PRTG, IRF1+SET, KIF18B+KIF2C, KLF1+CLDN6, LYL1+IER5L, MAPK1+IKZF3, MAPK1+PRTG, PTPN12+SNAI1, PTPN12+UBASH3A, PTPN12+ZBTB25, SAMD1+UBASH3B, SAMD1+ZBTB1, SET+CEBPE, SGK1+S1PR2, SGK1+TBX3, TGFBR2+ETS2, UBASH3B+ZBTB25, ZBTB10+DLX2, ZBTB10+SNAI1 
+
+Norman holdout split. Each holdout fold contains 15 held-out double-gene conditions. Their constituent single-gene perturbations are also held out. The train condition counts are 188, 185, 190, and 188. Table 4 lists test conditions. 
+
+Table 4: Norman holdout held-out conditions. Fold Single-gene test conditions Double-gene test conditions 0 BPGM, CEBPA, CEBPB, CEBPE, CNN1, ETS2, FEV, FOSB, FOXA1, FOXA3, HOXB9, HOXC13, IER5L, IGDCC3, ISL2, LYL1, PTPN12, SAMD1, SNAI1, UBASH3A, UBASH3B, ZBTB25, ZC3HAV1 BPGM+SAMD1, CEBPB+PTPN12, CEBPE+CEBPA, CNN1+UBASH3A, ETS2+IGDCC3, FEV+ISL2, FOSB+CEBPB, FOXA3+FOXA1, FOXA3+HOXB9, LYL1+IER5L, PTPN12+SNAI1, PTPN12+ZBTB25, SAMD1+PTPN12, UBASH3B+UBASH3A, ZC3HAV1+HOXC13 1 BAK1, BCL2L11, CBL, CEBPA, CEBPB, CEBPE, CLDN6, ETS2, FOSB, IGDCC3, IKZF3, KIF18B, KIF2C, KLF1, MAP2K3, MAP2K6, MAP7D1, PRTG, S1PR2, SAMD1, SGK1, SPI1, TBX2, TGFBR2, UBASH3A, UBASH3B BCL2L11+BAK1, CBL+UBASH3A, CEBPB+CEBPA, ETS2+MAP7D1, FOSB+CEBPE, IGDCC3+PRTG, KIF18B+KIF2C, KLF1+CEBPA, KLF1+CLDN6, MAP2K3+IKZF3, MAP2K6+SPI1, SAMD1+UBASH3B, SGK1+S1PR2, SGK1+TBX2, TGFBR2+IGDCC3 2 CBL, CEBPA, CEBPE, CNN1, DUSP9, FOSB, FOXA1, HOXB9, IER5L, JUN, KLF1, LYL1, MAP2K3, MAP2K6, MAPK1, PTPN12, RUNX1T1, SNAI1, SPI1, TGFBR2, UBASH3B CBL+CNN1, CBL+PTPN12, CBL+TGFBR2, CEBPE+CEBPA, CEBPE+RUNX1T1, CNN1+MAPK1, DUSP9+SNAI1, FOSB+PTPN12, FOXA1+HOXB9, JUN+CEBPA, KLF1+CEBPA, LYL1+IER5L, MAP2K3+MAP2K6, MAP2K6+SPI1, UBASH3B+CNN1 
+
+17 PerturbCellRL A P REPRINT 
+
+Fold Single-gene test conditions Double-gene test conditions 3 AHR, CEBPE, CLDN6, CNN1, DLX2, ETS2, FEV, IER5L, IGDCC3, IKZF3, KLF1, LYL1, MAP7D1, MAPK1, PRTG, PTPN12, S1PR2, SGK1, SNAI1, SPI1, TBX3, UBASH3A, ZBTB10 AHR+FEV, CEBPE+CNN1, CEBPE+SPI1, CNN1+MAPK1, ETS2+PRTG, FEV+MAP7D1, IGDCC3+PRTG, KLF1+CLDN6, LYL1+IER5L, MAPK1+IKZF3, PTPN12+UBASH3A, SGK1+S1PR2, SGK1+TBX3, ZBTB10+DLX2, ZBTB10+SNAI1 
+
+ComboSciPlex split. ComboSciPlex uses the default scDFM split. The seven held-out conditions are listed in Table 5. All other ComboSciPlex conditions are used for training. This gives 25 train conditions. Table 5: ComboSciPlex held-out test conditions. 
+
+Condition 1 Condition 2 Panobinostat Crizotinib Panobinostat Curcumin Panobinostat SRT1720 Panobinostat Sorafenib SRT2104 Alvespimycin control Alvespimycin control Dacinostat 
+
+# F Ablation Study 
+
+We ablate the PROGENy predictor reward on the Norman holdout setting. The full setting uses the same Perturb-CellRL reward set reported in Table 1. The ablated setting removes only the PROGENy predictor reward and keeps the Pearson top-k, DE Spearman, and RMSE top-k rewards. Table 6 reports population-level mean metrics over four holdout folds. Removing the PROGENy predictor reward leaves most holdout population metrics close to the full re-ward setting, while the holdout single pathway metric decreases from 0.1602 to 0.1509 . This suggests that the pathway reward contributes directly to pathway-aligned population behavior without substantially changing the other reported holdout metrics. 
+
+F.1 Test-Time Scaling 
+
+We study test-time scaling by varying the number of generated samples per condition n ∈ { 1, 2, 4, 8} and aggregating predictions across samples. Table 7 reports population-level metrics on Norman holdout single-gene perturbations, averaged over four holdout folds. All reported metrics are population-level. At each n, we draw n candidate popula-tions per condition and keep the one with the highest pathway reward, so the pathway metric improves by construction (from 0.160 at n=1 to 0.456 at n=8 ). The other population-level metrics (MAE, Pearson ∆, MMD, Energy) are off-target for this selection rule: picking the pathway-maximizing candidate biases the retained population toward strong pathway activity rather than toward matching the reference population’s per-gene means and cell-to-cell spread, so these scores drift away from the reference as n grows. Table 6: PROGENy predictor reward ablation on Norman holdout. Each value is averaged over four holdout folds. The MMD column follows Table 1 and reports the s = 0 .5 RBF-kernel MMD. “–” indicates that the metric is not available for that setting.                                                      
+
+> Setting Reward MAE ↓DE-Sp. LFC Sig ↑Pearson ˆ∆↑Pathway ↑Pearson ∆↑DS ↑MMD ↓Energy ↓
+> Holdout Single w/ PROGENy predictor 0.0197 0.8435 0.7047 0.1602 0.7323 0.8995 0.0507 0.5189 w/o PROGENy predictor 0.0195 0.8394 0.7119 0.1509 0.7335 0.8943 0.0483 0.5092
+> Holdout Double w/ PROGENy predictor 0.0253 0.8837 0.7618 –0.8362 0.9233 0.0414 0.6284 w/o PROGENy predictor 0.0253 0.8783 0.7610 –0.8359 0.9167 0.0412 0.6295
+
+18 PerturbCellRL A P REPRINT 
+
+Table 7: Test-time scaling population-level metrics on Norman holdout single-gene perturbations. Each value is averaged over four holdout folds. The MMD column follows Table 1 and reports the s = 0 .5 RBF-kernel MMD.                                                   
+
+> # Samples MAE ↓DE-Sp. LFC Sig ↑Pearson ˆ∆↑Pathway ↑Pearson ∆↑DS ↑MMD ↓Energy ↓
+> 10.0197 0.8438 0.7051 0.1598 0.7330 0.8995 0.0507 0.5188 20.0215 0.8401 0.6641 0.3432 0.7154 0.8955 0.0552 0.5918 40.0257 0.8280 0.5971 0.4218 0.6629 0.8793 0.0696 0.7890 80.0297 0.8167 0.5438 0.4557 0.6297 0.8805 0.0856 1.0205
+
+# G Responsible Use 
+
+PerturbCellRL is intended as a decision-support method for prioritizing biological hypotheses, not as a replacement for experimental validation. Predictions can be wrong when perturbations are outside the training distribution, when cell states are poorly represented, or when verifiers encode incomplete biological knowledge. Any candidate therapeutic or biological conclusion suggested by the model should be validated with independent experiments. 19

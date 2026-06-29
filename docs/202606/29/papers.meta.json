@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-29",
+  "date": "2026-06-29",
+  "generated_at": "2026-06-29T22:19:44",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202606/29/2606.27657v1-reconstructing-the-developmental-trajectory-of-adipocytes-in-human-adipose-tissue-using-single-cell-rna-sequencing",
+      "section": "deep",
+      "title_en": "Reconstructing the Developmental Trajectory of Adipocytes in Human Adipose Tissue Using Single-Cell RNA Sequencing",
+      "authors": "Weny S. M Sitinjak, Humasak Tommy Argo Simanjuntak",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.27657v1",
+      "score": "9.0",
+      "evidence": "使用单细胞RNA测序重建发育轨迹",
+      "tldr": "肥胖是全球性代谢疾病危机，理解脂肪细胞发育机制至关重要。本研究利用单细胞RNA测序技术，重建了人类脂肪细胞的发育轨迹，识别出15个转录簇和7个过渡状态，并发现IGF和FGF信号通路在分化中起核心作用。研究揭示了内脏与皮下脂肪部位特异性差异，为开发促进健康脂肪扩增或抑制病理性脂肪积累的疗法提供了首个全面的人类脂肪细胞发育图谱和潜在治疗靶点。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Obesity is a global health crisis associated with metabolic disorders such as type 2 diabetes and cardiovascular disease. This study employed single-cell RNA sequencing to reconstruct the developmental trajectory of human adipocytes from adipose tissue samples. Our analysis identified 15 transcriptionally distinct cell clusters, including 7 transitional states, revealing the dynamic process of adipocyte differentiation. We detected 16 functionally active signaling pathways mediating cellular communication between adipocytes and their progenitors. Among these, insulin-like growth factor (IGF) and fibroblast growth factor (FGF) pathways emerged as the most prominent networks, showing consistent activity across differentiation stages (p<0.05). The study revealed depot-specific differences, with visceral adipocytes undergoing additional extracellular matrix remodeling absent in subcutaneous differentiation. Spatial analysis further showed that IGF signaling was particularly active in perivascular niches, while FGF activity dominated in mature adipocyte zones. These results provide the first comprehensive map of human adipocyte development, highlighting IGF and FGF pathways as potential therapeutic targets. The identified signaling networks offer new insights for developing interventions to promote healthy adipose expansion or inhibit pathological fat accumulation. This work advances our fundamental understanding of adipose tissue biology while providing clinically relevant data for metabolic disorder treatments.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/29/2606.27752v1-perturbcellrl-verifier-guided-reinforcement-learning-for-single-cell-perturbation-prediction",
+      "section": "deep",
+      "title_en": "PerturbCellRL: Verifier-Guided Reinforcement Learning for Single-Cell Perturbation Prediction",
+      "authors": "Dongxia Wu, Mingyu Li, Yuhui Zhang, Anurendra Kumar, Emma Lundberg, Serena Yeung-Levy, Emily B. Fox",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.27752v1",
+      "score": "8.0",
+      "evidence": "使用强化学习预测单细胞扰动响应，直接与Perturb-seq分析相关",
+      "tldr": "单细胞扰动预测可替代湿实验，但现有生成模型未显式检查细胞生物一致性。本文提出PerturbCellRL，使用强化学习对预训练生成器进行后训练，以细胞级验证器（Pearson top-k相似性、RMSE top-k邻近、DE Spearman、通路活动性）作为奖励，引导生成生物一致的细胞。在多个遗传和化学扰动基准上，该方法在奖励对齐指标和保留评估指标上提升，且总体指标与SOTA持平。框架将可信预测视为验证器引导的生成对齐，超越仅匹配表达分布。",
+      "tags": "query:single-cell-omics",
+      "abstract_en": "Single-cell perturbation models can reduce costly wet-lab screening by predicting how cells respond transcriptionally to interventions. While recent generative models improve population-level prediction, individual generated cells are not explicitly checked for biological consistency. We introduce PerturbCellRL, a reinforcement learning (RL) framework that post-trains a pretrained single-cell transcriptomic generator using a suite of cell-level verifiers as rewards. These verifiers define four rewards: Pearson top-k similarity, RMSE top-k proximity, DE Spearman, and Pathway activity. The Pathway activity verifier rewards cells whose pathway responses match known perturbation biology. We evaluate PerturbCellRL on multiple genetic and chemical perturbation benchmarks. Across these benchmarks, PerturbCellRL improves over the pretrained flow-matching generator on reward-aligned evaluation metrics and a held-out evaluation metric. Moreover, PerturbCellRL remains competitive with state-of-the-art methods on population-level metrics. Together, these results frame trustworthy single-cell prediction as verifier-guided generative alignment, moving beyond matching expression distributions toward predictions whose single-cell perturbation effects are explicitly checked for biological consistency.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/29/2606.26061v1-deviance-style-normalization-for-jointly-overdispersed-counts",
+      "section": "quick",
+      "title_en": "Deviance-style normalization for jointly overdispersed counts",
+      "authors": "Akshay Balsubramani",
+      "date": "2026-06-24",
+      "pdf": "https://arxiv.org/pdf/2606.26061v1",
+      "score": "7.0",
+      "evidence": "针对单细胞RNA-seq中常见的过度分散计数数据的归一化方法",
+      "tldr": "针对测序等生化数据中稀疏且联合过度离差的计数矩阵，提出Dirichlet-多项（DM）偏差残差化。该变换基于固定总体的DM零模型，通过条件独立负二项特征计数得到，保持精确稀疏性，每个非零条目常数时间计算。与多项残差在单例计数上一致，并根据过度离差收缩重复计数残差，当α0→∞恢复多项残差。扩展至有序和树结构特征，计算轻量，可嵌入现有稀疏流程。",
+      "tags": "query:sc-methods",
+      "abstract_en": "We introduce a Dirichlet--multinomial (DM) deviance residualization for sparse, jointly overdispersed count matrices, the regime that dominates sequencing-based biochemical assays. The DM null treats each sample's count vector as a fixed-total composition with a single scalar concentration $α_0$ governing overdispersion, and arises exactly by conditioning independent negative-binomial feature counts on the observed sample total -- making the DM the joint conditional analogue of standard feature-wise overdispersed count models. The resulting transform preserves exact sparsity, evaluates in constant time per nonzero entry, agrees with multinomial residuals on singleton counts, shrinks repeated-count residuals according to the overdispersion the null tolerates, and recovers the multinomial residual as $α_0\\to\\infty$. The same fixed-dispersion comparison principle extends to ordered and tree-structured features via the generalized DM and the Dirichlet-tree multinomial, giving a single residual family that subsumes joint and feature-wise count nulls under a common compositional logic and is computationally lightweight enough to drop into existing sparse pipelines.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/29/2606.27529v1-modelling-chronic-stress-as-an-excitatory-inhibitory-perturbation-in-recurrent-working-memory-networks",
+      "section": "quick",
+      "title_en": "Modelling chronic stress as an excitatory-inhibitory perturbation in recurrent working-memory networks",
+      "authors": "Mauricio A Diaz, Manuela A. Beyer, Janina Hesse",
+      "date": "2026-06-25",
+      "pdf": "https://arxiv.org/pdf/2606.27529v1",
+      "score": "6.0",
+      "evidence": "将慢性压力建模为神经网络中的兴奋-抑制失衡，与精神分裂症的兴奋-抑制失衡相关",
+      "tldr": "慢性压力导致前额叶兴奋-抑制平衡偏向抑制性优势，但其机制不明。本研究在递归工作记忆网络中模拟八种突触或神经元调制，发现仅有增强抑制性到兴奋性突触能同时复现抑制优势、兴奋低功能及任务受损三个标志性特征。进一步发现，在压力下训练的弹性网络能保持任务表现，但泛化能力下降，揭示了压力下行为僵化的计算代价。",
+      "tags": "query:scz-model",
+      "abstract_en": "Stress is an adaptive response coordinated by neural and physiological systems. While acute stress can enhance survival, chronic stress drives structural brain changes, cognitive dysfunction, and increased psychiatric risk. At the cellular level, chronic stress shifts the excitatory-inhibitory (E/I) balance of prefrontal pyramidal neurons toward inhibitory dominance, yet the mechanisms underlying these alterations are still unknown. We here investigate possible mechanisms causing inhibitory dominance using recurrent neuronal networks trained on a working memory task. Chronic stress is modelled as a modulation in synaptic strength or neuronal activity, systematically comparing eight candidate operators against three experimentally motivated signatures of stress-induced prefrontal dysfunction: inhibitory dominance, excitatory hypofunction, and impaired task performance. These signatures are all recovered by a single stress mechanism, stronger inhibitory-to-excitatory synapses. Contrasting naive networks with resilient networks trained under the stress mechanism, we find that resilience training not only preserves task performance under stress, but also confines the network to the same dynamical subspace and energetic regime with and without stress. This resilience comes at a cost: resilient networks generalise less well when the task requires longer memory than seen during training, indicating that resilient networks find a specialised solution tuned to the trained regime. This trade-off between resilience and generalization performance persists across stress magnitude and network size, offering a computational analogue of the shift toward rigid, habit-like behaviour reported in animal following chronic stress.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
