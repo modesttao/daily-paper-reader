@@ -10,7 +10,7 @@ import requests
 统一的 LLM 客户端封装。
 
 提供商/模型命名规则：'provider/model'，provider 大小写不敏感，model 保留大小写与路径。
-当前运行链路仅支持 DeepSeek；本地 reranker 不走 LLM API。
+当前运行链路支持 DeepSeek 与 Anthropic (Claude)；本地 reranker 不走 LLM API。
 """
 
 # 单次实验级别的全局 token 统计（需由调用方在实验开始前手动 reset）
@@ -37,6 +37,9 @@ GLOBAL_TOKENS = {
 GLOBAL_TIME_SECONDS: float = 0.0
 
 DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-8"
+# Claude 输出上限（流式最高 128K，这里取安全值，避免超长请求超时）
+ANTHROPIC_MAX_OUTPUT_TOKENS = 64000
 
 
 def reset_global_tokens():
@@ -64,12 +67,6 @@ def get_global_time() -> float:
 
 
 class LLMClient:
-    tokens = {
-        'prompt': 0,
-        'content': 0,
-        'reasoning': 0,
-        'total': 0,
-    }
 
     def __init__(self, api_key: str, model: str, base_url: str):
         """
@@ -82,6 +79,13 @@ class LLMClient:
         self.api_key = api_key
         self.model = model
         self.base_url = base_url
+        # 实例级 token 统计（不能放在类属性上，否则所有 client 共享同一个 dict）
+        self.tokens = {
+            'prompt': 0,
+            'content': 0,
+            'reasoning': 0,
+            'total': 0,
+        }
         self._base_urls = self._normalize_base_urls([base_url])
         # 实例级别的累计统计（无需显式 reset；通常每个实验构造一个 client）
         self._call_index = 0
@@ -157,6 +161,9 @@ class LLMClient:
 
     @staticmethod
     def _is_authentication_error(exc: Exception) -> bool:
+        status_code = getattr(exc, "status_code", None)
+        if status_code in (401, 403):
+            return True
         response = getattr(exc, "response", None)
         status_code = getattr(response, "status_code", None)
         if status_code in (401, 403):
@@ -165,9 +172,62 @@ class LLMClient:
         return any(token in message for token in (
             "authentication fails",
             "invalid api key",
+            "invalid x-api-key",
             "authorization required",
             "unauthorized",
         ))
+
+    def _record_call_stats(
+        self,
+        *,
+        prompt_tokens: int,
+        reasoning_tokens: int,
+        visible_tokens: int,
+        total_tokens: int,
+        elapsed: float,
+    ) -> None:
+        """统一记录单次调用的 token / 耗时统计（实例级 + 全局）。"""
+        self.tokens['prompt'] += prompt_tokens
+        self.tokens['content'] += visible_tokens
+        self.tokens['reasoning'] += reasoning_tokens
+        self.tokens['total'] += total_tokens
+
+        try:
+            GLOBAL_TOKENS['prompt'] += int(prompt_tokens)
+            GLOBAL_TOKENS['thinking'] += int(reasoning_tokens)
+            GLOBAL_TOKENS['content'] += int(visible_tokens)
+            GLOBAL_TOKENS['total'] += int(total_tokens)
+        except Exception:
+            pass
+
+        try:
+            global GLOBAL_TIME_SECONDS
+            GLOBAL_TIME_SECONDS += float(elapsed)
+            self._cum_time_seconds += float(elapsed)
+
+            self._call_index += 1
+            self._cum_tokens['prompt'] += int(prompt_tokens)
+            self._cum_tokens['thinking'] += int(reasoning_tokens)
+            self._cum_tokens['content'] += int(visible_tokens)
+            self._cum_tokens['total'] += int(total_tokens)
+
+            provider = self._provider_name()
+            header = f"[{provider}][{self.model}] 第{self._call_index}次"
+            line_cur = (
+                f"本次 tokens：prompt={int(prompt_tokens)}, thinking={int(reasoning_tokens)}, "
+                f"content={int(visible_tokens)}, total={int(total_tokens)}"
+            )
+            line_cum = (
+                f"累计 tokens：prompt={self._cum_tokens['prompt']}, thinking={self._cum_tokens['thinking']}, "
+                f"content={self._cum_tokens['content']}, total={self._cum_tokens['total']}"
+            )
+            line_time = (
+                f"本次用时：{elapsed:.2f}s，"
+                f"累计用时：{self._cum_time_seconds:.2f}s"
+            )
+            print(header + "\n" + line_cur + "\n" + line_cum + "\n" + line_time)
+        except Exception:
+            pass
 
     @staticmethod
     def _extract_text_content(value: Any) -> str:
@@ -778,6 +838,356 @@ class DeepSeekClient(LLMClient):
         super().__init__(api_key=api_key, model=model, base_url=base_url)
 
 
+class AnthropicClient(LLMClient):
+    """Claude 客户端：走官方 anthropic SDK 的 Messages API。
+
+    与 OpenAI Chat Completions 的差异在这里统一适配：
+    - system 消息提升为顶层 system 参数；
+    - 不透传采样参数（Claude 4.7+ 拒绝 temperature/top_p/top_k）；
+    - response_format(json_schema) 映射为 output_config.format；
+    - usage 字段从 input_tokens/output_tokens 映射回统一结构。
+    """
+
+    _UNSUPPORTED_SCHEMA_KEYS = frozenset({
+        "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
+        "minLength", "maxLength", "pattern",
+        "minItems", "maxItems", "uniqueItems",
+        "default",
+    })
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = DEFAULT_ANTHROPIC_MODEL,
+        base_url: str | None = None,
+    ):
+        super().__init__(api_key=api_key, model=model, base_url=base_url or "")
+        self._sdk_client = None
+
+    def _get_sdk_client(self):
+        if self._sdk_client is None:
+            try:
+                import anthropic
+            except ImportError as exc:  # pragma: no cover
+                raise RuntimeError(
+                    "使用 Claude API 需要安装官方 SDK：pip install anthropic"
+                ) from exc
+            client_kwargs: Dict[str, Any] = {"api_key": self.api_key}
+            if self.base_url:
+                client_kwargs["base_url"] = self.base_url
+            self._sdk_client = anthropic.Anthropic(**client_kwargs)
+        return self._sdk_client
+
+    def _provider_name(self, base_url: str | None = None) -> str:
+        return 'anthropic'
+
+    def _structured_response_format_names(
+        self,
+        allow_json_object_fallback: bool,
+    ) -> List[str]:
+        # Claude 没有 json_object 模式：优先原生 json_schema（output_config.format），
+        # 不支持或校验失败时回退到提示词约束 + 本地 JSON 解析修复。
+        if not allow_json_object_fallback:
+            return ["json_schema"]
+        override = (
+            os.getenv("DPR_LLM_STRUCTURED_FORMAT")
+            or os.getenv("LLM_STRUCTURED_FORMAT")
+            or ""
+        ).strip().lower().replace("-", "_")
+        if override in ("prompt_only", "prompt", "none", "text"):
+            return ["prompt_only"]
+        return ["json_schema", "prompt_only"]
+
+    @staticmethod
+    def _is_structured_output_unsupported_error(error: Exception) -> bool:
+        status_code = getattr(error, "status_code", None)
+        lowered = str(error or "").lower()
+        if status_code == 400 and any(token in lowered for token in (
+            "output_config", "format", "schema", "structured",
+        )):
+            return True
+        return LLMClient._is_structured_output_unsupported_error(error)
+
+    @classmethod
+    def _prepare_output_schema(cls, schema: Any) -> Any:
+        """把项目内的宽松 JSON Schema 收敛为 Claude 结构化输出可接受的子集。
+
+        Claude 要求 object 节点带 additionalProperties: false，且不支持
+        数值/字符串/数组约束关键字（超出会 400）。
+        """
+        if not isinstance(schema, dict):
+            return schema
+        out: Dict[str, Any] = {}
+        for key, value in schema.items():
+            if key in cls._UNSUPPORTED_SCHEMA_KEYS:
+                continue
+            if key in ("properties", "$defs", "definitions") and isinstance(value, dict):
+                out[key] = {name: cls._prepare_output_schema(child) for name, child in value.items()}
+            elif key == "items":
+                out[key] = cls._prepare_output_schema(value)
+            elif key in ("anyOf", "allOf", "oneOf") and isinstance(value, list):
+                out[key] = [cls._prepare_output_schema(item) for item in value]
+            else:
+                out[key] = value
+        if out.get("type") == "object" and isinstance(out.get("properties"), dict):
+            out.setdefault("additionalProperties", False)
+            out.setdefault("required", list(out["properties"].keys()))
+        return out
+
+    def chat(self, messages: List[Dict[str, str]], response_format: Optional[Dict[str, Any]] = None) -> dict:
+        system_parts: List[str] = []
+        turns: List[Dict[str, Any]] = []
+        for message in messages or []:
+            if not isinstance(message, dict):
+                continue
+            role = str(message.get("role") or "").strip().lower()
+            content = self._extract_text_content(message.get("content"))
+            if role == "system":
+                if content:
+                    system_parts.append(content)
+            elif role in ("user", "assistant") and content:
+                turns.append({"role": role, "content": content})
+        if not turns:
+            turns = [{"role": "user", "content": "请根据系统提示完成任务。"}]
+
+        max_tokens = ANTHROPIC_MAX_OUTPUT_TOKENS
+        try:
+            configured = int(self.kwargs.get("max_tokens") or 0)
+            if configured > 0:
+                max_tokens = min(configured, ANTHROPIC_MAX_OUTPUT_TOKENS)
+        except Exception:
+            pass
+
+        params: Dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "messages": turns,
+        }
+        if system_parts:
+            params["system"] = "\n\n".join(system_parts)
+        if isinstance(response_format, dict) and response_format.get("type") == "json_schema":
+            schema = (response_format.get("json_schema") or {}).get("schema") or {}
+            params["output_config"] = {
+                "format": {
+                    "type": "json_schema",
+                    "schema": self._prepare_output_schema(schema),
+                }
+            }
+
+        sdk = self._get_sdk_client()
+        start_time = time.time()
+        try:
+            # 统一走流式再取完整消息，避免大 max_tokens 触发 SDK 的非流式超时保护
+            with sdk.messages.stream(**params) as stream:
+                response_message = stream.get_final_message()
+        except Exception as exc:
+            if self._is_authentication_error(exc):
+                print("LLM 鉴权失败：ANTHROPIC_API_KEY 无效或无权限，请更新后重试。")
+            raise
+
+        content_parts: List[str] = []
+        for block in getattr(response_message, "content", None) or []:
+            if getattr(block, "type", None) == "text":
+                text = getattr(block, "text", "") or ""
+                if text:
+                    content_parts.append(text)
+        content = "".join(content_parts).strip()
+
+        stop_reason = getattr(response_message, "stop_reason", None)
+        refusal = ""
+        if stop_reason == "refusal":
+            refusal = "Claude 拒绝了本次请求（stop_reason=refusal）。"
+        # 归一化为 OpenAI 语义，调用方按 None/"stop"/"length" 判断
+        finish_reason = {
+            "end_turn": "stop",
+            "stop_sequence": "stop",
+            "max_tokens": "length",
+        }.get(stop_reason, stop_reason)
+
+        usage = getattr(response_message, "usage", None)
+        prompt_tokens = int(getattr(usage, "input_tokens", 0) or 0)
+        completion_tokens = int(getattr(usage, "output_tokens", 0) or 0)
+        total_tokens = prompt_tokens + completion_tokens
+
+        self._record_call_stats(
+            prompt_tokens=prompt_tokens,
+            reasoning_tokens=0,
+            visible_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            elapsed=time.time() - start_time,
+        )
+
+        return {
+            "content": content,
+            "raw_content": content,
+            "reasoning_content": "",
+            "refusal": refusal,
+            "finish_reason": finish_reason,
+            "message": {"role": "assistant", "content": content},
+            "raw_response": response_message,
+            "tokens": {
+                "prompt": prompt_tokens,
+                "content": completion_tokens,
+                "reasoning": 0,
+                "total": total_tokens,
+            },
+        }
+
+
+class ClaudeCodeClient(LLMClient):
+    """通过本地 Claude Code CLI（`claude -p`）调用 Claude，消耗 Pro/Max 订阅额度。
+
+    与直连 API 的差异：
+    - 鉴权走 CLAUDE_CODE_OAUTH_TOKEN（`claude setup-token` 生成）或本机已登录的 Claude Code；
+    - 不支持 max_tokens / 采样参数 / json_schema 结构化输出，
+      结构化输出统一回退到提示词约束 + 本地 JSON 解析修复；
+    - 订阅额度有 5 小时滚动窗口与 7 天滚动上限，批量调用会与交互使用共享额度。
+    """
+
+    DEFAULT_TIMEOUT_SECONDS = 600
+
+    def __init__(
+        self,
+        oauth_token: str = '',
+        model: str = '',
+        cli_path: str | None = None,
+    ):
+        cli_model = str(model or '').strip()
+        super().__init__(
+            api_key=oauth_token,
+            model=cli_model or 'subscription-default',
+            base_url='',
+        )
+        self._cli_model = cli_model
+        self.cli_path = (
+            cli_path
+            or (os.getenv('CLAUDE_CODE_CLI_PATH') or '').strip()
+            or 'claude'
+        )
+
+    def _provider_name(self, base_url: str | None = None) -> str:
+        return 'claude-code'
+
+    def _structured_response_format_names(
+        self,
+        allow_json_object_fallback: bool,
+    ) -> List[str]:
+        # Claude Code headless 只输出文本，结构化输出永远走提示词约束。
+        return ["prompt_only"]
+
+    @staticmethod
+    def _resolve_timeout_seconds() -> int:
+        raw = (os.getenv('CLAUDE_CODE_TIMEOUT_SECONDS') or '').strip()
+        try:
+            value = int(raw)
+            if value > 0:
+                return value
+        except Exception:
+            pass
+        return ClaudeCodeClient.DEFAULT_TIMEOUT_SECONDS
+
+    def chat(self, messages: List[Dict[str, str]], response_format: Optional[Dict[str, Any]] = None) -> dict:
+        import subprocess
+        import tempfile
+
+        system_parts: List[str] = []
+        prompt_parts: List[str] = []
+        for message in messages or []:
+            if not isinstance(message, dict):
+                continue
+            role = str(message.get("role") or "").strip().lower()
+            content = self._extract_text_content(message.get("content"))
+            if not content:
+                continue
+            if role == "system":
+                system_parts.append(content)
+            elif role == "assistant":
+                prompt_parts.append(f"[之前的助手回复]\n{content}")
+            else:
+                prompt_parts.append(content)
+        prompt = "\n\n".join(prompt_parts).strip() or "请根据系统提示完成任务。"
+
+        cmd = [self.cli_path, '-p', '--output-format', 'json', '--max-turns', '1']
+        if self._cli_model:
+            cmd += ['--model', self._cli_model]
+        if system_parts:
+            cmd += ['--system-prompt', "\n\n".join(system_parts)]
+
+        env = os.environ.copy()
+        if self.api_key:
+            env['CLAUDE_CODE_OAUTH_TOKEN'] = self.api_key
+
+        start_time = time.time()
+        try:
+            # 在临时目录里执行，避免 Claude Code 读取当前仓库上下文
+            with tempfile.TemporaryDirectory() as workdir:
+                proc = subprocess.run(
+                    cmd,
+                    input=prompt,
+                    capture_output=True,
+                    text=True,
+                    env=env,
+                    cwd=workdir,
+                    timeout=self._resolve_timeout_seconds(),
+                )
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                f"找不到 Claude Code CLI（{self.cli_path}）。"
+                "请先安装：npm install -g @anthropic-ai/claude-code"
+            ) from exc
+
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or '').strip()[:500]
+            lowered = detail.lower()
+            if any(token in lowered for token in ("invalid api key", "unauthorized", "authentication", "oauth")):
+                print("LLM 鉴权失败：CLAUDE_CODE_OAUTH_TOKEN 无效或已过期，请重新执行 claude setup-token。")
+            raise RuntimeError(f"claude -p 调用失败 (exit={proc.returncode}): {detail}")
+
+        try:
+            data = json.loads((proc.stdout or '').strip() or '{}')
+        except ValueError as exc:
+            raise RuntimeError(f"claude -p 输出无法解析为 JSON：{(proc.stdout or '')[:500]}") from exc
+        if not isinstance(data, dict):
+            raise RuntimeError(f"claude -p 输出结构异常：{str(data)[:500]}")
+        if data.get('is_error'):
+            raise RuntimeError(f"claude -p 返回错误：{str(data)[:500]}")
+
+        content = str(data.get('result') or '').strip()
+        usage = data.get('usage') or {}
+        prompt_tokens = (
+            int(usage.get('input_tokens') or 0)
+            + int(usage.get('cache_read_input_tokens') or 0)
+            + int(usage.get('cache_creation_input_tokens') or 0)
+        )
+        completion_tokens = int(usage.get('output_tokens') or 0)
+        total_tokens = prompt_tokens + completion_tokens
+
+        self._record_call_stats(
+            prompt_tokens=prompt_tokens,
+            reasoning_tokens=0,
+            visible_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            elapsed=time.time() - start_time,
+        )
+
+        return {
+            "content": content,
+            "raw_content": content,
+            "reasoning_content": "",
+            "refusal": "",
+            # 归一化为 OpenAI 语义：success -> stop，其余保留原值便于排查
+            "finish_reason": "stop" if data.get('subtype') == 'success' else data.get('subtype'),
+            "message": {"role": "assistant", "content": content},
+            "raw_response": data,
+            "tokens": {
+                "prompt": prompt_tokens,
+                "content": completion_tokens,
+                "reasoning": 0,
+                "total": total_tokens,
+            },
+        }
+
+
 def parse_provider_model(model_str: str) -> Tuple[str, str]:
     """
     解析模型字符串为 (provider, model)。
@@ -785,9 +1195,13 @@ def parse_provider_model(model_str: str) -> Tuple[str, str]:
     规则：第一个 '/' 之前为提供商（大小写不敏感），之后的全部为模型名（大小写敏感，允许包含 '/').
     示例：
     - "deepseek/deepseek-v4-flash" -> ("deepseek", "deepseek-v4-flash")
+    - "anthropic/claude-opus-4-8" -> ("anthropic", "claude-opus-4-8")
     """
     if not isinstance(model_str, str) or '/' not in model_str:
-        raise ValueError("缺少模型提供商：请使用 'deepseek/model' 格式，例如 'deepseek/deepseek-v4-flash'")
+        raise ValueError(
+            "缺少模型提供商：请使用 'provider/model' 格式，"
+            "例如 'deepseek/deepseek-v4-flash' 或 'anthropic/claude-opus-4-8'"
+        )
     provider, model = model_str.split('/', 1)
     return provider.lower(), model
 
@@ -815,7 +1229,18 @@ class ClientFactory:
         if provider == 'deepseek':
             base_url = base_url or DEFAULT_DEEPSEEK_BASE_URL
             return DeepSeekClient(api_key=api_key or os.getenv('DEEPSEEK_API_KEY', ''), model=model, base_url=base_url)
-        raise ValueError(f"当前仅支持 DeepSeek API，请使用 'deepseek/模型名'，当前 provider={provider}")
+        if provider in ('anthropic', 'claude'):
+            key = api_key or (os.getenv('ANTHROPIC_API_KEY') or '').strip()
+            base_url = base_url or (os.getenv('ANTHROPIC_BASE_URL') or '').strip() or None
+            return AnthropicClient(api_key=key, model=model, base_url=base_url)
+        if provider in ('claude-code', 'claude_code', 'claudecode'):
+            token = api_key or (os.getenv('CLAUDE_CODE_OAUTH_TOKEN') or '').strip()
+            cli_model = '' if model.strip().lower() in ('default', 'subscription') else model
+            return ClaudeCodeClient(oauth_token=token, model=cli_model)
+        raise ValueError(
+            f"当前支持 DeepSeek / Anthropic / Claude Code，请使用 'deepseek/模型名'、"
+            f"'anthropic/模型名' 或 'claude-code/模型名'，当前 provider={provider}"
+        )
 
     @staticmethod
     def from_config(_config: dict | None = None):
@@ -823,3 +1248,58 @@ class ClientFactory:
         兼容旧调用入口，但不再读取 config 文件，统一从环境变量读取。
         """
         return ClientFactory.from_env()
+
+
+def create_summary_client_from_env(
+    *,
+    deepseek_api_key: str | None = None,
+    deepseek_model: str | None = None,
+    deepseek_base_url: str | None = None,
+) -> LLMClient | None:
+    """摘要 / 精排链路统一的客户端选择入口。
+
+    优先级：
+    1. LLM_MODEL='provider/model'（支持 anthropic / deepseek / claude-code，走 ClientFactory）；
+    2. CLAUDE_CODE_OAUTH_TOKEN 已配置（或 DPR_USE_CLAUDE_CODE=1 使用本机登录）
+       → Claude Code CLI，消耗 Pro/Max 订阅额度（模型取 CLAUDE_CODE_MODEL，可留空）；
+    3. ANTHROPIC_API_KEY 已配置 → Claude API（模型取 ANTHROPIC_MODEL，默认 claude-opus-4-8）；
+    4. DeepSeek（沿用各步骤原有 DEEPSEEK_* / SUMMARY_* 环境变量）；
+    5. 都没有 → 返回 None，由调用方决定跳过或报错。
+    """
+    model_env = (os.getenv('LLM_MODEL') or '').strip()
+    if model_env:
+        return ClientFactory.from_env()
+
+    claude_code_token = (os.getenv('CLAUDE_CODE_OAUTH_TOKEN') or '').strip()
+    use_claude_code = (os.getenv('DPR_USE_CLAUDE_CODE') or '').strip().lower() in ('1', 'true', 'yes', 'on')
+    if claude_code_token or use_claude_code:
+        cli_model = (os.getenv('CLAUDE_CODE_MODEL') or '').strip()
+        return ClaudeCodeClient(oauth_token=claude_code_token, model=cli_model)
+
+    anthropic_key = (os.getenv('ANTHROPIC_API_KEY') or '').strip()
+    if anthropic_key:
+        model = (os.getenv('ANTHROPIC_MODEL') or '').strip() or DEFAULT_ANTHROPIC_MODEL
+        base_url = (os.getenv('ANTHROPIC_BASE_URL') or '').strip() or None
+        return AnthropicClient(api_key=anthropic_key, model=model, base_url=base_url)
+
+    api_key = (
+        deepseek_api_key
+        or os.getenv('DEEPSEEK_API_KEY')
+        or os.getenv('SUMMARY_API_KEY')
+        or ''
+    ).strip()
+    if not api_key:
+        return None
+    model = (
+        deepseek_model
+        or os.getenv('SUMMARY_MODEL')
+        or os.getenv('DEEPSEEK_MODEL')
+        or 'deepseek-v4-flash'
+    ).strip()
+    base_url = (
+        deepseek_base_url
+        or os.getenv('DEEPSEEK_BASE_URL')
+        or os.getenv('SUMMARY_BASE_URL')
+        or DEFAULT_DEEPSEEK_BASE_URL
+    ).strip()
+    return DeepSeekClient(api_key=api_key, model=model, base_url=base_url)

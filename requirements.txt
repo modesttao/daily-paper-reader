@@ -1,4 +1,5 @@
 openai
+anthropic
 requests
 PyMuPDF>=1.24
 arxiv<3

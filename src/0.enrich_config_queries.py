@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 
 import yaml  # type: ignore
 
-from llm import DeepSeekClient
+from llm import LLMClient, create_summary_client_from_env
 
 SCRIPT_DIR = os.path.dirname(__file__)
 CONFIG_FILE = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "config.yaml"))
@@ -112,7 +112,7 @@ def build_rewrite_prompt(query: str) -> List[Dict[str, str]]:
   ]
 
 
-def call_llm_json(client: DeepSeekClient, messages: List[Dict[str, str]], schema_name: str, schema: Dict[str, Any]) -> Dict[str, Any]:
+def call_llm_json(client: LLMClient, messages: List[Dict[str, str]], schema_name: str, schema: Dict[str, Any]) -> Dict[str, Any]:
   resp = client.chat_structured(
     messages,
     schema_name=schema_name,
@@ -146,9 +146,15 @@ def main() -> None:
     if not os.path.exists(CONFIG_FILE):
         raise FileNotFoundError(f"找不到 config.yaml：{CONFIG_FILE}")
 
-    api_key = os.getenv("DEEPSEEK_API_KEY") or os.getenv("SUMMARY_API_KEY")
-    if not api_key:
-        raise RuntimeError("缺少 DEEPSEEK_API_KEY 或 SUMMARY_API_KEY 环境变量，无法调用 DeepSeek。")
+    client = create_summary_client_from_env(
+        deepseek_model=MODEL_NAME,
+        deepseek_base_url=BASE_URL,
+    )
+    if client is None:
+        raise RuntimeError(
+            "缺少 LLM API Key：请配置 CLAUDE_CODE_OAUTH_TOKEN（Claude 订阅额度）、"
+            "ANTHROPIC_API_KEY（Claude API）或 DEEPSEEK_API_KEY / SUMMARY_API_KEY（DeepSeek）。"
+        )
 
     group_start("Step 0.0 - load config")
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -159,7 +165,6 @@ def main() -> None:
     keywords = subs.get("keywords") or []
     llm_queries = subs.get("llm_queries") or []
 
-    client = DeepSeekClient(api_key=api_key, model=MODEL_NAME, base_url=BASE_URL)
 
     related_schema = {
       "type": "object",

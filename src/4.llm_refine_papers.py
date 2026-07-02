@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List
 
-from llm import DeepSeekClient, resolve_max_output_tokens
+from llm import LLMClient, create_summary_client_from_env, resolve_max_output_tokens
 from subscription_plan import build_pipeline_inputs
 
 SCRIPT_DIR = os.path.dirname(__file__)
@@ -320,7 +320,7 @@ def build_repeated_user_prompt(query: str) -> str:
 
 
 def call_filter(
-    client: DeepSeekClient,
+    client: LLMClient,
     all_requirements: List[Dict[str, str]],
     docs: List[Dict[str, str]],
     debug_dir: str,
@@ -641,14 +641,20 @@ def recover_filter_results(
     )
 
 
-def _make_filter_client(api_key: str, model: str, max_output_tokens: int) -> DeepSeekClient:
-    client = DeepSeekClient(api_key=api_key, model=model, base_url=DEFAULT_DEEPSEEK_BASE_URL)
+def _make_filter_client(api_key: str, model: str, max_output_tokens: int) -> LLMClient:
+    client = create_summary_client_from_env(
+        deepseek_api_key=api_key,
+        deepseek_model=model,
+        deepseek_base_url=DEFAULT_DEEPSEEK_BASE_URL,
+    )
+    if client is None:
+        raise RuntimeError("missing LLM api key")
     client.kwargs.update({"temperature": 0.1, "max_tokens": max_output_tokens})
     return client
 
 
 def _make_filter_runner(
-    client: DeepSeekClient,
+    client: LLMClient,
     all_requirements: List[Dict[str, str]],
     debug_dir: str,
     base_tag: str,
@@ -793,9 +799,16 @@ def process_file(
         return
     paper_map = build_paper_map(papers)
 
-    api_key = os.getenv("DEEPSEEK_API_KEY") or os.getenv("SUMMARY_API_KEY")
+    api_key = (
+        os.getenv("DEEPSEEK_API_KEY")
+        or os.getenv("SUMMARY_API_KEY")
+        or os.getenv("ANTHROPIC_API_KEY")
+        or os.getenv("CLAUDE_CODE_OAUTH_TOKEN")
+    )
     if not api_key:
-        raise RuntimeError("missing DEEPSEEK_API_KEY or SUMMARY_API_KEY")
+        raise RuntimeError(
+            "missing CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY / DEEPSEEK_API_KEY / SUMMARY_API_KEY"
+        )
 
     group_start(f"Step 4 - llm refine {os.path.basename(input_path)}")
     log(
