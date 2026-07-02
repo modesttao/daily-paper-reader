@@ -1054,6 +1054,13 @@ class ClaudeCodeClient(LLMClient):
     """
 
     DEFAULT_TIMEOUT_SECONDS = 600
+    # 防跑飞的轮数上限：设 1 会让模型偶发的内部工具调用直接报 error_max_turns，
+    # 线上观测 num_turns 通常为 1-2，这里留足余量。
+    DEFAULT_MAX_TURNS = 5
+    NO_TOOLS_INSTRUCTION = (
+        "Answer directly in a single message. Do not use any tools, "
+        "do not read or write files, and do not run commands."
+    )
 
     def __init__(
         self,
@@ -1095,6 +1102,17 @@ class ClaudeCodeClient(LLMClient):
             pass
         return ClaudeCodeClient.DEFAULT_TIMEOUT_SECONDS
 
+    @staticmethod
+    def _resolve_max_turns() -> int:
+        raw = (os.getenv('CLAUDE_CODE_MAX_TURNS') or '').strip()
+        try:
+            value = int(raw)
+            if value > 0:
+                return value
+        except Exception:
+            pass
+        return ClaudeCodeClient.DEFAULT_MAX_TURNS
+
     def chat(self, messages: List[Dict[str, str]], response_format: Optional[Dict[str, Any]] = None) -> dict:
         import subprocess
         import tempfile
@@ -1116,11 +1134,14 @@ class ClaudeCodeClient(LLMClient):
                 prompt_parts.append(content)
         prompt = "\n\n".join(prompt_parts).strip() or "请根据系统提示完成任务。"
 
-        cmd = [self.cli_path, '-p', '--output-format', 'json', '--max-turns', '1']
+        cmd = [
+            self.cli_path, '-p',
+            '--output-format', 'json',
+            '--max-turns', str(self._resolve_max_turns()),
+        ]
         if self._cli_model:
             cmd += ['--model', self._cli_model]
-        if system_parts:
-            cmd += ['--system-prompt', "\n\n".join(system_parts)]
+        cmd += ['--system-prompt', "\n\n".join([*system_parts, self.NO_TOOLS_INSTRUCTION])]
 
         env = os.environ.copy()
         if self.api_key:
