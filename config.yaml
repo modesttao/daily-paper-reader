@@ -497,6 +497,13 @@ subscriptions:
     - query: brain organoid single-cell trajectory and cell type annotation
     - query: spatial transcriptomics of neural tissue
     - query: single-cell multiomics integration method
+  selection:
+    per_tag_quota: true
+    per_tag_min: 1
+    per_tag_max: 2
+    per_tag_high_score: 8.0
+    per_tag_min_score: 6.0
+    per_tag_prioritize_source: pubmed
 source_backends:
   arxiv:
     kind: supabase
@@ -596,3 +603,25 @@ source_backends:
     bm25_rpc: match_icml_openreview_papers_bm25
     sync_table: ''
     sync_success_value: ''
+cns_source:
+  enabled: true
+  journal_whitelist:
+  - Nature
+  - Science
+  - Cell
+  - Nature Neuroscience
+  - Nature Methods
+  - Nature Biotechnology
+  - Nature Medicine
+  - Nature Genetics
+  - Nature Cell Biology
+  - Nature Communications
+  - Cell Stem Cell
+  - Neuron
+  - Cell Systems
+  - Molecular Cell
+  - Developmental Cell
+  - Science Translational Medicine
+  - Science Advances
+  per_direction_fetch: 30
+  reldays: 30
