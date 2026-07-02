@@ -32,6 +32,15 @@ def run_step(label: str, args: list[str], env: dict[str, str] | None = None) -> 
     subprocess.run(args, check=True, env=env)
 
 
+def run_step_soft(label: str, args: list[str], env: dict[str, str] | None = None) -> None:
+    """可失败的步骤：出错只记日志、不中断主链路（用于 CNS 等补充源）。"""
+    print(f"[INFO] {label}: {' '.join(args)}", flush=True)
+    try:
+        subprocess.run(args, check=True, env=env)
+    except Exception as exc:  # pragma: no cover - 网络/外部依赖
+        print(f"[WARN] {label} 失败，已跳过（不影响主链路）：{exc}", flush=True)
+
+
 def _load_full_config() -> dict:
     if not os.path.exists(CONFIG_FILE):
         return {}
@@ -683,6 +692,17 @@ def main() -> None:
     )
     if trace_ids:
         print_trace_retrieval("RERANK", rerank_path, trace_ids)
+    # Step 3.5：CNS 级已发表期刊源（PubMed）——查询驱动，按方向注入候选池。
+    # 由 config.yaml 的 cns_source.enabled 控制；失败降级不影响预印本主链路。
+    run_step_soft(
+        "Step 3.5 - CNS PubMed",
+        [
+            python,
+            os.path.join(SRC_DIR, "pubmed_cns.py"),
+            "--rerank",
+            rerank_path,
+        ],
+    )
     run_step(
         "Step 4 - LLM refine",
         [python, os.path.join(SRC_DIR, "4.llm_refine_papers.py")],

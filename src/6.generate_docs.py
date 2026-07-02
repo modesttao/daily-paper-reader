@@ -1208,6 +1208,18 @@ def extract_sidebar_tags(paper: Dict[str, Any], max_tags: int = 6) -> List[Tuple
     return score_tag + tags
 
 
+# 无免费全文 PDF 的来源：这类论文降级为摘要级（不抓 PDF、不提图）。
+NO_FULLTEXT_SOURCES = {"pubmed"}
+
+
+def pdf_text_source_url(paper: Dict[str, Any]) -> str:
+    """返回用于抽取全文的 PDF URL；CNS/PubMed 等付费墙来源返回空串走摘要级。"""
+    src = str(paper.get("source") or "").strip().lower()
+    if src in NO_FULLTEXT_SOURCES:
+        return ""
+    return str(paper.get("link") or paper.get("pdf_url") or "").strip()
+
+
 def ensure_text_content(pdf_url: str, txt_path: str) -> str:
     if os.path.exists(txt_path):
         with open(txt_path, "r", encoding="utf-8") as f:
@@ -1448,7 +1460,7 @@ def process_paper(
     arxiv_id = str(paper.get("id") or paper.get("paper_id") or "").strip()
     md_path, txt_path, paper_id = prepare_paper_paths(docs_dir, date_str, title, arxiv_id)
     abstract_en = (paper.get("abstract") or "").strip()
-    pdf_url = str(paper.get("link") or paper.get("pdf_url") or "").strip()
+    pdf_url = pdf_text_source_url(paper)
     paper_llm_client = create_llm_client()
 
     glance = ""
@@ -1623,9 +1635,11 @@ def process_paper(
             if tail:
                 return paper_id, title
 
-            # 生成详细总结
-            pdf_url = str(paper.get("link") or paper.get("pdf_url") or "").strip()
-            ensure_text_content(pdf_url, txt_path)
+            # 生成详细总结（PubMed 等无全文来源走摘要级：pdf_url 为空则 txt 为空，
+            # generate_deep_summary 退化为基于 md 中摘要生成）
+            pdf_url = pdf_text_source_url(paper)
+            if pdf_url:
+                ensure_text_content(pdf_url, txt_path)
             summary = generate_deep_summary(md_path, txt_path, client=paper_llm_client)
             if summary:
                 upsert_auto_block(md_path, "论文详细总结（自动生成）", summary)
@@ -1662,9 +1676,10 @@ def process_paper(
             f.write(content)
         return paper_id, title
 
-    # 新文件：生成完整内容
-    pdf_url = str(paper.get("link") or paper.get("pdf_url") or "").strip()
-    ensure_text_content(pdf_url, txt_path)
+    # 新文件：生成完整内容（PubMed 等无全文来源 pdf_url 为空，走摘要级）
+    pdf_url = pdf_text_source_url(paper)
+    if pdf_url:
+        ensure_text_content(pdf_url, txt_path)
     figures, tables = maybe_generate_paper_media(
         paper,
         docs_dir=docs_dir,

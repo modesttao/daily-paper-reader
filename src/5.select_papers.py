@@ -276,6 +276,30 @@ def load_config_tag_count() -> Tuple[int, List[str]]:
     return count_subscription_tags(data if isinstance(data, dict) else {})
 
 
+def load_selection_config() -> Dict[str, Any]:
+    """读取 subscriptions.selection（每方向配额等）。缺省返回空 dict。
+
+    支持字段：per_tag_quota(bool)、per_tag_min、per_tag_max、
+    per_tag_high_score、per_tag_min_score、per_tag_prioritize_source。
+    也可用环境变量 DPR_PER_TAG_QUOTA=1 强制开启。
+    """
+    cfg: Dict[str, Any] = {}
+    if os.path.exists(CONFIG_FILE):
+        try:
+            import yaml  # type: ignore
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            sel = ((data.get("subscriptions") or {}).get("selection")) or {}
+            if isinstance(sel, dict):
+                cfg.update(sel)
+        except Exception as exc:
+            log(f"[WARN] failed to read selection config: {exc}")
+    env_flag = (os.getenv("DPR_PER_TAG_QUOTA") or "").strip().lower()
+    if env_flag in ("1", "true", "yes", "on"):
+        cfg["per_tag_quota"] = True
+    return cfg
+
+
 def load_arxiv_paper_setting() -> Dict[str, Any]:
     if not os.path.exists(CONFIG_FILE):
         return {}
@@ -789,6 +813,9 @@ def process_mode(
     cfg: Dict[str, Any],
     carryover_ratio: float,
 ) -> Dict[str, Any]:
+    if cfg.get("per_tag_quota"):
+        return process_mode_per_tag_quota(candidates=candidates, mode=mode, cfg=cfg)
+
     if cfg.get("all_quick_min_score") is not None:
         return process_mode_all_quick_min_score(
             candidates=candidates,
@@ -866,6 +893,86 @@ def process_mode(
         "quick_selected": len(quick_selected),
     }
 
+    return {
+        "mode": mode,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "stats": stats,
+        "deep_dive": sanitize_items(deep_selected),
+        "quick_skim": sanitize_items(quick_selected),
+    }
+
+
+def resolve_direction_tags(item: Dict[str, Any]) -> List[str]:
+    """取论文命中的裸方向 tag（去掉 keyword:/query: 前缀），供每方向配额分组。"""
+    tags = resolve_carryover_tags(item, item.get("tags"))
+    return [t for t in tags if t and t != CARRYOVER_UNTAGGED]
+
+
+def process_mode_per_tag_quota(
+    candidates: List[Dict[str, Any]],
+    mode: str,
+    cfg: Dict[str, Any],
+) -> Dict[str, Any]:
+    """每个方向保底 1-2 篇（雨露均沾）。
+
+    规则：
+    - 只考虑 llm_score >= per_tag_min_score 的候选；
+    - 每个方向至少 per_tag_min 篇；当某方向第 2 篇 >= per_tag_high_score 时可到 per_tag_max 篇；
+    - prioritize_source（默认 pubmed=CNS）在同方向内优先占坑，实现"CNS 为主、预印本为辅"；
+    - 跨方向按 id 去重；一篇命中多个方向时同时代表这些方向；
+    - >=8 分进精读区，其余进速览区。
+    """
+    per_min = int(cfg.get("per_tag_min", 1) or 1)
+    per_max = int(cfg.get("per_tag_max", 2) or 2)
+    high = float(cfg.get("per_tag_high_score", 8.0))
+    floor = float(cfg.get("per_tag_min_score", 6.0))
+    prio = str(cfg.get("per_tag_prioritize_source", "pubmed") or "")
+
+    eligible = [p for p in candidates if float(p.get("llm_score", 0)) >= floor]
+
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for p in eligible:
+        for tag in resolve_direction_tags(p):
+            groups.setdefault(tag, []).append(p)
+
+    def sort_key(p: Dict[str, Any]):
+        is_prio = 0 if (prio and str(p.get("source")) == prio) else 1
+        return (is_prio, -float(p.get("llm_score", 0)), str(p.get("id") or ""))
+
+    selected: List[Dict[str, Any]] = []
+    seen: set = set()
+
+    for tag in sorted(groups.keys()):
+        items = sorted(groups[tag], key=sort_key)
+        # 已被其它方向选中且命中本方向的论文，计入本方向的"已覆盖"数
+        picked = sum(1 for it in items if it.get("id") in seen)
+        for it in items:
+            if picked >= per_max:
+                break
+            pid = it.get("id")
+            if pid in seen:
+                continue
+            is_high = float(it.get("llm_score", 0)) >= high
+            if picked < per_min or is_high:
+                selected.append(it)
+                seen.add(pid)
+                picked += 1
+            else:
+                break
+
+    deep_selected = sort_by_score([p for p in selected if float(p.get("llm_score", 0)) >= 8.0])
+    quick_selected = sort_by_score([p for p in selected if float(p.get("llm_score", 0)) < 8.0])
+
+    stats = {
+        "mode": mode,
+        "per_tag_quota": True,
+        "per_tag_min": per_min,
+        "per_tag_max": per_max,
+        "tag_count": len(groups),
+        "deep_selected": len(deep_selected),
+        "quick_selected": len(quick_selected),
+        "total_selected": len(selected),
+    }
     return {
         "mode": mode,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1032,6 +1139,9 @@ def main() -> None:
 
     tag_count, tag_list = load_config_tag_count()
     active_carryover_tags = [normalize_carryover_tag(tag) for tag in tag_list if normalize_carryover_tag(tag)]
+    selection_cfg = load_selection_config()
+    if selection_cfg.get("per_tag_quota"):
+        log(f"[INFO] per-tag quota enabled: {json.dumps(selection_cfg, ensure_ascii=False)}")
     log(f"[INFO] config tags={tag_count} | {tag_list}")
     log(f"[INFO] arxiv_paper_setting mode={mode_text} days_window={carryover_days}")
 
@@ -1115,7 +1225,10 @@ def main() -> None:
 
     log_substep("5.4", "按模式生成推荐结果", "START")
     for mode in modes:
-        cfg = MODES.get(mode) or {}
+        cfg = dict(MODES.get(mode) or {})
+        # 合并每方向配额配置（skims/backfill 的 all_quick 场景不启用）
+        if selection_cfg.get("per_tag_quota") and cfg.get("all_quick_min_score") is None:
+            cfg.update(selection_cfg)
         if args.all_quick_min_score is not None:
             result = process_mode_all_quick_min_score(
                 candidates=candidates,
