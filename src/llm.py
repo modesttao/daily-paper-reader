@@ -36,6 +36,15 @@ GLOBAL_TOKENS = {
 # 单次实验级别的全局时间统计（秒）
 GLOBAL_TIME_SECONDS: float = 0.0
 
+def clean_secret(value: Any) -> str:
+    """清理 API Key / OAuth token：去掉复制粘贴带入的换行、空格等空白字符。
+
+    合法的 key/token 不含空白字符；网页复制常把换行带进 GitHub Secrets，
+    导致 401 Invalid bearer token 这类难排查的鉴权失败。
+    """
+    return re.sub(r"\s+", "", str(value or ""))
+
+
 DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-8"
 # Claude 输出上限（流式最高 128K，这里取安全值，避免超长请求超时）
@@ -76,7 +85,7 @@ class LLMClient:
         :param model: 模型名称
         :param base_url: API 的基础 URL
         """
-        self.api_key = api_key
+        self.api_key = clean_secret(api_key)
         self.model = model
         self.base_url = base_url
         # 实例级 token 统计（不能放在类属性上，否则所有 client 共享同一个 dict）
@@ -1116,6 +1125,11 @@ class ClaudeCodeClient(LLMClient):
         env = os.environ.copy()
         if self.api_key:
             env['CLAUDE_CODE_OAUTH_TOKEN'] = self.api_key
+        else:
+            # 未显式传 token 时也清理进程环境里的值，避免粘贴带入的空白字符导致 401
+            env_token = clean_secret(env.get('CLAUDE_CODE_OAUTH_TOKEN'))
+            if env_token:
+                env['CLAUDE_CODE_OAUTH_TOKEN'] = env_token
 
         start_time = time.time()
         try:
