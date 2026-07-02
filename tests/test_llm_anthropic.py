@@ -222,9 +222,14 @@ class ClaudeCodeChatTest(unittest.TestCase):
         self.assertIn("json", cmd)
         self.assertIn("--model", cmd)
         self.assertIn("opus", cmd)
-        self.assertIn("--system-prompt", cmd)
         self.assertEqual(kwargs["input"], "rewrite this")
         self.assertEqual(kwargs["env"]["CLAUDE_CODE_OAUTH_TOKEN"], "sk-ant-oat01-test")
+        # --max-turns 需要留出内部工具调用余量，且系统提示里要求直接作答
+        turns = int(cmd[cmd.index("--max-turns") + 1])
+        self.assertGreaterEqual(turns, 2)
+        system_prompt = cmd[cmd.index("--system-prompt") + 1]
+        self.assertIn("output json", system_prompt)
+        self.assertIn("Do not use any tools", system_prompt)
 
     def test_chat_raises_on_cli_error(self):
         import subprocess
