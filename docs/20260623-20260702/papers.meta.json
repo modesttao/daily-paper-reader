@@ -1,8 +1,69 @@
 {
   "label": "2026-06-23 ~ 2026-07-02",
   "date": "2026-06-23 ~ 2026-07-02",
-  "generated_at": "2026-07-02T02:17:54",
-  "count": 0,
-  "papers": [],
+  "generated_at": "2026-07-02T03:15:17",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "20260623-20260702/2606.28459v1-sckdgm-kan-guided-dynamic-graph-masked-learning-for-single-cell-rna-seq-clustering",
+      "section": "deep",
+      "title_en": "scKDGM: KAN-guided Dynamic Graph Masked Learning for Single-Cell RNA-seq Clustering",
+      "authors": "Jun Tang, Pengwei Hu, Sicong Gao, Jie Guo, Lun Hu, Xin Luo",
+      "date": "2026-06-26",
+      "pdf": "https://arxiv.org/pdf/2606.28459v1",
+      "score": "10.0",
+      "evidence": "提出scKDGM动态图掩码学习框架专门用于scRNA-seq聚类",
+      "tldr": "scRNA-seq聚类面临高维、稀疏、dropout及技术噪声干扰，现有掩码自编码器仅做表达重建，图聚类方法又依赖固定KNN图，两者未形成闭环。scKDGM提出图感知分布保持掩码(GDP-Mask)扰动细胞身份，用KAN结构的TAKGCN编码器学习掩码视图表征，再通过掩码引导的表达恢复动态构建细胞图，并借跨视图对比学习把恢复信号反馈到图拓扑更新，同时用ZINB损失建模过离散与零膨胀。在12个真实scRNA-seq数据集上，scKDGM在平均NMI和ARI上超越10个基线方法，验证了掩码重建与图结构联合优化的有效性。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Single-cell RNA sequencing (scRNA-seq) clustering is essential for identifying cell types, but high dimensionality, sparsity, dropout, and technical noise hinder robust expression representation and cell graph construction. Existing masked autoencoders mainly use expression recovery for feature reconstruction, while graph clustering methods usually depend on fixed KNN graphs and do not feed recovered expression back into graph optimization. We propose scKDGM, a KAN-guided dynamic graph masked learning framework for scRNA-seq clustering. scKDGM uses graph-aware distribution preserving gene masking (GDP-Mask) to perturb cell identity, a KAN-based TAKGCN encoder to learn masked-view representations, mask-guided expression recovery to construct a dynamic graph, and cross-view contrastive learning to transfer recovery signals into topology updates. A ZINB loss models overdispersion and zero inflation. Experiments on 12 real scRNA-seq datasets show that scKDGM outperforms 10 baselines in average NMI and ARI.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260623-20260702/2606.30095v1-a-systematic-framework-for-evaluating-topological-representations-in-single-cell-classification",
+      "section": "quick",
+      "title_en": "A Systematic Framework for Evaluating Topological Representations in Single-Cell Classification",
+      "authors": "Rocío Picón-González, Salvador Chulián, Ana Niño-López, Álvaro Martínez-Rubio, María Rosa Durán",
+      "date": "2026-06-29",
+      "pdf": "https://arxiv.org/pdf/2606.30095v1",
+      "score": "7.0",
+      "evidence": "提出用于单细胞分类中拓扑表示评估的系统框架，契合单细胞基准评测需求",
+      "tldr": "单细胞高维数据几何结构复杂，传统统计方法难以刻画其形状特征，而拓扑数据分析（TDA）可通过持续同调提取多尺度结构特征。本文提出一个系统化的两层评估框架：第一层（R1）基于临床分组可分性对拓扑描述符进行统计筛选，第二层（R2）评估其在监督分类模型中的预测效用，从而同时衡量判别性能与对分析选择的稳健性。以儿童急性淋巴细胞白血病骨髓流式细胞术数据为例，聚焦复发分层任务进行验证。结果显示不同拓扑表示在统计可分性和预测稳定性上差异显著，Betti曲线和持续轮廓比持续图像表现更稳健，为拓扑描述符的系统比较提供了可复现方法学框架。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Recent advances in biomedicine generate high-dimensional single-cell data that describe cellular heterogeneity with unprecedented detail, but their geometric complexity and non-linear structure often limit the effectiveness of conventional statistical tools. Topological Data Analysis (TDA) provides a mathematical framework for characterizing the shape of data through persistent homology, which extracts structural features such as connected components and cycles across multiple scales. In this work, we propose a systematic two-level framework for evaluating topological representations in high-dimensional single-cell classification. The first level (\\(R_1\\)) performs statistical screening of topological descriptors based on separability between clinical groups, whereas the second level (\\(R_2\\)) evaluates their predictive utility in supervised classification models. This design makes it possible to compare representations not only in terms of discriminative performance, but also in terms of robustness to analytical choices. We illustrate the framework using bone marrow flow cytometry data from pediatric acute lymphoblastic leukemia, with a particular focus on relapse stratification. The results show that different topological representations vary substantially in both statistical separability and predictive stability, with Betti Curves and Persistence Silhouettes showing more robust behavior than Persistence Images in this cohort. Overall, the study provides a reproducible methodological framework for the systematic comparison of topological descriptors in complex biomedical point clouds.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260623-20260702/2606.30693v1-distill-a-hybrid-cloud-hpc-workflow-system-for-reproducible-spatial-transcriptomics-analysis",
+      "section": "quick",
+      "title_en": "DiSTILL: A Hybrid Cloud-HPC Workflow System for Reproducible Spatial Transcriptomics Analysis",
+      "authors": "Myles Joshua Toledo Tan, Vasco Gerardo Hinostroza Fuentes, Nikhil Yerra, Maria Kapetanaki, Parisa Rashidi, Kejun Huang, Panayiotis V. Benos",
+      "date": "2026-06-28",
+      "pdf": "https://arxiv.org/pdf/2606.30693v1",
+      "score": "7.0",
+      "evidence": "该论文提出了面向空间转录组学可重复分析的工作流系统，并包含可解释潜在学习模型",
+      "tldr": "空间转录组学分析常需结合大型标注数据对象、笔记本式分析与计算密集的统计模型，但实际流程因配置、验证、阶段执行与产物管理分散在临时脚本和手动编辑的笔记本中而难以复现。为此作者提出DiSTILL系统，基于FastAPI后端、Web前端、数据集与预设注册表及Python流水线生成器，可生成运行专属的执行包和SLURM提交脚本，支持本地、SSH中转和拉取式轮询三种HPC执行模式。论文以炎症性肠病空间转录组工作流为例，将Tan等人的分析流程封装为可审计的应用层。该工作的贡献在于云端-HPC混合架构下的可复现执行、队列编排与配置语义等系统层面的设计。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Spatial transcriptomics workflows increasingly combine large annotated data objects, notebook-based analyses, and resource-intensive statistical models that must be executed on high-performance computing (HPC) systems. In practice, these workflows are often difficult to reproduce because configuration, validation, stage execution, and artifact handling are fragmented across $\\textit{ad hoc}$ scripts and manually edited notebooks. We present $\\textit{DiSTILL}$ (Disease Diagnosis from Spatial Transcriptomics via Interpretable Latent Learning), a hybrid cloud$-$HPC workflow system for reproducible spatial transcriptomics (ST) analysis. DiSTILL combines an application programming interface (API) backend built with $\\texttt{FastAPI}$, a web frontend, a dataset and preset registry, and a Python pipeline generator that materializes run-specific execution bundles and $\\texttt{SLURM}$ submission scripts. The system supports local, Secure Shell (SSH)-mediated, and pull-based poller execution modes, enabling HPC submission in environments where persistent API-initiated automation is restricted. We describe the system through the lens of an inflammatory bowel disease (IBD) ST workflow that operationalizes the analytical pipeline of Tan $\\textit{et al.}$ into an auditable application layer. Accordingly, the contribution of this paper is a workflow systems contribution centered on reproducible execution, queue-based orchestration, configuration semantics, and deployment across a split cloud$-$HPC architecture. The broader application goal of DiSTILL is to support user-supplied datasets that satisfy the schema assumptions of the wrapped analytical pipeline.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260623-20260702/2606.30695v1-modeling-cell-cycle-aware-single-cell-drug-perturbation-responses",
+      "section": "quick",
+      "title_en": "Modeling Cell-Cycle-Aware Single-Cell Drug Perturbation Responses",
+      "authors": "Dingping Zhao, Jie Lin",
+      "date": "2026-06-29",
+      "pdf": "https://arxiv.org/pdf/2606.30695v1",
+      "score": "7.0",
+      "evidence": "scCycleMol是基于单细胞RNA测序基因表达数据的扰动预测框架",
+      "tldr": "单细胞药物扰动预测通常将细胞周期作为需忽略的干扰变量，忽视药物是否改变细胞增殖状态这一关键信号。本文提出scCycleMol框架，基于标准化的24小时SciPlex3基准数据集，用可学习的全表达细胞周期头从预测的处理后表达中衍生监督信号，并以循环G1/S/G2M相位为目标进行闭环传播。在超60万细胞、186种扰动条件的基准上，该方法在分布外表达预测上显著优于ChemCPA等条件扰动基线，最佳LINCS预训练模型的all-gene和DEG r方分别达0.9093和0.6843；闭环细胞周期监督还使相位准确率提升约0.5-0.6点且表达预测几乎不受影响，Tahoe预训练变体相位准确率达0.9609，验证了显式细胞周期感知监督的价值。",
+      "tags": "query:sc-methods",
+      "abstract_en": "Single-cell drug perturbation models should predict not only transcriptional response magnitude, but also whether a treatment alters the proliferative state of a cell. This is challenging because cell-cycle variation is often treated as nuisance variation, and benchmark pipelines rarely treat drug-induced phase changes as a primary prediction target. We introduce scCycleMol, a cell-cycle-aware perturbation prediction framework built on a curated 24-hour SciPlex3 benchmark with standardized molecule identities, dose and cell-line metadata, and gene expression with cell-cycle supervision derived from treated states. Instead of using cell-cycle state as an input covariate, scCycleMol derives supervision from predicted treated expression and propagates it through a learnable full-expression cell-cycle head with circular G1/S/G2M phase targets. We evaluate marker-based supervision, molecular representations, and pretraining strategies to isolate sources of improvement. Across a SciPlex3 benchmark with over 600k cells, 186 perturbation conditions, multiple cancer cell lines, and thousands of genes, scCycleMol improves out-of-distribution expression prediction compared with conditional perturbation baselines. The best LINCS-pretrained circular model achieves 0.9093 expected all-gene r squared and 0.6843 expected differentially expressed gene r squared, compared with 0.6800 and 0.5400 for LINCS-pretrained ChemCPA. Closed-loop cell-cycle supervision improves phase accuracy by about 0.5 to 0.6 points while maintaining nearly unchanged expression prediction. A Tahoe-pretrained variant reaches 0.9609 phase accuracy, highlighting the benefit of explicit cell-cycle-aware supervision in perturbation modeling.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
   "errors": []
 }

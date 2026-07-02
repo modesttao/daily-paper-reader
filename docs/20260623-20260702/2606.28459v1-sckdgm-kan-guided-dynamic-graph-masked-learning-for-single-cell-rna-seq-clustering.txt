@@ -1,0 +1,438 @@
+Title: scKDGM: KAN-guided Dynamic Graph Masked Learning for Single-Cell RNA-seq Clustering
+
+URL Source: https://arxiv.org/pdf/2606.28459v1
+
+Published Time: Tue, 30 Jun 2026 00:05:14 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# scKDGM: KAN-guided Dynamic Graph Masked Learning for Single-Cell RNA-seq Clustering 
+
+Jun Tang ∗, Pengwei Hu †*, Sicong Gao ∗, Jie Guo ∗, Lun Hu †, Xin Luo ∗∗ College of Computer and Information Science , Southwest University , Chongqing, China Email: swutangjun@email.swu.edu.cn; gsc020825@email.swu.edu.cn; myliya46@email.swu.edu.cn; luoxin@swu.edu.cn  
+
+> †
+
+Xinjiang Technical Institute of Physics and Chemistry , Chinese Academy of Sciences , Urumqi, China Email: hpw@ms.xjb.ac.cn; hulun@ms.xjb.ac.cn 
+
+> *
+
+Corresponding author: Pengwei Hu. 
+
+Abstract —Single-cell RNA sequencing (scRNA-seq) clustering is essential for identifying cell types, but high dimensionality, sparsity, dropout, and technical noise hinder robust expression representation and cell graph construction. Existing masked autoencoders mainly use expression recovery for feature recon-struction, while graph clustering methods usually depend on fixed KNN graphs and do not feed recovered expression back into graph optimization. We propose scKDGM, a KAN-guided dynamic graph masked learning framework for scRNA-seq clustering. scKDGM uses graph-aware distribution preserving gene masking (GDP-Mask) to perturb cell identity, a KAN-based TAKGCN encoder to learn masked-view representations, mask-guided expression recovery to construct a dynamic graph, and cross-view contrastive learning to transfer recovery signals into topology updates. A ZINB loss models overdispersion and zero inflation. Experiments on 12 real scRNA-seq datasets show that scKDGM outperforms 10 baselines in average NMI and ARI. 
+
+Index Terms —single-cell RNA-seq, clustering, graph neural networks, Kolmogorov-Arnold networks, masked learning, con-trastive learning 
+
+I. I NTRODUCTION 
+
+Single-cell RNA sequencing (scRNA-seq) profiles transcrip-tomic heterogeneity at single-cell resolution and supports cell type identification, trajectory analysis, and disease mi-croenvironment studies. Early single-cell whole-transcriptome sequencing [1] and high-throughput platforms such as Drop-seq [2] and 10x Genomics [3] made large-scale scRNA-seq routine. As data scale and tissue complexity grow, unsu-pervised cell subpopulation identification remains central to scRNA-seq analysis [4], [5]. Related structured-recognition studies in biomedical and visual domains also show the value of attention, tensor decomposition, fuzzy clustering, and multiscale features under noisy observations [6]–[9]. scRNA-seq data are high-dimensional, sparse, and dropout-prone, so direct clustering on Euclidean distances or low-dimensional projections is sensitive to noise. Seurat [10], SC3 [11], and CIDR [12] improve stability with nearest-neighbor graphs, consensus clustering, or implicit imputation, but still rely on handcrafted features or shallow assumptions. Deep methods learn richer representations through embedded clustering, ZINB or negative-binomial autoencoding, metric learning, masked estimation, and contrastive learning [13]– [18]. Graph methods model cell relations with GNNs, graph autoencoders, adaptive graphs, and graph contrastive objec-tives [19]–[26]. Biological-prior graphs in scPriorGraph [27], pathway-consensus graphs in scMCGraph [28], and masked graph autoencoding [29] further improve representation learn-ing. Broader graph studies similarly emphasize spatiotemporal message passing, high-order filters, global dependency learn-ing, node collaboration, graph pooling, attributed clustering, community search, graph transitions, metapath associations, and graph-regularized factorization [30]–[39]. Yet most graph clustering pipelines still use a fixed KNN graph, which can form hubs, weaken rare or low-degree cells, and turn expres-sion recovery into reconstruction-only supervision. The expression recovery branch is also related to high-dimensional incomplete (HDI) representation learning. Re-views and adaptive-divergence latent factor models show that objective design matters under sparse observations [40]–[42]. PI/PID control, fuzzy SGD, asynchronous or accelerated paral-lel SGD, ADMM, Nesterov acceleration, PSO, genetic search, and coevolutionary optimization provide related strategies for stable latent-factor learning [43]–[54]. Nonlinear HDI models based on randomized or nonnegative factors, hash factors, multimetric features, autoencoders, outlier-resilient reconstruc-tion, and prediction sampling further motivate robust feature recovery from noisy high-dimensional matrices [55]–[62]. The dynamic graph component is motivated by temporal and tensor representation studies. Kalman filtering, temporal QoS modeling, neighborhood regularization, temporal bias, and traffic imputation show how sparse observations can be refined by temporal structure [63]–[68]. Mode-aware Tucker networks, neural Tucker factorization, dynamic graph mixers, attention-based or neural tensor factorization, and battery-life tensor prediction indicate that nonlinear and mode-aware tensor models can capture interactions beyond static features [69]–[76]. Dynamic transaction networks, tensor causal con-volution, convolution-bias factorization, fine-grained tensor regularization, electricity-theft detection, and spatiotemporal recovery further support linking recovered signals with evolv-ing relational structure [77]–[82]. We propose scKDGM, a KAN-guided dynamic graph masked learning framework for robust scRNA-seq cluster-ing. scKDGM uses a KAN-based Topology Adaptive Graph Convolutional Network (TAKGCN) encoder. KAN replaces 
+
+> arXiv:2606.28459v1 [cs.LG] 26 Jun 2026
+
+fixed activations and scalar linear weights with learnable uni-variate edge functions [83], and KAN-based graph networks extend this idea to graph learning [84], [85]. TAKGCN also follows TAGCN-style multi-hop aggregation [86]; modular graph convolution, graph tensor attention, and network com-pression studies provide related evidence that graph operators and compact neural transformations can improve structured representation learning [87]–[89]. On this basis, GDP-Mask samples non-neighbor donor cells and shuffles values within each gene column. The model recovers expression from the masked view, builds a differentiable dynamic graph from the recovered matrix, and aligns masked and dynamic views by contrastive learning. Thus expression recovery directly refines graph topology instead of acting only as reconstruction supervision. Our contributions are:  
+
+> •
+
+First, we propose TAKGCN, which aggregates high-order cell-neighborhood information through topology-adaptive graph convolution and models nonlinear gene-expression dependencies with Fourier KAN-style transformations.  
+
+> •
+
+Second, we design GDP-Mask to construct graph-aware and distribution preserving cell identity perturbations for masked recovery.  
+
+> •
+
+Third, we introduce a mask-recovery-driven dynamic graph learning mechanism that uses recovered expression information to refine cell adjacency.  
+
+> •
+
+Experiments on 12 real scRNA-seq datasets show that scKDGM achieves the best average NMI and ARI under the benchmark setting. II. M ETHODS 
+
+A. Overview 
+
+Given an scRNA-seq matrix X ∈ Rn×g , scKDGM learns 
+
+Z ∈ Rn×d and partitions n cells into C latent groups. Preprocessing removes zero-count genes and cells, applies library-size normalization, median scaling, log transformation, and Scanpy-based selection of the top 1000 highly variable genes [90]. A KNN graph A0 initializes message passing. Fig. 1 shows the two-stage pipeline. During masked pre-training, GDP-Mask generates X′ and an observed-change mask M from X and the current graph At. TAKGCN encodes 
+
+X′ on At, predicts M , reconstructs ˆX, and uses ˆX to build a differentiable dynamic graph. Clean expression is re-encoded on this graph and aligned with the masked view. During clustering refinement, the mask branch is removed, DEC-style clustering is optimized on clean expression, and dynamic-graph contrastive learning remains active. 
+
+B. GDP-Mask 
+
+GDP-Mask perturbs expression by graph-aware, gene-wise shuffling. For cell i, non-neighbor donors under At form 
+
+Dt(i) = {r | At(i, r ) = 0 , r ̸ = i}. (1) If Dt(i) is empty, the donor is sampled from non-self cells. With πt(i) ∼ Uniform( Dt(i)) , GDP-Mask samples 
+
+Sij ∼ Bernoulli( ρ), (2) where ρ is the mask rate, and replaces only within the same gene column: 
+
+X′ 
+
+> ij
+
+=
+
+(
+
+Xπt(i)j , Sij = 1 
+
+Xij , Sij = 0 . (3) This preserves each gene’s marginal distribution while intro-ducing non-neighbor cell identity confusion. The supervised target is the observed-change mask 
+
+Mij = I(X′
+
+> ij
+
+̸ = Xij ). (4) Thus supervision ignores unchanged sampled entries, such as 
+
+0 → 0, and forces recovery of cell-specific expression from graph context and gene combinations. 
+
+C. TAKGCN Encoder 
+
+TAKGCN combines TAG-style multi-hop aggregation with KAN-style nonlinear transformations. Let H(ℓ) be the layer input and ˜A the normalized adjacency. One TAKGConv layer is 
+
+H(ℓ+1) =
+
+> K
+
+X
+
+> r=0
+
+Φr
+
+ ˜Ar H(ℓ)
+
++ b. (5) Here K is the maximum hop number. The hop-specific Fourier KAN transform is 
+
+Φr (x)o =
+
+> din
+
+X
+
+> i=1
+> G
+
+X
+
+> q=1
+
+a(r) 
+
+> oiq
+
+[cos( qx i/s ) − 1] + b(r) 
+
+> oiq
+
+sin( qx i/s ).
+
+(6) Here G is the number of Fourier harmonics and s = 10 scales inputs to avoid overly rapid oscillation. The cos( ·) − 1 term centers the basis at zero input. This gives TAKGCN both high-order graph receptive fields and flexible nonlinear gene-expression fitting. 
+
+D. Recovery-driven Dynamic Graph Learning 
+
+After GDP-Mask, TAKGCN encodes 
+
+Zm = fenc (X′, A t). (7) The mask predictor estimates changed entries, 
+
+ˆM = fm(Zm). (8) with 
+
+Lmask = BCEWithLogits( ˆM , M ). (9) The feature decoder uses both Zm and σ( ˆM ):
+
+ˆX = fx
+
+h 
+
+Zm, σ ( ˆM )
+
+i 
+
+. (10) Weighted MSE emphasizes observed-change positions: 
+
+Lrec = 1
+
+np 
+
+X
+
+> i,j
+
+wij ( ˆXij − Xij )2 (11) 
+
+wij = αM ij + (1 − α)(1 − Mij ). (12) The ZINB decoder provides an auxiliary LZINB for zero inflation and overdispersion. Crucially, ˆX also drives graph learning. During pre-training, U = ˆX; during refinement, Cells × Genes     
+
+> Current Graph A t
+> KNN init
+> XEmbedding Z
+> π
+> ZINB Decoder μ
+> θ
+> Mask Predictor
+> Concat
+> M̂
+> Mask Decoder
+> Clustering
+> Clustering Layer
+> Embedding Z
+> GDP-MASK
+> MX'
+> unchanged
+> changed
+> TAKGCN Encoder
+> ...
+> Fourier KAN Transform
+> xy
+> xy
+> →
+> 1-hop 2-hop
+> ...
+> k-hop
+> Topology-Adaptive Multi-hop
+> Pre Training
+> Dynamic Graph Builder
+> Gumbel Top-k
+> Removed edge New edge
+> non-neighbor donors
+> X̂
+
+Fig. 1. The architecture of scKDGM. GDP-Mask produces the graph-aware masked feature matrix and observed-change mask. TAKGCN encodes the masked expression on the current graph, while the recovered feature matrix is used to construct dynamic graph. 
+
+U = Zc = fenc (X, A t). After row-normalizing U , the model computes 
+
+Rij = u⊤ 
+
+> i
+
+uj
+
+∥ui∥2∥uj ∥2
+
+, Rii = −∞ . (13) With Gumbel noise 
+
+Gij = − log( − log ϵij ), ϵij ∼ Uniform(0 , 1) , (14) the soft edge probability is 
+
+Pij = softmax j (( Rij + Gij )/τ g ) , (15) where τg is the Gumbel temperature. Top-k selection yields 
+
+Ahard  
+
+> ij
+
+= I (j ∈ TopK( Pi, k )) . (16) The straight-through graph keeps a sparse forward pass and soft gradients: 
+
+P k = P ⊙ Ahard , (17) 
+
+Ast = Ahard − sg( P k) + P k, (18) where sg( ·) stops gradients. After symmetrization and self-loop removal, Ast dyn re-encodes clean expression: 
+
+Zdyn = fenc (X, A st dyn ). (19) The hard symmetrized graph updates At+1 after each epoch. InfoNCE aligns current and dynamic views: 
+
+I(Za, Z b) = − 1
+
+n
+
+> n
+
+X
+
+> i=1
+
+log exp(sim( zai , z bi )/τ c)
+
+Pnj=1 exp(sim( zai , z bj )/τ c) , (20) where τc is the contrastive temperature. The contrastive losses are 
+
+Lpre  
+
+> con
+
+= I(Zm, Z dyn ), (21) 
+
+Lf ine  
+
+> con
+
+= I(Zc, Z dyn ), (22) with Zc = fenc (X, A t). DEC-style refinement supplies Lclu =KL( P ∥Q). The full objectives are 
+
+Lpre = λr Lrec + λmLmask + λz LZINB + λcLpre 
+
+> con
+
+. (23) 
+
+Lfine = λclu Lclu + λz LZINB + λcLf ine  
+
+> con
+
+. (24) III. E XPERIMENTS 
+
+A. Datasets and Evaluation Protocol 
+
+We evaluate scKDGM on 12 real scRNA-seq datasets from Adam [91], Klein [92], Plasschaert [93], Tabula Muris [94], Romanov [95], Wang Lung [96], and Young [97]. They cover kidney, embryonic stem cells, trachea, limb muscle, diaphragm, heart, hypothalamus, and lung; Drop-seq, inDrop, 10x, and Smart-seq2; 2 to 11 cell types; 870 to 11269 cells; and 65.58% to 94.70% zero entries. We compare 10 base-lines: graph-based scMGCA [22], scAGC [25], scCDCG [23], scDSC [20], and scGNN [19], plus CIRCLE [17], scDML [15], scziDesk [14], scDeepCluster [13], and scMAE [18]. Metrics are NMI and ARI. 
+
+B. Implementation Details 
+
+All experiments are implemented in PyTorch and executed on an NVIDIA A6000 GPU with 48 GB memory. scKDGM uses a hidden dimension of 256, a latent dimension of 128, an encoder dropout rate of 0.2, and TAKGConv with K = 3 
+
+and Fourier harmonic number G = 4 . Pre-training runs for 1000 epochs with a learning rate of 10 −4. GDP-Mask uses a mask rate of 0.3, the dynamic graph neighbor number is k =15 , the Gumbel temperature is 1.0, the InfoNCE temperature is 0.7, and the loss weights are λr = 1 .0, λ m = 0 .1, λ z =1.0, λ c = 0 .1. Clustering refinement runs for 200 epochs with 
+
+λclu = 1 .0, λ z = 0 .1, λ c = 0 .01 , and the target distribution is updated every 8 epochs. Ablation and parameter sensitivity experiments follow the same training protocol and change only the module or parameter under analysis. 
+
+C. Overall Clustering Performance 
+
+Table I reports mean scores over three seeds against ground-truth labels. Baselines marked with ∗ use unified reproduced results from scCluBench [98]; other baselines follow the same protocol. scKDGM achieves the best average NMI/ARI of 0.8854/0.9105, ranking first on 9 of 12 datasets for NMI and 8 of 12 for ARI. TABLE I OVERALL CLUSTERING PERFORMANCE ON 12 SC RNA-SEQ DATASETS .
+
+Metric Dataset Ours GNN Methods Deep Methods scKDGM scMGCA scAGC scCDCG* scDSC* scGNN* CIRCLE scDML scziDesk scDeep Cluster* scMAE* 
+
+NMI Adam 0.9381 0.8664 0.8871 0.6246 0.7889 0.7129 0.6999 0.8547 0.8275 0.6466 0.7901 
+
+Klein 0.8245 0.6939 0.8004 0.7753 0.5748 0.6492 0.7652 0.5957 0.7855 0.7323 0.8134 
+
+Plasschaert 0.8438 0.7457 0.8582 0.6559 0.7690 0.5419 0.6400 0.6793 0.7952 0.6047 0.7198 
+
+Qx Limb Muscle 0.9832 0.9417 0.9402 0.9412 0.7970 0.7760 0.9050 0.9470 0.8987 0.9112 0.9682 
+
+Qx Trachea 0.8788 0.7018 0.8335 0.4984 0.6750 0.3636 0.5736 0.6716 0.8473 0.5254 0.8314 
+
+QS Diaphragm 0.9765 0.9350 0.9473 0.8431 0.9182 0.9446 0.8544 0.8559 0.9429 0.9066 0.9522 
+
+QS Heart 0.9199 0.9092 0.9106 0.8465 0.8681 0.6814 0.7671 0.8465 0.8334 0.8070 0.8644 
+
+QS Limb Muscle 0.9637 0.9397 0.9645 0.8779 0.8847 0.8736 0.7709 0.9470 0.9587 0.8946 0.9511 
+
+QS Trachea 0.7528 0.7710 0.6898 0.6634 0.5687 0.7442 0.5715 0.6375 0.6468 0.6493 0.6414 
+
+Romanov 0.7800 0.6308 0.6654 0.6018 0.5463 0.5577 0.6654 0.5204 0.7278 0.5755 0.6931 
+
+Wang Lung 0.9231 0.6516 0.8786 0.8347 0.8526 0.8252 0.8571 0.8177 0.8192 0.6748 0.9184 
+
+Young 0.8406 0.8046 0.7822 0.6148 0.7283 0.4047 0.7565 0.8210 0.7537 0.4931 0.6790 
+
+AVG 0.8854 0.7993 0.8465 0.7315 0.7476 0.6729 0.7355 0.7662 0.8197 0.7018 0.8185 
+
+ARI Adam 0.9502 0.8725 0.9028 0.4537 0.7484 0.5966 0.6298 0.8506 0.8033 0.4575 0.7378 
+
+Klein 0.8174 0.6886 0.8188 0.7533 0.5728 0.5771 0.7723 0.6128 0.8096 0.7010 0.7595 
+
+Plasschaert 0.9017 0.7718 0.9144 0.6399 0.8320 0.4125 0.4837 0.6563 0.8495 0.4255 0.6162 
+
+Qx Limb Muscle 0.9902 0.9572 0.9525 0.9660 0.7820 0.7541 0.8695 0.9448 0.9059 0.9332 0.9836 
+
+Qx Trachea 0.9670 0.5404 0.9340 0.4659 0.7278 0.3002 0.3621 0.6683 0.9201 0.3730 0.9456 
+
+QS Diaphragm 0.9872 0.9612 0.9747 0.9184 0.9416 0.9699 0.8550 0.8272 0.9668 0.9353 0.9714 
+
+QS Heart 0.9615 0.9521 0.9580 0.9162 0.9260 0.5544 0.6131 0.8303 0.7544 0.6928 0.7757 
+
+QS Limb Muscle 0.9808 0.9701 0.9816 0.9315 0.9305 0.8833 0.6302 0.9669 0.9723 0.9097 0.9718 
+
+QS Trachea 0.8396 0.8686 0.8133 0.5995 0.5451 0.7807 0.4103 0.5528 0.7065 0.4850 0.5389 
+
+Romanov 0.7969 0.5303 0.6330 0.5861 0.4175 0.5140 0.6105 0.4063 0.7507 0.4795 0.6705 
+
+Wang Lung 0.9690 0.7288 0.9394 0.9134 0.9257 0.8975 0.9320 0.8988 0.9023 0.6637 0.9667 
+
+Young 0.7644 0.7078 0.6946 0.4166 0.6675 0.1907 0.7085 0.7163 0.6448 0.2618 0.5162 
+
+AVG 0.9105 0.7958 0.8764 0.7134 0.7514 0.6193 0.6564 0.7443 0.8322 0.6098 0.7878 
+
+D. Ablation Study 
+
+We compare full scKDGM with three variants. w/o Mask removes GDP-Mask pre-training and recovery supervision; w/o KAN replaces TAKGConv with a comparable TAGCN encoder of about 9M parameters; w/o DG disables dynamic graph updates. Fig. 2 shows that w/o DG drops average NMI/ARI by 0.0919/0.1309, confirming the value of recovery-driven graph updates for reducing information bottlenecks, uneven propagation, and oversmoothing in static KNN graphs. w/o Mask drops NMI/ARI by 0.0596/0.0804, supporting graph-aware perturbation and observed-change recovery. w/o KAN also declines, showing that Fourier KAN transformations improve nonlinear high-order neighborhood aggregation. 0.150 0.125 0.100 0.075 0.050 0.025 0.000         
+
+> Change vs full scKDGM
+> w/o Mask
+> w/o KAN*
+> w/o DG
+> -0.060
+> -0.042
+> -0.092
+> -0.080
+> -0.067
+> -0.131
+> a
+> 0.2 0.4 0.6
+> mask rate
+> 0.960
+> 0.965
+> 0.970
+> 0.975
+> 0.980
+> 0.985
+> 0.990
+> Score
+> b
+> 10 20 30
+> K
+> 0.95
+> 0.96
+> 0.97
+> 0.98
+> Score
+> c
+> 246
+> G
+> 0.94
+> 0.95
+> 0.96
+> 0.97
+> 0.98
+> Score
+> d
+> Metric NMI ARI
+
+Fig. 2. Ablation and parameter sensitivity results. Panel (a) reports average performance changes relative to full scKDGM, where the TAGCN variant uses an encoder with a comparable parameter count. Panels (b)-(d) report sensitivity to mask rate, graph neighbor number k, and Fourier harmonic number G on Quake Smart-seq2 Diaphragm. 
+
+E. Dynamic Graph Study 
+
+We further inspect cell type consistency and degree distri-bution. Edge homophily is the fraction of edges linking cells of the same type. In Fig. 3a, dynamic-graph homophily rises during training, reaches about 0.599 in refinement, and peaks at about 0.611, indicating increasingly cell-type-consistent edges. Fig. 3b shows that the KNN graph has a long-tailed hub structure, with maximum degree 175 and 99% quantile 96.3. The dynamic graph reduces them to 44 and 37.0, sup-pressing hub concentration and mitigating uneven propagation, semantic mixing, and oversmoothing. 0 200 400 600 800 1000 Training epoch 
+
+> 0.3
+> 0.4
+> 0.5
+> 0.6 Homophily
+> clustering
+> 0.599
+
+a Dynamic graph homophily 50 100 150 Node degree     
+
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0Tail prob.
+
+b Degree-tail distribution KNN graph Dynamic graph 
+
+Fig. 3. Graph-structure diagnostics on the Quake Smart-seq2 Diaphragm dataset. (a) Training evolution of dynamic graph edge homophily. (b) Degree-tail distributions of the KNN-constructed graph and the learned dynamic graph. The two graphs are constructed with the same neighbor number k.
+
+F. Parameter Sensitivity 
+
+As shown in Fig. 2, the mask rate reaches the best NMI/ARI at 0.3 on Quake Smart-seq2 Diaphragm, with 0.9773/0.9893, and remains stable from 0.3 to 0.5. Thus moderate perturba-tion supplies useful self-supervision, while excessive masking weakens cell-specific patterns. For the dynamic graph, k = 15 gives 0.9731/0.9875; smaller k lacks coverage, and larger k
+
+increases semantic mixing. For Fourier harmonics, G = 4 is best with 0.9731/0.9875, balancing basis capacity and stability. The defaults k = 15 , G = 4 , and mask rate 0.3 therefore lie in the stable high-performance range. IV. C ONCLUSION 
+
+This paper presents scKDGM, a KAN-guided dynamic graph masked learning framework for scRNA-seq clustering. GDP-Mask builds graph-aware distribution preserving per-turbations, TAKGCN learns nonlinear graph-aware represen-tations, and the mask-recovered feature matrix updates the dynamic graph, closing the loop between expression recovery and topology optimization. On 12 real datasets, scKDGM achieves higher average NMI and ARI than representative deep and graph clustering methods. Ablation and sensitivity studies confirm the contributions of dynamic graph updates, GDP-Mask, and TAKGConv. However, pairwise dynamic graph construction needs approximate neighbor search or mini-batch updates for million-cell data, and biological interpretation should be further validated by marker enrichment and cell type annotation consistency. Future work will improve graph efficiency and extend scKDGM to batch correction, multi-omics clustering, and spatial transcriptomics. ACKNOWLEDGMENT 
+
+This work was supported in part by the National Key R&D Program of China under Grant 2025YFC3409000. REFERENCES [1] F. Tang, C. Barbacioru, Y. Wang, E. Nordman, C. Lee, N. Xu, X. Wang, J. Bodeau, B. B. Tuch, A. Siddiqui et al. , “mrna-seq whole-transcriptome analysis of a single cell,” Nature methods , vol. 6, no. 5, pp. 377–382, 2009. [2] E. Z. Macosko, A. Basu, R. Satija, J. Nemesh, K. Shekhar, M. Goldman, I. Tirosh, A. R. Bialas, N. Kamitaki, E. M. Martersteck et al. , “Highly parallel genome-wide expression profiling of individual cells using nanoliter droplets,” Cell , vol. 161, no. 5, pp. 1202–1214, 2015. [3] G. X. Zheng, J. M. Terry, P. Belgrader, P. Ryvkin, Z. W. Bent, R. Wilson, S. B. Ziraldo, T. D. Wheeler, G. P. McDermott, J. Zhu 
+
+et al. , “Massively parallel digital transcriptional profiling of single cells,” 
+
+Nature communications , vol. 8, no. 1, p. 14049, 2017. [4] M. D. Luecken and F. J. Theis, “Current best practices in single-cell rna-seq analysis: a tutorial,” Molecular systems biology , vol. 15, no. 6, p. MSB188746, 2019. [5] V. Y. Kiselev, T. S. Andrews, and M. Hemberg, “Challenges in unsuper-vised clustering of single-cell rna-seq data,” Nature Reviews Genetics ,vol. 20, no. 5, pp. 273–282, 2019. [6] Z. He, M. Lin, X. Luo, and Z. Xu, “Structure-preserved self-attention for fusion image information in multiple color spaces,” 
+
+IEEE Transactions on Neural Networks and Learning Systems ,vol. 36, no. 7, pp. 13 021–13 035, July 2025. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2024.3490800 [7] N. Zeng, X. Li, P. Wu, H. Li, and X. Luo, “A novel tensor decomposition-based efficient detector for low-altitude aerial objects with knowledge distillation scheme,” IEEE/CAA Journal of Automatica Sinica , vol. 11, no. 2, pp. 487–501, Feb. 2024. [Online]. Available: http://dx.doi.org/10.1109/jas.2023.124029 [8] Y. Yang, L. Hu, G. Li, D. Li, P. Hu, and X. Luo, “Fmvpci: A multiview fusion neural network for identifying protein complex via fuzzy clustering,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 55, no. 9, pp. 6189–6202, September 2025. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2025.3578348 [9] X. Deng, P. Hu, T. Herget, F. Tan, X. Zhu, J. Zhang, Y.-a. Huang, L. Hu, Z. You, and X. Luo, “Fuzzy mixture-of-experts aggregation for organoid identification with multiscale state space features,” IEEE Transactions on Fuzzy Systems , vol. 34, no. 1, pp. 324–335, Jan. 2026. [Online]. Available: http://dx.doi.org/10.1109/tfuzz.2025.3622935 [10] R. Satija, J. A. Farrell, D. Gennert, A. F. Schier, and A. Regev, “Spatial reconstruction of single-cell gene expression data,” Nature biotechnology , vol. 33, no. 5, pp. 495–502, 2015. [11] V. Y. Kiselev, K. Kirschner, M. T. Schaub, T. Andrews, A. Yiu, T. Chandra, K. N. Natarajan, W. Reik, M. Barahona, A. R. Green et al. ,“Sc3: consensus clustering of single-cell rna-seq data,” Nature methods ,vol. 14, no. 5, pp. 483–486, 2017. [12] P. Lin, M. Troup, and J. W. Ho, “Cidr: Ultrafast and accurate cluster-ing through imputation for single-cell rna-seq data,” Genome biology ,vol. 18, no. 1, p. 59, 2017. [13] T. Tian, J. Wan, Q. Song, and Z. Wei, “Clustering single-cell rna-seq data with a model-based deep learning approach,” Nature Machine Intelligence , vol. 1, no. 4, pp. 191–198, 2019. [14] L. Chen, W. Wang, Y. Zhai, and M. Deng, “Deep soft k-means clustering with self-training for single-cell rna sequence data,” NAR Genomics and Bioinformatics , vol. 2, no. 2, p. lqaa039, 06 2020. [Online]. Available: https://doi.org/10.1093/nargab/lqaa039 [15] X. Yu, X. Xu, J. Zhang, and X. Li, “Batch alignment of single-cell tran-scriptomics data using deep metric learning,” Nature communications ,vol. 14, no. 1, p. 960, 2023. [16] H. Wan, L. Chen, and M. Deng, “scname: neighborhood contrastive clustering with ancillary mask estimation for scrna-seq data,” Bioinfor-matics , vol. 38, no. 6, pp. 1575–1583, 2022. [17] J. Wang, W. Jiang, J. Guan, and S. Zhou, “Circle: scrna-seq data clustering by cluster-aware iterative contrastive learning,” in 2024 IEEE International Conference on Bioinformatics and Biomedicine (BIBM) .IEEE, 2024, pp. 1219–1225. [18] Z. Fang, R. Zheng, and M. Li, “scmae: a masked autoencoder for single-cell rna-seq clustering,” Bioinformatics , vol. 40, no. 1, p. btae020, 2024. [19] J. Wang, A. Ma, Y. Chang, J. Gong, Y. Jiang, R. Qi, C. Wang, H. Fu, Q. Ma, and D. Xu, “scgnn is a novel graph neural network framework for single-cell rna-seq analyses,” Nature communications , vol. 12, no. 1, p. 1882, 2021. [20] Y. Gan, X. Huang, G. Zou, S. Zhou, and J. Guan, “Deep structural clustering for single-cell rna-seq data jointly through autoencoder and graph neural network,” Briefings in Bioinformatics , vol. 23, no. 2, p. bbac018, 2022. [21] Z. Yu, Y. Lu, Y. Wang, F. Tang, K.-C. Wong, and X. Li, “Zinb-based graph embedding autoencoder for single-cell rna-seq interpretations,” in 
+
+Proceedings of the AAAI conference on artificial intelligence , vol. 36, no. 4, 2022, pp. 4671–4679. [22] Z. Yu, Y. Su, Y. Lu, Y. Yang, F. Wang, S. Zhang, Y. Chang, K.-C. Wong, and X. Li, “Topological identification and interpretation for single-cell gene regulation elucidation across multiple platforms using scmgca,” 
+
+Nature Communications , vol. 14, no. 1, p. 400, 2023. [23] P. Xu, Z. Ning, M. Xiao, G. Feng, X. Li, Y. Zhou, and P. Wang, “sccdcg: efficient deep structural clustering for single-cell rna-seq via deep cut-informed graph embedding,” in International Conference on Database Systems for Advanced Applications . Springer, 2024, pp. 172–187. [24] S. Wang, Y. Liu, H. Zhang, and Z. Liu, “sce2egae: enhancing single-cell rna-seq data analysis through an end-to-end cell-graph-learnable graph autoencoder with differentiable edge sampling,” Biology direct , vol. 20, no. 1, p. 66, 2025. [25] H. Li, J. Fu, X. Zhuang, H. Yang, X. Ling, T. Cheng, I. Razzak, Z. Chen 
+
+et al. , “scagc: Learning adaptive cell graphs with contrastive guidance for single-cell clustering,” arXiv preprint arXiv:2508.09180 , 2025. [26] H.-B. Tian, X.-Z. Kong, J.-X. Liu, J.-L. Shang, J. Wang, and L.-Y. Dai, “scgzdc: Graph-based zinb deep clustering for single-cell rna-seq data,” in 2025 IEEE International Conference on Bioinformatics and Biomedicine (BIBM) . IEEE, 2025, pp. 6369–6375. [27] X. Cao, Y.-A. Huang, Z.-H. You, X. Shang, L. Hu, P.-W. Hu, and Z.-A. Huang, “scpriorgraph: constructing biosemantic cell–cell graphs with prior gene set selection for cell type identification from scrna-seq data,” 
+
+Genome Biology , vol. 25, no. 1, p. 207, 2024. [28] Y.-A. Huang, Y.-C. Li, Z.-H. You, L. Hu, P.-W. Hu, L. Wang, Y. Peng, and Z.-A. Huang, “Consensus representation of multiple cell–cell graphs from gene signaling pathways for cell type annotation,” BMC biology ,vol. 23, no. 1, p. 23, 2025. [29] Z. Hou, X. Liu, Y. Cen, Y. Dong, H. Yang, C. Wang, and J. Tang, “Graphmae: Self-supervised masked graph autoencoders,” in Proceed-ings of the 28th ACM SIGKDD conference on knowledge discovery and data mining , 2022, pp. 594–604. [30] L. Wang, Y. Yuan, and X. Luo, “Graph tensor convolutional network,” 
+
+IEEE Transactions on Systems, Man, and Cybernetics: Systems ,vol. 56, no. 5, pp. 3008–3024, May 2026. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2026.3655418 [31] ——, “Advanced high-order graph convolutional networks with assorted time-frequency transforms,” IEEE/CAA Journal of Automatica Sinica , vol. 13, no. 2, pp. 394–408, Feb. 2026. [Online]. Available: http://dx.doi.org/10.1109/jas.2025.125429 [32] M. Han, L. Wang, Y. Yuan, and X. Luo, “Sgd-dyg: Self-reliant global dependency apprehending on dynamic graphs,” in Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2 , ser. KDD ’25. ACM, Aug. 2025, pp. 802–813. [Online]. Available: http://dx.doi.org/10.1145/3711896.3737126 [33] Y. Yuan, Y. Wang, and X. Luo, “A node-collaboration-informed graph convolutional network for highly accurate representation to undirected weighted graph,” IEEE Transactions on Neural Networks and Learning Systems , vol. 36, no. 6, pp. 11 507–11 519, June 2025. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2024.3514652 [34] F. Bi, T. He, Y.-S. Ong, and X. Luo, “Graph linear convolution pooling for learning in incomplete high-dimensional data,” IEEE Transactions on Knowledge and Data Engineering , vol. 37, no. 4, pp. 1838–1852, Apr. 2025. [Online]. Available: http://dx.doi.org/10.1109/tkde.2024.3524627 [35] Y. Yang, L. Hu, G. Li, D. Li, P. Hu, and X. Luo, “Link-based attributed graph clustering via approximate generative bayesian learning,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 55, no. 8, pp. 5730–5743, Aug. 2025. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2025.3572738 [36] L. Lin, Q. Li, M. Qiao, Z. Wang, J. Zhao, R.-H. Li, X. Luo, and T. Jia, “Ncsac: Effective neural community search via attribute-augmented conductance,” IEEE Transactions on Knowledge and Data Engineering ,vol. 38, no. 2, pp. 1221–1235, Feb. 2026. [Online]. Available: http://dx.doi.org/10.1109/tkde.2025.3630626 [37] J. Gou, Y. Cheng, B. Ma, L. Du, X. Luo, and Z. Yi, “Multi-scale collaborative distillation graph neural networks for session-based recommendation,” IEEE Transactions on Services Computing ,vol. 19, no. 1, pp. 504–517, Jan. 2026. [Online]. Available: http://dx.doi.org/10.1109/tsc.2025.3637009 [38] M.-Y. Wu, P.-W. Hu, Z.-H. You, J. Zhang, L. Hu, and X. Luo, “Graph-based prediction of mirna-drug associations with multisource information and metapath enhancement matrices,” IEEE Journal of Biomedical and Health Informatics , vol. 30, no. 6, pp. 4513–4524, June 2026. [Online]. Available: http://dx.doi.org/10.1109/jbhi.2025.3558303 [39] Z. Liu, X. Luo, and M. Zhou, “Symmetry and graph bi-regularized non-negative matrix factorization for precise community detection,” IEEE Transactions on Automation Science and Engineering ,vol. 21, no. 2, pp. 1406–1420, Apr. 2024. [Online]. Available: http://dx.doi.org/10.1109/tase.2023.3240335 [40] Q. Hu, H. Wu, and X. Luo, “A comprehensive review of parallel optimization algorithms for high-dimensional and incomplete matrix factorization,” IEEE/CAA Journal of Automatica Sinica ,vol. 12, no. 12, pp. 2399–2426, Dec. 2025. [Online]. Available: http://dx.doi.org/10.1109/jas.2025.125774 [41] Y. Yuan, X. Luo, and M. Zhou, “Adaptive divergence-based non-negative latent factor analysis of high-dimensional and incomplete matrices from industrial applications,” IEEE Transactions on Emerging Topics in Computational Intelligence , vol. 8, no. 2, pp. 1209–1222, Apr. 2024. [Online]. Available: http://dx.doi.org/10.1109/tetci.2023.3332550 [42] Y. Yuan, R. Wang, G. Yuan, and L. Xin, “An adaptive divergence-based non-negative latent factor model,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 53, no. 10, pp. 6475–6487, Oct. 2023. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2023.3282950 [43] J. Li, Y. Yuan, T. He, and X. Luo, “Adaptive pid-incorporated nonnegative latent factor analysis,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 56, no. 7, pp. 4384–4397, July 2026. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2026.3678292 [44] Y. Yuan, S. Lu, and X. Luo, “A proportional integral controller-enhanced non-negative latent factor analysis model,” IEEE/CAA Journal of Automatica Sinica , vol. 12, no. 6, pp. 1246–1259, June 2025. [Online]. Available: http://dx.doi.org/10.1109/jas.2024.125055 [45] J. Li, Y. Yuan, and X. Luo, “Learning error refinement in stochastic gradient descent-based latent factor analysis via diversified pid controllers,” IEEE Transactions on Emerging Topics in Computational Intelligence , vol. 9, no. 5, pp. 3582–3597, Oct. 2025. [Online]. Available: http://dx.doi.org/10.1109/tetci.2025.3547854 [46] Y. Yuan, J. Li, and X. Luo, “A fuzzy pid-incorporated stochastic gradient descent algorithm for fast and accurate latent factor analysis,” IEEE Transactions on Fuzzy Systems , vol. 32, no. 7, pp. 4049–4061, July 2024. [Online]. Available: http://dx.doi.org/10.1109/tfuzz.2024.3389733 [47] W. Qin and X. Luo, “Asynchronous parallel fuzzy stochastic gradient descent for high-dimensional incomplete data representation,” IEEE Transactions on Fuzzy Systems , vol. 32, no. 2, pp. 445–459, Feb. 2024. [Online]. Available: http://dx.doi.org/10.1109/tfuzz.2023.3300370 [48] W. Qin, X. Luo, and M. Zhou, “Adaptively-accelerated parallel stochastic gradient descent for high-dimensional and incomplete data representation learning,” IEEE Transactions on Big Data ,vol. 10, no. 1, pp. 92–107, Feb. 2024. [Online]. Available: http://dx.doi.org/10.1109/tbdata.2023.3326304 [49] W. Qin, X. Luo, S. Li, and M. Zhou, “Parallel adaptive stochastic gradient descent algorithms for latent factor analysis of high-dimensional and incomplete industrial data,” IEEE Transactions on Automation Science and Engineering , vol. 21, no. 3, pp. 2716–2729, July 2024. [Online]. Available: http://dx.doi.org/10.1109/tase.2023.3267609 [50] Y. Zhong, K. Liu, S. Gao, and X. Luo, “Alternating-direction-method of multipliers-based adaptive nonnegative latent factor analysis,” IEEE Transactions on Emerging Topics in Computational Intelligence ,vol. 8, no. 5, pp. 3544–3558, Oct. 2024. [Online]. Available: http://dx.doi.org/10.1109/tetci.2024.3420735 [51] W. Li, R. Wang, and X. Luo, “A generalized nesterov-accelerated second-order latent factor model for high-dimensional and incomplete data,” IEEE Transactions on Neural Networks and Learning Systems ,vol. 36, no. 1, pp. 1518–1532, Jan. 2025. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2023.3321915 [52] C. Lyu, Z. Ma, X. Luo, and Y. Shi, “Dynamic stochastic reorientation particle swarm optimization for adaptive latent factor analysis in high-dimensional sparse matrices,” IEEE Transactions on Knowledge and Data Engineering , vol. 38, no. 1, pp. 222–234, Jan. 2026. [Online]. Available: http://dx.doi.org/10.1109/tkde.2025.3621469 [53] C. Lyu, J. Cheng, X. Luo, and Y. Shi, “Genetic algorithm-based two-step optimization for precise latent factor analysis,” 
+
+IEEE Transactions on Neural Networks and Learning Systems ,vol. 37, no. 5, pp. 2294–2306, May 2026. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2025.3631465 [54] L. Wei, L. Jin, and X. Luo, “A robust coevolutionary neural-based optimization algorithm for constrained nonconvex optimization,” 
+
+IEEE Transactions on Neural Networks and Learning Systems ,vol. 35, no. 6, pp. 7778–7791, June 2024. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2022.3220806 [55] Y. Yuan, Q. He, X. Luo, and M. Shang, “A multilayered-and-randomized latent factor model for high-dimensional and sparse matrices,” IEEE Transactions on Big Data , vol. 8, no. 3, pp. 784–794, June 2022. [Online]. Available: http://dx.doi.org/10.1109/tbdata.2020.2988778 [56] Y. Yuan, X. Luo, M. Shang, and D. Wu, “A generalized and fast-converging non-negative latent factor model for predicting user preferences in recommender systems,” in Proceedings of The Web Conference 2020 , ser. WWW ’20. ACM, Apr. 2020, pp. 498–507. [Online]. Available: http://dx.doi.org/10.1145/3366423.3380133 [57] D. Wu, S. Li, Y. He, X. Luo, and X. Gao, “Non-gradient hash factor learning for high-dimensional and incomplete data representation learning,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 48, no. 5, pp. 5811–5826, May 2026. [Online]. Available: http://dx.doi.org/10.1109/tpami.2026.3653780 [58] D. Wu, P. Zhang, Y. He, and X. Luo, “Mmlf: Multi-metric latent feature analysis for high-dimensional and incomplete data,” IEEE Transactions on Services Computing , vol. 17, no. 2, pp. 575–588, Mar. 2024. [Online]. Available: http://dx.doi.org/10.1109/tsc.2023.3331570 [59] F. Bi, T. He, and X. Luo, “A fast nonnegative autoencoder-based approach to latent feature analysis on high-dimensional and incomplete data,” IEEE Transactions on Services Computing ,vol. 17, no. 3, pp. 733–746, May 2024. [Online]. Available: http://dx.doi.org/10.1109/tsc.2023.3319713 [60] D. Wu, C. Liang, Y. He, Y. Qiao, and X. Luo, “Multimetric autoencoder for representing high-dimensional and incomplete data,” 
+
+IEEE Transactions on Systems, Man, and Cybernetics: Systems ,vol. 56, no. 3, pp. 1533–1546, Mar. 2026. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2025.3646863 [61] D. Wu, Y. Hu, K. Liu, J. Li, X. Wang, S. Deng, N. Zheng, and X. Luo, “An outlier-resilient autoencoder for representing high-dimensional and incomplete data,” IEEE Transactions on Emerging Topics in Computational Intelligence , vol. 9, no. 2, pp. 1379–1391, Apr. 2025. [Online]. Available: http://dx.doi.org/10.1109/tetci.2024.3437370 [62] D. Wu, X. Luo, Y. He, and M. Zhou, “A prediction-sampling-based multilayer-structured latent factor model for accurate representation to high-dimensional and sparse data,” IEEE Transactions on Neural Networks and Learning Systems , vol. 35, no. 3, pp. 3845–3858, Mar. 2024. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2022.3200009 [63] Y. Yuan, S. Wang, H. Zhou, L. Wang, and X. Luo, “A novel approach to temporal qos estimation via extended kalman filter-incorporated latent feature analysis,” IEEE Transactions on Services Computing , pp. 1–12, 2026. [Online]. Available: http://dx.doi.org/10.1109/tsc.2026.3697552 [64] Y. Yuan, X. Luo, M. Shang, and Z. Wang, “A kalman-filter-incorporated latent factor analysis model for temporally dynamic sparse data,” IEEE Transactions on Cybernetics , vol. 53, no. 9, pp. 5788–5801, September 2023. [Online]. Available: http://dx.doi.org/10.1109/tcyb.2022.3185117 [65] Y. Yuan, M. Shang, and X. Luo, Temporal Web Service QoS Prediction via Kalman Filter-Incorporated Dynamic Latent Factor Analysis . IOS Press, 2020. [Online]. Available: http://dx.doi.org/10.3233/faia200139 [66] X. Xu, M. Lin, Z. Xu, and X. Luo, “A sampling-neighborhood-regularized latent factorization of tensor for dynamic qos estimation,” 
+
+IEEE Transactions on Network and Service Management , vol. 23, pp. 1707–1722, 2026. [Online]. Available: http://dx.doi.org/10.1109/tnsm. 2025.3644937 [67] X. Xu, M. Lin, X. Luo, and Z. Xu, “An adaptively bias-extended non-negative latent factorization of tensors model for accurately representing the dynamic qos data,” IEEE Transactions on Services Computing , vol. 18, no. 2, pp. 603–617, Mar. 2025. [Online]. Available: http://dx.doi.org/10.1109/tsc.2025.3544123 [68] H. Yang, M. Lin, H. Chen, X. Luo, and Z. Xu, “Latent factor analysis model with temporal regularized constraint for road traffic data imputation,” IEEE Transactions on Intelligent Transportation Systems , vol. 26, no. 1, pp. 724–741, Jan. 2025. [Online]. Available: http://dx.doi.org/10.1109/tits.2024.3486529 [69] H. Wu, Q. Wang, X. Luo, and Z. Wang, “Learning accurate representation to nonstandard tensors via a mode-aware tucker network,” IEEE Transactions on Knowledge and Data Engineering ,vol. 37, no. 12, pp. 7272–7285, Dec. 2025. [Online]. Available: http://dx.doi.org/10.1109/tkde.2025.3617894 [70] P. Tang, X. Luo, and J. Woodcock, “Auto-encoding neural tucker factorization,” IEEE Transactions on Knowledge and Data Engineering ,vol. 37, no. 10, pp. 5795–5807, Oct. 2025. [Online]. Available: http://dx.doi.org/10.1109/tkde.2025.3590198 [71] Y. Hou, P. Tang, and X. Luo, “Multi-aspect self-attending neural tucker factorization for spatiotemporal representation learning,” IEEE/CAA Journal of Automatica Sinica , vol. 13, no. 4, pp. 986–988, Apr. 2026. [Online]. Available: http://dx.doi.org/10.1109/jas.2025.125723 [72] P. Tang and X. Luo, “Neural tucker factorization,” IEEE/CAA Journal of Automatica Sinica , vol. 12, no. 2, pp. 475–477, Feb. 2025. [Online]. Available: http://dx.doi.org/10.1109/jas.2024.124977 [73] F. Bi, T. He, Y.-S. Ong, and X. Luo, “Discovering spatiotemporal– individual coupled features from nonstandard tensors—a novel dynamic graph mixer approach,” IEEE Transactions on Neural Networks and Learning Systems , vol. 36, no. 11, pp. 19 834–19 848, Nov. 2025. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2025.3592692 [74] X. Xu, M. Lin, Z. Xu, and X. Luo, “Attention-mechanism-based neural latent-factorization-of-tensors model,” ACM Transactions on Knowledge Discovery from Data , vol. 19, no. 4, pp. 1–27, Apr. 2025. [Online]. Available: http://dx.doi.org/10.1145/3719295 [75] W. Li, M. Lin, X. Xu, L. Lin, Z. Xu, and X. Luo, “Neural nonnegative latent factorization of tensors model with acceleration and unconstraint,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 56, no. 1, pp. 164–178, Jan. 2026. [Online]. Available: http://dx.doi.org/10.1109/tsmc.2025.3622727 [76] M. Chen, L. Tao, J. Lou, and X. Luo, “Latent-factorization-of-tensors-incorporated battery cycle life prediction,” IEEE/CAA Journal of Automatica Sinica , vol. 12, no. 3, pp. 633–635, Mar. 2025. [Online]. Available: http://dx.doi.org/10.1109/jas.2024.124602 [77] X. Liao, H. Wu, T. He, and X. Luo, “A proximal-admm-incorporated nonnegative latent-factorization-of-tensors model for representing dynamic cryptocurrency transaction network,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 55, no. 11, pp. 8387–8401, Nov. 2025. [Online]. Available: http: //dx.doi.org/10.1109/tsmc.2025.3605054 [78] X. Liao, H. Wu, and X. Luo, “A novel tensor causal convolution network model for highly-accurate representation to spatio-temporal data,” IEEE Transactions on Automation Science and Engineering ,vol. 22, pp. 19 525–19 537, 2025. [Online]. Available: http://dx.doi.org/ 10.1109/tase.2025.3595545 [79] Q. Wang, H. Wu, and X. Luo, “A convolution bias-incorporated nonnegative latent factorization of tensors model for accurate representation learning to dynamic directed graphs,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 55, no. 12, pp. 8902–8914, Dec. 2025. [Online]. Available: http://dx.doi.org/10.1109/ tsmc.2025.3611792 [80] H. Wu, Y. Qiao, and X. Luo, “A fine-grained regularization scheme for non-negative latent factorization of high-dimensional and incomplete tensors,” IEEE Transactions on Services Computing ,vol. 17, no. 6, pp. 3006–3021, Nov. 2024. [Online]. Available: http://dx.doi.org/10.1109/tsc.2024.3486171 [81] W. Qin, Y. Ding, and X. Luo, “A robust approach to electricity theft detection via tensor representation-driven contrastive distillation,” 
+
+IEEE Transactions on Industrial Informatics , vol. 22, no. 5, pp. 4561–4570, May 2026. [Online]. Available: http://dx.doi.org/10.1109/ tii.2026.3659333 [82] D. Wu, Z. Li, Z. Yu, Y. He, and X. Luo, “Robust low-rank latent feature analysis for spatiotemporal signal recovery,” 
+
+IEEE Transactions on Neural Networks and Learning Systems ,vol. 36, no. 2, pp. 2829–2842, Feb. 2025. [Online]. Available: http://dx.doi.org/10.1109/tnnls.2023.3339786 [83] Z. Liu, Y. Wang, S. Vaidya, F. Ruehle, J. Halverson, M. Soljacic, T. Hou, and M. Tegmark, “Kan: Kolmogorov–arnold networks,” in International conference on learning representations , vol. 2025, 2025, pp. 70 367– 70 413. [84] R. Bresson, G. Nikolentzos, G. Panagopoulos, M. Chatzianastasis, J. Pang, and M. Vazirgiannis, “Kagnns: Kolmogorov-arnold networks meet graph learning,” arXiv preprint arXiv:2406.18380 , 2024. [85] L. Li, Y. Zhang, G. Wang, and K. Xia, “Kolmogorov–arnold graph neural networks for molecular property prediction,” Nature Machine Intelligence , vol. 7, no. 8, pp. 1346–1354, 2025. [86] J. Du, S. Zhang, G. Wu, J. M. Moura, and S. Kar, “Topology adaptive graph convolutional networks,” arXiv preprint arXiv:1710.10370 , 2017. [87] T. He, Z. Duan, and X. Luo, “Modularized graph convolutional network,” IEEE/CAA Journal of Automatica Sinica , vol. 13, no. 3, pp. 737–739, Mar. 2026. [Online]. Available: http://dx.doi.org/10.1109/jas. 2025.125336 [88] L. Wang, K. Liu, and Y. Yuan, “Gt-a2t: Graph tensor alliance attention network,” IEEE/CAA Journal of Automatica Sinica , vol. 12, no. 10, pp. 2165–2167, Oct. 2025. [Online]. Available: http: //dx.doi.org/10.1109/jas.2024.124863 [89] Y. He and X. Luo, “Tensor low-rank orthogonal compression for convolutional neural networks,” IEEE/CAA Journal of Automatica Sinica , vol. 13, no. 1, pp. 227–229, Jan. 2026. [Online]. Available: http://dx.doi.org/10.1109/jas.2025.125213 [90] F. A. Wolf, P. Angerer, and F. J. Theis, “Scanpy: large-scale single-cell gene expression data analysis,” Genome biology , vol. 19, no. 1, p. 15, 2018. [91] M. Adam, A. S. Potter, and S. S. Potter, “Psychrophilic proteases dramatically reduce single-cell rna-seq artifacts: a molecular atlas of kidney development,” Development , vol. 144, no. 19, pp. 3625–3632, 2017. [92] A. M. Klein, L. Mazutis, I. Akartuna, N. Tallapragada, A. Veres, V. Li, L. Peshkin, D. A. Weitz, and M. W. Kirschner, “Droplet barcoding for single-cell transcriptomics applied to embryonic stem cells,” Cell , vol. 161, no. 5, pp. 1187–1201, 2015. [93] L. W. Plasschaert, R. ˇZilionis, R. Choo-Wing, V. Savova, J. Knehr, G. Roma, A. M. Klein, and A. B. Jaffe, “A single-cell atlas of the airway epithelium reveals the cftr-rich pulmonary ionocyte,” Nature , vol. 560, no. 7718, pp. 377–381, 2018. [94] The Tabula Muris Consortium, “Single-cell transcriptomics of 20 mouse organs creates a tabula muris,” Nature , vol. 562, no. 7727, pp. 367–372, 2018. [95] R. A. Romanov, A. Zeisel, J. Bakker, F. Girach, A. Hellysaz, R. Tomer, A. Alpar, J. Mulder, F. Clotman, E. Keimpema et al. , “Molecular interrogation of hypothalamic organization reveals distinct dopamine neuronal subtypes,” Nature neuroscience , vol. 20, no. 2, pp. 176–188, 2017. [96] Y. Wang, Z. Tang, H. Huang, J. Li, Z. Wang, Y. Yu, C. Zhang, J. Li, H. Dai, F. Wang et al. , “Pulmonary alveolar type i cell population consists of two distinct subtypes that differ in cell fate,” Proceedings of the National Academy of Sciences , vol. 115, no. 10, pp. 2407–2412, 2018. [97] M. D. Young, T. J. Mitchell, F. A. Vieira Braga, M. G. Tran, B. J. Stewart, J. R. Ferdinand, G. Collord, R. A. Botting, D.-M. Popescu, K. W. Loudon et al. , “Single-cell transcriptomes from human kidneys reveal the cellular identity of renal tumors,” Science , vol. 361, no. 6402, pp. 594–599, 2018. [98] P. Xu, Z. Wang, Z. Wang, P. Li, J. Wang, R. Zhang, P. Wang, and Y. Zhou, “scclubench: Comprehensive benchmarking of clustering algorithms for single-cell rna sequencing,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 40, no. 2, 2026, pp. 1364– 1372.
