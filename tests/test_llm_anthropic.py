@@ -282,6 +282,41 @@ class ClaudeCodeFactoryTest(_EnvIsolationMixin):
         self.assertEqual(client.model, "opus")
 
 
+class SecretCleaningTest(unittest.TestCase):
+    def test_pasted_whitespace_is_stripped_from_tokens(self):
+        # 模拟从网页复制粘贴带入换行/空格的 token
+        dirty = "sk-ant-oat01-abc\n def-ghi "
+        client = ClaudeCodeClient(oauth_token=dirty)
+        self.assertEqual(client.api_key, "sk-ant-oat01-abcdef-ghi")
+
+        api_client = AnthropicClient(api_key="sk-ant-\nxyz ")
+        self.assertEqual(api_client.api_key, "sk-ant-xyz")
+
+    def test_env_token_cleaned_before_subprocess(self):
+        import os
+        import subprocess
+        payload = {
+            "subtype": "success",
+            "is_error": False,
+            "result": "ok",
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        }
+        proc = SimpleNamespace(returncode=0, stdout=__import__("json").dumps(payload), stderr="")
+        client = ClaudeCodeClient()  # 不显式传 token，走进程环境变量
+        saved = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = "sk-ant-oat01-abc\ndef"
+        try:
+            with unittest.mock.patch.object(subprocess, "run", return_value=proc) as mock_run:
+                client.chat([{"role": "user", "content": "hi"}])
+            env = mock_run.call_args.kwargs["env"]
+            self.assertEqual(env["CLAUDE_CODE_OAUTH_TOKEN"], "sk-ant-oat01-abcdef")
+        finally:
+            if saved is None:
+                os.environ.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
+            else:
+                os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = saved
+
+
 class TokensIsolationTest(unittest.TestCase):
     def test_token_stats_are_instance_level(self):
         a = LLMClient(api_key="k", model="m", base_url="https://example.com")
