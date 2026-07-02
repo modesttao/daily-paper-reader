@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T03:10:26.277329+00:00",
+  "generated_at": "2026-07-02T04:08:53.231859+00:00",
   "updated_date": "20260623-20260702",
   "carryover_days": 9,
   "tag_states": {
@@ -22,6 +22,59 @@
       "updated_date": "20260623-20260702",
       "carryover_days": 9,
       "items": []
+    },
+    "neural-organoid": {
+      "updated_date": "20260623-20260702",
+      "carryover_days": 9,
+      "items": []
+    },
+    "sc-neuro-bioinfo": {
+      "updated_date": "20260623-20260702",
+      "carryover_days": 9,
+      "items": [
+        {
+          "id": "pmid:42373665",
+          "pmid": "42373665",
+          "source": "pubmed",
+          "title": "Accurate trajectory inference in time-series spatial transcriptomics with structurally-constrained optimal transport.",
+          "abstract": "New experimental and computational methods use genetic or gene expression observations with single cell resolution to study the relationship between single-cell molecular profiles and developmental trajectories. Most tissues contain spatially contiguous regions that develop as a unit, such as follicles in the ovary, or tubules and glomeruli in the kidney. We find that existing approaches designed to use time series spatial transcriptomics (ST) data produce biologically incoherent trajectories that fail to maintain these structural units over time. We present Spatiotemporal Optimal transport with Contiguous Structures (SOCS), an Optimal Transport-based trajectory inference method for time-series ST that produces trajectory inferences preserving the structural integrity of contiguous biologically meaningful units, along with gene expression similarity and global geometric structure. We show that SOCS produces more plausible trajectory estimates, maintaining the spatial coherence of biological structures across time, enabling more accurate trajectory inference and biological insight than other approaches.",
+          "authors": [
+            "John P Bryan",
+            "Samouil L Farhi",
+            "Brian Cleary"
+          ],
+          "journal": "Nature communications",
+          "issn": "2041-1723",
+          "doi": "10.1038/s41467-026-74927-8",
+          "pmcid": "",
+          "open_access": false,
+          "published": "2026-06-29T00:00:00+00:00",
+          "link": "https://pubmed.ncbi.nlm.nih.gov/42373665/",
+          "primary_category": null,
+          "categories": [],
+          "tags": [
+            "keyword:sc-neuro-bioinfo",
+            "query:sc-neuro-bioinfo"
+          ],
+          "matched_query_tag": "query:sc-neuro-bioinfo",
+          "llm_score": 8.0,
+          "llm_evidence_en": "trajectory inference method for time-series spatial transcriptomics using optimal transport",
+          "llm_evidence_cn": "面向时间序列空间转录组学的轨迹推断方法，基于最优传输",
+          "llm_evidence": "面向时间序列空间转录组学的轨迹推断方法，基于最优传输",
+          "canonical_evidence": "面向时间序列空间转录组学的轨迹推断方法，基于最优传输",
+          "llm_tldr_en": "This paper addresses that existing trajectory inference methods for time-series spatial transcriptomics produce biologically incoherent results by ignoring spatial contiguity. It proposes SOCS, a structurally-constrained optimal transport method that preserves spatially contiguous developmental units. Results show more biologically coherent trajectories across tissues like ovarian follicles and kidney tubules. This provides a broadly applicable computational tool for single-cell/spatial developmental trajectory analysis.",
+          "llm_tldr_cn": "现有的时间序列空间转录组学轨迹推断方法常常忽视组织中空间连续的发育单元，导致推断出的发育轨迹在生物学上不连贯。本文提出SOCS方法，一种基于最优传输并施加结构约束的轨迹推断算法，专门用于保持卵泡、肾小管等空间连续结构在时间序列中的一致性。实验表明该方法相比现有方法能生成更符合生物学规律的发育轨迹。该工作为单细胞与空间转录组学的发育轨迹分析提供了通用且可迁移的计算方法，具有较高的方法学价值。",
+          "llm_tldr": "现有的时间序列空间转录组学轨迹推断方法常常忽视组织中空间连续的发育单元，导致推断出的发育轨迹在生物学上不连贯。本文提出SOCS方法，一种基于最优传输并施加结构约束的轨迹推断算法，专门用于保持卵泡、肾小管等空间连续结构在时间序列中的一致性。实验表明该方法相比现有方法能生成更符合生物学规律的发育轨迹。该工作为单细胞与空间转录组学的发育轨迹分析提供了通用且可迁移的计算方法，具有较高的方法学价值。",
+          "llm_tags": [
+            "query:sc-neuro-bioinfo"
+          ],
+          "matched_query_text": "trajectory inference",
+          "matched_requirement_id": "req-76",
+          "selection_source": "carryover_cache",
+          "paper_id": "pmid:42373665",
+          "carry_days": 1
+        }
+      ]
     }
   }
 }
