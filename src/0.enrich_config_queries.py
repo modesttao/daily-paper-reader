@@ -152,8 +152,8 @@ def main() -> None:
     )
     if client is None:
         raise RuntimeError(
-            "缺少 LLM API Key：请配置 ANTHROPIC_API_KEY（Claude）或 "
-            "DEEPSEEK_API_KEY / SUMMARY_API_KEY（DeepSeek）。"
+            "缺少 LLM API Key：请配置 CLAUDE_CODE_OAUTH_TOKEN（Claude 订阅额度）、"
+            "ANTHROPIC_API_KEY（Claude API）或 DEEPSEEK_API_KEY / SUMMARY_API_KEY（DeepSeek）。"
         )
 
     group_start("Step 0.0 - load config")

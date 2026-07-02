@@ -539,7 +539,7 @@ def generate_deep_summary(
 ) -> str | None:
     active_client = client or LLM_CLIENT
     if active_client is None:
-        log("[WARN] 未配置 ANTHROPIC_API_KEY / DEEPSEEK_API_KEY / SUMMARY_API_KEY，跳过精读总结。")
+        log("[WARN] 未配置 CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY / DEEPSEEK_API_KEY / SUMMARY_API_KEY，跳过精读总结。")
         return None
     if not os.path.exists(md_file_path):
         return None

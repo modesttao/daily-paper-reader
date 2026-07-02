@@ -803,9 +803,12 @@ def process_file(
         os.getenv("DEEPSEEK_API_KEY")
         or os.getenv("SUMMARY_API_KEY")
         or os.getenv("ANTHROPIC_API_KEY")
+        or os.getenv("CLAUDE_CODE_OAUTH_TOKEN")
     )
     if not api_key:
-        raise RuntimeError("missing ANTHROPIC_API_KEY / DEEPSEEK_API_KEY / SUMMARY_API_KEY")
+        raise RuntimeError(
+            "missing CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY / DEEPSEEK_API_KEY / SUMMARY_API_KEY"
+        )
 
     group_start(f"Step 4 - llm refine {os.path.basename(input_path)}")
     log(

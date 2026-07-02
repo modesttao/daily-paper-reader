@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from llm import (
     AnthropicClient,
+    ClaudeCodeClient,
     DeepSeekClient,
     LLMClient,
     create_summary_client_from_env,
@@ -165,6 +166,120 @@ class AnthropicFactoryTest(_AnthropicStubMixin):
     def test_returns_none_without_any_key(self):
         client = create_summary_client_from_env()
         self.assertIsNone(client)
+
+
+class _EnvIsolationMixin(unittest.TestCase):
+    _ENV_KEYS = (
+        "LLM_MODEL", "LLM_API_KEY", "LLM_BASE_URL",
+        "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL", "ANTHROPIC_BASE_URL",
+        "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_MODEL", "DPR_USE_CLAUDE_CODE",
+        "DEEPSEEK_API_KEY", "SUMMARY_API_KEY", "SUMMARY_MODEL", "DEEPSEEK_MODEL",
+    )
+
+    def setUp(self):
+        import os
+        self._saved_env = {key: os.environ.pop(key, None) for key in self._ENV_KEYS}
+
+    def tearDown(self):
+        import os
+        for key, value in self._saved_env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+class ClaudeCodeChatTest(unittest.TestCase):
+    def _fake_proc(self, payload):
+        import json as _json
+        return SimpleNamespace(returncode=0, stdout=_json.dumps(payload), stderr="")
+
+    def test_chat_parses_headless_json_output(self):
+        import subprocess
+        payload = {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": '{"rewrite": "Find research papers describing x"}',
+            "usage": {"input_tokens": 12, "output_tokens": 8, "cache_read_input_tokens": 3},
+        }
+        client = ClaudeCodeClient(oauth_token="sk-ant-oat01-test", model="opus")
+        with unittest.mock.patch.object(subprocess, "run", return_value=self._fake_proc(payload)) as mock_run:
+            result = client.chat([
+                {"role": "system", "content": "output json"},
+                {"role": "user", "content": "rewrite this"},
+            ])
+
+        self.assertEqual(result["content"], '{"rewrite": "Find research papers describing x"}')
+        self.assertEqual(result["finish_reason"], "stop")
+        self.assertEqual(result["tokens"]["prompt"], 15)
+        self.assertEqual(result["tokens"]["content"], 8)
+
+        args, kwargs = mock_run.call_args
+        cmd = args[0]
+        self.assertIn("-p", cmd)
+        self.assertIn("--output-format", cmd)
+        self.assertIn("json", cmd)
+        self.assertIn("--model", cmd)
+        self.assertIn("opus", cmd)
+        self.assertIn("--system-prompt", cmd)
+        self.assertEqual(kwargs["input"], "rewrite this")
+        self.assertEqual(kwargs["env"]["CLAUDE_CODE_OAUTH_TOKEN"], "sk-ant-oat01-test")
+
+    def test_chat_raises_on_cli_error(self):
+        import subprocess
+        proc = SimpleNamespace(returncode=1, stdout="", stderr="Invalid API key")
+        client = ClaudeCodeClient(oauth_token="sk-ant-oat01-test")
+        with unittest.mock.patch.object(subprocess, "run", return_value=proc):
+            with self.assertRaises(RuntimeError):
+                client.chat([{"role": "user", "content": "hi"}])
+
+    def test_structured_always_uses_prompt_only(self):
+        import subprocess
+        payload = {
+            "subtype": "success",
+            "is_error": False,
+            "result": '{"related": ["a"]}',
+            "usage": {"input_tokens": 1, "output_tokens": 1},
+        }
+        client = ClaudeCodeClient(oauth_token="sk-ant-oat01-test")
+        schema = {
+            "type": "object",
+            "properties": {"related": {"type": "array", "items": {"type": "string"}}},
+        }
+        with unittest.mock.patch.object(subprocess, "run", return_value=self._fake_proc(payload)):
+            result = client.chat_structured(
+                [{"role": "user", "content": "related terms"}],
+                schema_name="related",
+                schema=schema,
+            )
+        self.assertEqual(result["response_format_used"], "prompt_only")
+        self.assertEqual(result["parsed"], {"related": ["a"]})
+
+
+class ClaudeCodeFactoryTest(_EnvIsolationMixin):
+    def test_oauth_token_takes_priority_over_api_keys(self):
+        import os
+        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = "sk-ant-oat01-test"
+        os.environ["ANTHROPIC_API_KEY"] = "sk-ant-test"
+        os.environ["DEEPSEEK_API_KEY"] = "sk-ds-test"
+        client = create_summary_client_from_env()
+        self.assertIsInstance(client, ClaudeCodeClient)
+
+    def test_dpr_use_claude_code_flag_without_token(self):
+        import os
+        os.environ["DPR_USE_CLAUDE_CODE"] = "1"
+        client = create_summary_client_from_env()
+        self.assertIsInstance(client, ClaudeCodeClient)
+        self.assertEqual(client.api_key, "")
+
+    def test_llm_model_env_selects_claude_code_provider(self):
+        import os
+        os.environ["LLM_MODEL"] = "claude-code/opus"
+        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = "sk-ant-oat01-test"
+        client = create_summary_client_from_env()
+        self.assertIsInstance(client, ClaudeCodeClient)
+        self.assertEqual(client.model, "opus")
 
 
 class TokensIsolationTest(unittest.TestCase):

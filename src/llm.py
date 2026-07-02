@@ -997,6 +997,12 @@ class AnthropicClient(LLMClient):
         refusal = ""
         if stop_reason == "refusal":
             refusal = "Claude 拒绝了本次请求（stop_reason=refusal）。"
+        # 归一化为 OpenAI 语义，调用方按 None/"stop"/"length" 判断
+        finish_reason = {
+            "end_turn": "stop",
+            "stop_sequence": "stop",
+            "max_tokens": "length",
+        }.get(stop_reason, stop_reason)
 
         usage = getattr(response_message, "usage", None)
         prompt_tokens = int(getattr(usage, "input_tokens", 0) or 0)
@@ -1016,9 +1022,163 @@ class AnthropicClient(LLMClient):
             "raw_content": content,
             "reasoning_content": "",
             "refusal": refusal,
-            "finish_reason": stop_reason,
+            "finish_reason": finish_reason,
             "message": {"role": "assistant", "content": content},
             "raw_response": response_message,
+            "tokens": {
+                "prompt": prompt_tokens,
+                "content": completion_tokens,
+                "reasoning": 0,
+                "total": total_tokens,
+            },
+        }
+
+
+class ClaudeCodeClient(LLMClient):
+    """通过本地 Claude Code CLI（`claude -p`）调用 Claude，消耗 Pro/Max 订阅额度。
+
+    与直连 API 的差异：
+    - 鉴权走 CLAUDE_CODE_OAUTH_TOKEN（`claude setup-token` 生成）或本机已登录的 Claude Code；
+    - 不支持 max_tokens / 采样参数 / json_schema 结构化输出，
+      结构化输出统一回退到提示词约束 + 本地 JSON 解析修复；
+    - 订阅额度有 5 小时滚动窗口与 7 天滚动上限，批量调用会与交互使用共享额度。
+    """
+
+    DEFAULT_TIMEOUT_SECONDS = 600
+
+    def __init__(
+        self,
+        oauth_token: str = '',
+        model: str = '',
+        cli_path: str | None = None,
+    ):
+        cli_model = str(model or '').strip()
+        super().__init__(
+            api_key=oauth_token,
+            model=cli_model or 'subscription-default',
+            base_url='',
+        )
+        self._cli_model = cli_model
+        self.cli_path = (
+            cli_path
+            or (os.getenv('CLAUDE_CODE_CLI_PATH') or '').strip()
+            or 'claude'
+        )
+
+    def _provider_name(self, base_url: str | None = None) -> str:
+        return 'claude-code'
+
+    def _structured_response_format_names(
+        self,
+        allow_json_object_fallback: bool,
+    ) -> List[str]:
+        # Claude Code headless 只输出文本，结构化输出永远走提示词约束。
+        return ["prompt_only"]
+
+    @staticmethod
+    def _resolve_timeout_seconds() -> int:
+        raw = (os.getenv('CLAUDE_CODE_TIMEOUT_SECONDS') or '').strip()
+        try:
+            value = int(raw)
+            if value > 0:
+                return value
+        except Exception:
+            pass
+        return ClaudeCodeClient.DEFAULT_TIMEOUT_SECONDS
+
+    def chat(self, messages: List[Dict[str, str]], response_format: Optional[Dict[str, Any]] = None) -> dict:
+        import subprocess
+        import tempfile
+
+        system_parts: List[str] = []
+        prompt_parts: List[str] = []
+        for message in messages or []:
+            if not isinstance(message, dict):
+                continue
+            role = str(message.get("role") or "").strip().lower()
+            content = self._extract_text_content(message.get("content"))
+            if not content:
+                continue
+            if role == "system":
+                system_parts.append(content)
+            elif role == "assistant":
+                prompt_parts.append(f"[之前的助手回复]\n{content}")
+            else:
+                prompt_parts.append(content)
+        prompt = "\n\n".join(prompt_parts).strip() or "请根据系统提示完成任务。"
+
+        cmd = [self.cli_path, '-p', '--output-format', 'json', '--max-turns', '1']
+        if self._cli_model:
+            cmd += ['--model', self._cli_model]
+        if system_parts:
+            cmd += ['--system-prompt', "\n\n".join(system_parts)]
+
+        env = os.environ.copy()
+        if self.api_key:
+            env['CLAUDE_CODE_OAUTH_TOKEN'] = self.api_key
+
+        start_time = time.time()
+        try:
+            # 在临时目录里执行，避免 Claude Code 读取当前仓库上下文
+            with tempfile.TemporaryDirectory() as workdir:
+                proc = subprocess.run(
+                    cmd,
+                    input=prompt,
+                    capture_output=True,
+                    text=True,
+                    env=env,
+                    cwd=workdir,
+                    timeout=self._resolve_timeout_seconds(),
+                )
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                f"找不到 Claude Code CLI（{self.cli_path}）。"
+                "请先安装：npm install -g @anthropic-ai/claude-code"
+            ) from exc
+
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or '').strip()[:500]
+            lowered = detail.lower()
+            if any(token in lowered for token in ("invalid api key", "unauthorized", "authentication", "oauth")):
+                print("LLM 鉴权失败：CLAUDE_CODE_OAUTH_TOKEN 无效或已过期，请重新执行 claude setup-token。")
+            raise RuntimeError(f"claude -p 调用失败 (exit={proc.returncode}): {detail}")
+
+        try:
+            data = json.loads((proc.stdout or '').strip() or '{}')
+        except ValueError as exc:
+            raise RuntimeError(f"claude -p 输出无法解析为 JSON：{(proc.stdout or '')[:500]}") from exc
+        if not isinstance(data, dict):
+            raise RuntimeError(f"claude -p 输出结构异常：{str(data)[:500]}")
+        if data.get('is_error'):
+            raise RuntimeError(f"claude -p 返回错误：{str(data)[:500]}")
+
+        content = str(data.get('result') or '').strip()
+        usage = data.get('usage') or {}
+        prompt_tokens = (
+            int(usage.get('input_tokens') or 0)
+            + int(usage.get('cache_read_input_tokens') or 0)
+            + int(usage.get('cache_creation_input_tokens') or 0)
+        )
+        completion_tokens = int(usage.get('output_tokens') or 0)
+        total_tokens = prompt_tokens + completion_tokens
+
+        self._record_call_stats(
+            prompt_tokens=prompt_tokens,
+            reasoning_tokens=0,
+            visible_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            elapsed=time.time() - start_time,
+        )
+
+        return {
+            "content": content,
+            "raw_content": content,
+            "reasoning_content": "",
+            "refusal": "",
+            # 归一化为 OpenAI 语义：success -> stop，其余保留原值便于排查
+            "finish_reason": "stop" if data.get('subtype') == 'success' else data.get('subtype'),
+            "message": {"role": "assistant", "content": content},
+            "raw_response": data,
             "tokens": {
                 "prompt": prompt_tokens,
                 "content": completion_tokens,
@@ -1073,9 +1233,13 @@ class ClientFactory:
             key = api_key or (os.getenv('ANTHROPIC_API_KEY') or '').strip()
             base_url = base_url or (os.getenv('ANTHROPIC_BASE_URL') or '').strip() or None
             return AnthropicClient(api_key=key, model=model, base_url=base_url)
+        if provider in ('claude-code', 'claude_code', 'claudecode'):
+            token = api_key or (os.getenv('CLAUDE_CODE_OAUTH_TOKEN') or '').strip()
+            cli_model = '' if model.strip().lower() in ('default', 'subscription') else model
+            return ClaudeCodeClient(oauth_token=token, model=cli_model)
         raise ValueError(
-            f"当前支持 DeepSeek / Anthropic，请使用 'deepseek/模型名' 或 "
-            f"'anthropic/模型名'，当前 provider={provider}"
+            f"当前支持 DeepSeek / Anthropic / Claude Code，请使用 'deepseek/模型名'、"
+            f"'anthropic/模型名' 或 'claude-code/模型名'，当前 provider={provider}"
         )
 
     @staticmethod
@@ -1095,14 +1259,22 @@ def create_summary_client_from_env(
     """摘要 / 精排链路统一的客户端选择入口。
 
     优先级：
-    1. LLM_MODEL='provider/model'（支持 anthropic / deepseek，走 ClientFactory）；
-    2. ANTHROPIC_API_KEY 已配置 → Claude（模型取 ANTHROPIC_MODEL，默认 claude-opus-4-8）；
-    3. DeepSeek（沿用各步骤原有 DEEPSEEK_* / SUMMARY_* 环境变量）；
-    4. 都没有 → 返回 None，由调用方决定跳过或报错。
+    1. LLM_MODEL='provider/model'（支持 anthropic / deepseek / claude-code，走 ClientFactory）；
+    2. CLAUDE_CODE_OAUTH_TOKEN 已配置（或 DPR_USE_CLAUDE_CODE=1 使用本机登录）
+       → Claude Code CLI，消耗 Pro/Max 订阅额度（模型取 CLAUDE_CODE_MODEL，可留空）；
+    3. ANTHROPIC_API_KEY 已配置 → Claude API（模型取 ANTHROPIC_MODEL，默认 claude-opus-4-8）；
+    4. DeepSeek（沿用各步骤原有 DEEPSEEK_* / SUMMARY_* 环境变量）；
+    5. 都没有 → 返回 None，由调用方决定跳过或报错。
     """
     model_env = (os.getenv('LLM_MODEL') or '').strip()
     if model_env:
         return ClientFactory.from_env()
+
+    claude_code_token = (os.getenv('CLAUDE_CODE_OAUTH_TOKEN') or '').strip()
+    use_claude_code = (os.getenv('DPR_USE_CLAUDE_CODE') or '').strip().lower() in ('1', 'true', 'yes', 'on')
+    if claude_code_token or use_claude_code:
+        cli_model = (os.getenv('CLAUDE_CODE_MODEL') or '').strip()
+        return ClaudeCodeClient(oauth_token=claude_code_token, model=cli_model)
 
     anthropic_key = (os.getenv('ANTHROPIC_API_KEY') or '').strip()
     if anthropic_key:
